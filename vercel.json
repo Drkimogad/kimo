@@ -8,6 +8,7 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/agent.js" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/(.*)", "dest": "/index.html" },
+    { "src": "/offline.html", "dest": "/offline.html" }
   ]
 }
