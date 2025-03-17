@@ -115,3 +115,11 @@ loadModels().catch(error => {
   console.error("Model loading failed:", error);
   displayResponse("Failed to initialize AI models. Please refresh.");
 });
+
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('Service Worker Registered'))
+    .catch(err => console.log('SW Registration Failed:', err));
+}
