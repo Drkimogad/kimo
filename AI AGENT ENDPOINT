@@ -1,0 +1,10 @@
+const AI_AGENT_ENDPOINT = '/api/agent'; // More descriptive
+
+async function fetchAIResponse(prompt) {
+  const response = await fetch(AI_AGENT_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt })
+  });
+  return (await response.json()).response;
+}
