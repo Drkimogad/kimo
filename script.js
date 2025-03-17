@@ -64,32 +64,33 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
   localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
 
   // Get AI response
-  const response = await getAIResponse(input);
-  const humanized = humanizeResponse(response);
-  displayResponse(humanized);
+  try {
+    const response = await getAIResponse(input);
+    const humanized = humanizeResponse(response);
+    displayResponse(humanized);
+  } catch (error) {
+    displayResponse("Sorry, I'm having trouble responding right now.");
+    console.error("API Error:", error);
+  }
 });
 
 // Helper functions
 async function getAIResponse(input) {
-  // Use OpenAI API (replace with your key)
-  const response = await fetch('https://api.openai.com/v1/completions', {
+  const response = await fetch('/api/agent', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer YOUR_OPENAI_KEY'
-    },
-    body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
-      prompt: input,
-      max_tokens: 100
-    })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: input })
   });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
   const data = await response.json();
-  return data.choices[0].text;
+  return data.response || "No response generated";
 }
 
 async function checkPlagiarism(text) {
-  // Compare with sample text (replace with your logic)
   const sample = "Original text for comparison...";
   const embeddings = await plagiarismModel.embed([text, sample]);
   const similarity = tf.matMul(embeddings[0], embeddings[1], false, true).dataSync()[0];
@@ -97,14 +98,20 @@ async function checkPlagiarism(text) {
 }
 
 function humanizeResponse(text) {
-  // Simple humanizer (replace with a paraphrase model)
-  return text.replace(/AI/g, "this agent").replace(/automatically/g, "carefully");
+  return text
+    .replace(/AI/g, "this agent")
+    .replace(/automatically/g, "carefully")
+    .replace(/(\w)(\1{2,})/g, "$1"); // Basic stutter remover
 }
 
 function displayResponse(text) {
   const responseArea = document.getElementById('response-area');
   responseArea.innerHTML = `<p>${text}</p>`;
+  responseArea.scrollTop = responseArea.scrollHeight;
 }
 
 // Initialize
-loadModels();
+loadModels().catch(error => {
+  console.error("Model loading failed:", error);
+  displayResponse("Failed to initialize AI models. Please refresh.");
+});
