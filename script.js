@@ -2,6 +2,13 @@ let isListening = false;
 let recognition;
 let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
+// Add to script.js
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  console.log('PWA installation available');
+  // You can add an install button later
+});
+
 // Load models
 let plagiarismModel;
 let imageModel;
