@@ -2,13 +2,13 @@ import axios from 'axios';
 
 export default async (req, res) => {
   // Customize your AI behavior here
-  const config = {
-    model: "google/flan-t5-xxl", // Or any free model
-    parameters: {
-      temperature: 0.7, // Control creativity
-      max_new_tokens: 150
-    }
-  };
+const config = {
+  model: "google/flan-t5-xxl", // Try others: "bigscience/bloom"
+  parameters: {
+    temperature: 0.9, // More creative
+    max_new_tokens: 200
+  }
+};
 
   try {
     const response = await axios.post(
