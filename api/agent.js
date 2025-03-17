@@ -3,12 +3,16 @@ import axios from 'axios';
 export default async (req, res) => {
   // Customize your AI behavior here
 const config = {
-  model: "google/flan-t5-xxl", // Try others: "bigscience/bloom"
+  model: "google/flan-t5-xxl", // Try other free models
   parameters: {
-    temperature: 0.9, // More creative
-    max_new_tokens: 200
+    temperature: 0.7, // 0=strict, 1=creative
+    max_new_tokens: 150, // Response length
+    repetition_penalty: 1.2 // Avoid repeating
   }
 };
+
+// Add pre-processing/filters
+const filteredPrompt = input.replace(/bad-word/g, "***");
 
   try {
     const response = await axios.post(
