@@ -1,17 +1,17 @@
+let isListening = false;
+let recognition;
+let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
+
+import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/models/handwritingModel.js';
+
+// Load AI models
+loadModels();
+
 // PWA Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   console.log('PWA installation available');
 });
-
-import { recognizeHandwriting } from './models/handwriting-model.js';
-
-let isListening = false;
-let recognition;
-let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
-
-// Load AI models
-loadModels();
 
 // 🌙 Theme Toggle
 document.getElementById('theme-toggle').addEventListener('click', () => {
@@ -108,7 +108,7 @@ function saveToFile(content, filename) {
 
 // ⚡ **Register Service Worker**
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
+  navigator.serviceWorker.register('https://drkimogad.github.io/kimo/sw.js')
     .then(() => console.log('Service Worker Registered'))
     .catch(err => console.log('SW Registration Failed:', err));
 }
