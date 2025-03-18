@@ -30,6 +30,9 @@ const CACHE_ASSETS = [
   'https://storage.googleapis.com/tfjs-models/tfjs/universal-sentence-encoder/model.json',
   'https://storage.googleapis.com/tfjs-models/tfjs/universal-sentence-encoder/group1-shard1of2',
   'https://storage.googleapis.com/tfjs-models/tfjs/universal-sentence-encoder/group1-shard2of2'
+   // Handwriting model files
+  '/models/handwriting/model.json',
+  '/models/handwriting/group1-shard1of1.bin'
 ];
 
 // ✅ Install Service Worker & Cache Assets
