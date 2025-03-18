@@ -9,6 +9,11 @@ Kimo AI is a fully offline AI-powered progressive web application (PWA) designed
 ✔️ Image Classification – Identify objects using pre-trained models.
 ✔️ User-Friendly UI – Minimalistic, fast, and responsive.
 ✔️ PWA Support – Installable on mobile and desktop.
+# Extra Features:
+- ✅ **Web Search** (DuckDuckGo API)
+- ✅ **Offline AI Generation**
+- ✅ **Handwriting Recognition**
+- ✅ **Local Save & Export**
 
 📂 Project Structure
 bash
