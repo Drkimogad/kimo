@@ -1,4 +1,3 @@
-
 // PWA Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
@@ -14,12 +13,12 @@ let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 // Load AI models
 loadModels();
 
-// Theme toggle
+// 🌙 Theme Toggle
 document.getElementById('theme-toggle').addEventListener('click', () => {
   document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
 });
 
-// 🎤 Voice Input
+// 🎤 Voice Input Handling
 if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
   recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   recognition.continuous = false;
@@ -40,14 +39,15 @@ document.getElementById('voice-btn').addEventListener('click', () => {
   }
 });
 
-// 📂 File Upload (OCR & Text Processing)
+// 📂 **File Upload for OCR & Text Processing**
 document.getElementById('file-upload').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
   if (file.type.startsWith('image/')) {
-    const text = await extractHandwriting(file);
-    displayResponse(`Extracted text: ${text}`);
+    const img = await loadImage(file);
+    const handwritingText = await recognizeHandwriting(img);
+    displayResponse(`Recognized text: ${handwritingText}`);
   } else if (file.type === 'text/plain') {
     const text = await file.text();
     const isPlagiarized = await checkPlagiarism(text);
@@ -55,7 +55,7 @@ document.getElementById('file-upload').addEventListener('change', async (e) => {
   }
 });
 
-// 🚀 Submit Query (Search or AI Generation)
+// 🚀 **Submit Query (Search or AI Generation)**
 document.getElementById('submit-btn').addEventListener('click', async () => {
   const input = document.getElementById('user-input').value.trim();
   if (!input) return;
@@ -71,7 +71,7 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
   }
 });
 
-// 🔍 Online Search via DuckDuckGo API
+// 🔍 **Online Search via DuckDuckGo API**
 async function fetchDuckDuckGoResults(query) {
   try {
     const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
@@ -83,7 +83,7 @@ async function fetchDuckDuckGoResults(query) {
   }
 }
 
-// 📝 Humanize Text
+// 📝 **Humanize Text**
 document.getElementById('humanize-btn').addEventListener('click', async () => {
   const text = document.getElementById('response-area').innerText;
   if (text) {
@@ -92,7 +92,7 @@ document.getElementById('humanize-btn').addEventListener('click', async () => {
   }
 });
 
-// 💾 Save Response
+// 💾 **Save Response**
 document.getElementById('save-btn').addEventListener('click', () => {
   const text = document.getElementById('response-area').innerText;
   if (text) saveToFile(text, "ai_generated.txt");
@@ -106,7 +106,7 @@ function saveToFile(content, filename) {
   link.click();
 }
 
-// Register service worker
+// ⚡ **Register Service Worker**
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js')
     .then(() => console.log('Service Worker Registered'))
