@@ -129,6 +129,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+// Canvas Drawing Implementation
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+const canvas = document.getElementById('drawing-canvas');
+const ctx = canvas.getContext('2d');
+
+// Set canvas size
+canvas.width = 800;
+canvas.height = 200;
+
+// Drawing functions
+function startDrawing(e) {
+  isDrawing = true;
+  [lastX, lastY] = [e.offsetX, e.offsetY];
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(e.offsetX, e.offsetY);
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  [lastX, lastY] = [e.offsetX, e.offsetY];
+}
+
+function endDrawing() {
+  isDrawing = false;
+}
+
+// Event listeners
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', endDrawing);
+canvas.addEventListener('mouseout', endDrawing);
+
+document.getElementById('clear-canvas').addEventListener('click', () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
+// Add recognize button handler
+document.getElementById('recognize-btn').addEventListener('click', async () => {
+  const recognizedText = await recognizeHandwriting.recognize(canvas);
+  displayResponse(`Handwriting: ${recognizedText}`);
+});
+
+  
   // ************** THEME MANAGEMENT **************
   const themeToggle = document.getElementById('theme-toggle');
   const currentTheme = localStorage.getItem('theme') || 'light';
