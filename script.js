@@ -1,3 +1,87 @@
+// MobileNet Model Instance
+let imageModel;
+let isModelLoading = false;
+
+// Initialize MobileNet
+async function initializeImageModel() {
+  try {
+    isModelLoading = true;
+    showLoading();
+    imageModel = await mobilenet.load({
+      version: 2,
+      alpha: 1.0
+    });
+    hideLoading();
+    console.log('Image model loaded successfully');
+  } catch (error) {
+    console.error('Failed to load image model:', error);
+    displayResponse('Error: Image recognition unavailable', true);
+  } finally {
+    isModelLoading = false;
+  }
+}
+
+// Enhanced File Upload Handler
+document.getElementById('file-upload').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    showLoading();
+    
+    if (file.type.startsWith('image/')) {
+      if (!imageModel) await initializeImageModel();
+      
+      const img = await loadImage(file);
+      const predictions = await imageModel.classify(img);
+      
+      const resultText = predictions
+        .map(p => `${p.className} (${Math.round(p.probability * 100)}%)`)
+        .join('\n');
+      
+      displayResponse(`Image Analysis:\n${resultText}`);
+      addToHistory(file, predictions);
+
+    } else if (file.type === 'text/plain') {
+      const text = await file.text();
+      displayResponse(`File Content:\n${text}`);
+    }
+  } catch (error) {
+    console.error('File processing error:', error);
+    displayResponse('Error processing file', true);
+  } finally {
+    hideLoading();
+  }
+});
+
+// Image Loading Helper
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    
+    reader.onload = (e) => {
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Loading State Management
+function showLoading() {
+  document.getElementById('loading').classList.remove('loading-hidden');
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.add('loading-hidden');
+}
+
+// Existing functionality remains below...
+// [Keep your existing voice, theme, and other handlers here]
 // Wrap in DOMContentLoaded for safe DOM access
 document.addEventListener('DOMContentLoaded', () => {
   let isListening = false;
