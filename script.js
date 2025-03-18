@@ -3,8 +3,8 @@ let recognition;
 let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
 import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/models/handwritingModel.js';
-import {  } from 'https://drkimogad.github.io/kimo/models/image-model.js';
-import { checkPlagiarism } from 'https://drkimogad.github.io/kimo/models/text-model.js';
+import { image } from 'https://drkimogad.github.io/kimo/models/image-model.js';
+import { text } from 'https://drkimogad.github.io/kimo/models/text-model.js';
 });
 // Load AI models
 loadModels();
