@@ -8,15 +8,12 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 // Load models
-let plagiarismModel;
 let imageModel;
 
 async function loadModels() {
   // Load MobileNet model using ml5.js
   imageModel = await ml5.imageClassifier('MobileNet');
   console.log("Image classification model loaded.");
-
-  console.log("Models initialized.");
 }
 
 // Theme toggle
@@ -56,7 +53,7 @@ document.getElementById('file-upload').addEventListener('change', async (e) => {
     displayResponse(`Image classified as: ${predictions[0].className}`);
   } else if (file.type === 'text/plain') {
     const text = await file.text();
-    const isPlagiarized = await checkPlagiarism(text);
+    const isPlagiarized = checkPlagiarism(text);
     displayResponse(`Plagiarism likelihood: ${isPlagiarized ? 'High' : 'Low'}`);
   }
 });
@@ -70,58 +67,27 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
   localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
 
   try {
-    const response = await getAIResponse(input);
-    const humanized = humanizeResponse(response);
-    displayResponse(humanized);
+    const response = getAIResponse(input);
+    displayResponse(response);
   } catch (error) {
     displayResponse("Sorry, I'm having trouble responding right now.");
-    console.error("API Error:", error);
+    console.error("Error:", error);
   }
 });
 
 // Helper functions
-async function getAIResponse(input) {
-  const response = await fetch('/api/agent', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt: input })
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data.response || "No response generated";
+function getAIResponse(input) {
+  return "This is a sample AI response (local function)."; // Replace this with offline logic if needed
 }
 
-async function checkPlagiarism(text) {
-  const apiKey = "YOUR_OPENAI_API_KEY"; // Replace with your actual API key
-  const response = await fetch('https://api.openai.com/v1/embeddings', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      input: text,
-      model: 'text-embedding-ada-002'
-    })
-  });
-
-  const data = await response.json();
-  return data && data.data ? data.data.length > 0 : false;
+function checkPlagiarism(text) {
+  const sampleText = "This is an example of original content for comparison.";
+  const similarity = stringSimilarity.compareTwoStrings(text, sampleText);
+  return similarity > 0.8;
 }
 
 async function classifyImage(image) {
   return await imageModel.classify(image);
-}
-
-function humanizeResponse(text) {
-  return text
-    .replace(/AI/g, "this agent")
-    .replace(/automatically/g, "carefully")
-    .replace(/(\w)(\1{2,})/g, "$1");
 }
 
 function displayResponse(text) {
