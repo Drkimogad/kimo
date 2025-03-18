@@ -1,107 +1,117 @@
-// MobileNet Model Instance
-let imageModel;
-let isModelLoading = false;
+// MobileNet Model Idocument.addEventListener('DOMContentLoaded', () => {
+  // ====================
+  // 1. INITIALIZATIONS
+  // ====================
+  let isListening = false;
+  let recognition;
+  let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
+  let imageModel; // MobileNet instance
 
-// Initialize MobileNet
-async function initializeImageModel() {
-  try {
-    isModelLoading = true;
-    showLoading();
-    imageModel = await mobilenet.load({
-      version: 2,
-      alpha: 1.0
-    });
-    hideLoading();
-    console.log('Image model loaded successfully');
-  } catch (error) {
-    console.error('Failed to load image model:', error);
-    displayResponse('Error: Image recognition unavailable', true);
-  } finally {
-    isModelLoading = false;
-  }
-}
-
-// Enhanced File Upload Handler
-document.getElementById('file-upload').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  try {
-    showLoading();
-    
-    if (file.type.startsWith('image/')) {
-      if (!imageModel) await initializeImageModel();
+  // ====================
+  // 2. MODEL MANAGEMENT
+  // ====================
+  async function initializeModels() {
+    try {
+      // Load MobileNet
+      imageModel = await mobilenet.load({
+        version: 2,
+        alpha: 1.0
+      });
       
+      // Load other models
+      await Promise.all([
+        recognizeHandwriting.init(),
+        image.init(),
+        text.init()
+      ]);
+      
+      console.log('All models loaded successfully');
+    } catch (error) {
+      console.error('Model initialization failed:', error);
+      displayResponse('Some features might be unavailable', true);
+    }
+  }
+
+  // ====================
+  // 3. IMAGE PROCESSING
+  // ====================
+  async function handleImageUpload(file) {
+    try {
+      showLoading();
       const img = await loadImage(file);
+      
+      // Get predictions from MobileNet
       const predictions = await imageModel.classify(img);
       
+      // Format results
       const resultText = predictions
         .map(p => `${p.className} (${Math.round(p.probability * 100)}%)`)
         .join('\n');
       
       displayResponse(`Image Analysis:\n${resultText}`);
-      addToHistory(file, predictions);
+      addToHistory({
+        type: 'image',
+        file: file.name,
+        results: predictions
+      });
 
-    } else if (file.type === 'text/plain') {
-      const text = await file.text();
-      displayResponse(`File Content:\n${text}`);
-    }
-  } catch (error) {
-    console.error('File processing error:', error);
-    displayResponse('Error processing file', true);
-  } finally {
-    hideLoading();
-  }
-});
-
-// Image Loading Helper
-function loadImage(file) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
-    
-    reader.onload = (e) => {
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = e.target.result;
-    };
-    
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-// Loading State Management
-function showLoading() {
-  document.getElementById('loading').classList.remove('loading-hidden');
-}
-
-function hideLoading() {
-  document.getElementById('loading').classList.add('loading-hidden');
-}
-
-// Existing functionality remains below...
-// [Keep your existing voice, theme, and other handlers here]
-// Wrap in DOMContentLoaded for safe DOM access
-document.addEventListener('DOMContentLoaded', () => {
-  let isListening = false;
-  let recognition;
-  let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
-
-  // Import with proper error handling
-  import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/models/handwritingModel.js';
-  import { image } from 'https://drkimogad.github.io/kimo/models/image-model.js';
-  import { text } from 'https://drkimogad.github.io/kimo/models/text-model.js';
-  
-  // Initialize models
-  async function loadModels() {
-    try {
-      await Promise.all([recognizeHandwriting.init(), image.init(), text.init()]);
     } catch (error) {
-      console.error('Model initialization failed:', error);
+      console.error('Image processing error:', error);
+      displayResponse('Failed to analyze image', true);
+    } finally {
+      hideLoading();
     }
   }
-  loadModels();
+
+  // ====================
+  // 4. UPDATED FILE UPLOAD HANDLER
+  // ====================
+  document.getElementById('file-upload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      if (file.type.startsWith('image/')) {
+        await handleImageUpload(file);
+      } else if (file.type === 'text/plain') {
+        const textContent = await file.text();
+        const plagiarismResult = await text.checkPlagiarism(textContent);
+        displayResponse(`Plagiarism Score: ${plagiarismResult.score}%`);
+      }
+    } catch (error) {
+      console.error('File processing error:', error);
+      displayResponse('Error processing file', true);
+    }
+  });
+
+  // ====================
+  // 5. SERVICE WORKER CONFIG
+  // ====================
+  const MODEL_CACHE = [
+    // MobileNet files
+    'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/model.json',
+    'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard*.bin',
+    // Your existing model files
+    'https://drkimogad.github.io/kimo/models/handwritingModel.js',
+    'https://drkimogad.github.io/kimo/models/image-model.js',
+    'https://drkimogad.github.io/kimo/models/text-model.js'
+  ];
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('SW registered');
+        // Update check logic remains
+      });
+  }
+
+  // ====================
+  // 6. INITIALIZE APP
+  // ====================
+  initializeModels();
+  
+  // Rest of your existing code remains unchanged below...
+  // [Keep all your voice, theme, search, and other handlers]
 
   // PWA Install Prompt
   let deferredPrompt;
