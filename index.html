@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>kimo AI</title>
+  <title>Kimo AI</title>
   <link rel="stylesheet" href="/styles.css">
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/icon-192.png">
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
 </head>
 <body>
   <header>
-    <h1>kimo AI</h1>
+    <h1>Kimo AI</h1>
     <button id="theme-toggle">🌓 Toggle Theme</button>
   </header>
 
@@ -29,9 +31,11 @@
   </main>
 
   <footer>
-    <p>© 2024 kimo AI. All rights reserved.</p>
+    <p>© 2024 Kimo AI. All rights reserved.</p>
   </footer>
 
+  <script src="/models.js"></script>
+  <script src="/utils.js"></script>
   <script src="/script.js"></script>
 </body>
 </html>
