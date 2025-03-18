@@ -130,13 +130,3 @@ if ('serviceWorker' in navigator) {
     .then(() => console.log('Service Worker Registered'))
     .catch(err => console.log('SW Registration Failed:', err));
 }
-
-// Add to script.js
-async function verifyModels() {
-  const [mobilenet, use] = await Promise.all([
-    tf.loadLayersModel('https://tfhub.dev/google/imagenet/mobilenet_v2_100_224/classification/4'),
-    use.load()
-  ]);
-  console.log('Models loaded:', mobilenet, use);
-}
-verifyModels();
