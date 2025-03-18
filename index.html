@@ -6,35 +6,36 @@
   <title>Kimo AI</title>
   <link rel="stylesheet" href="/styles.css">
   <link rel="manifest" href="/manifest.json">
- <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <!-- TensorFlow.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <!-- TensorFlow.js and MobileNet -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
 </head>
 <body data-theme="light">
   <header>
-    <h1>kimo AI</h1>
+    <h1>Kimo AI</h1>
     <button id="theme-toggle">🌗</button>
   </header>
 
   <main>
-    <textarea id="user-input" placeholder="Type your query or upload a file..."></textarea>
-    <button id="voice-btn">🎤 Voice Input</button>
-    <input type="file" id="file-upload">
-    <button id="submit-btn">🚀 Generate/Search</button>
-    <button id="save-btn">💾 Save Response</button>
-    <button id="humanize-btn">📝 Humanize Text</button>
+    <textarea id="user-input" placeholder="Type your query, upload a file, or speak..."></textarea>
+    <div class="button-group">
+      <button id="voice-btn">🎤 Voice Input</button>
+      <input type="file" id="file-upload" accept="image/*,text/plain">
+      <button id="submit-btn">🚀 Generate/Search</button>
+      <button id="save-btn">💾 Save</button>
+      <button id="humanize-btn">📝 Humanize</button>
+    </div>
 
-    <div id="response-area"></div>
+    <div id="response-area" class="response-container"></div>
+    <div id="loading" class="loading-hidden">Processing...</div>
   </main>
-  
+
   <footer>
     <p>© 2024 Kimo AI. All rights reserved.</p>
   </footer>
 
-  <script src="/models.js"></script>
-  <script src="/utils.js"></script>
   <script src="/script.js"></script>
 </body>
 </html>
