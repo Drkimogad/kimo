@@ -146,3 +146,6 @@ button {
   color: white;
   border-radius: 4px;
 }
+canvas {
+  display: none; /* Hide processing canvas */
+}
