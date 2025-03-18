@@ -7,7 +7,6 @@ const STATIC_ASSETS = [
   '/script.js',
   '/offline.html',
   '/icon-192.png',
-  '/icon-512.png',
   '/manifest.json'
 ];
 
