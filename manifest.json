@@ -1,7 +1,7 @@
 {
   "name": "Kimo",
   "short_name": "KimoAI",
-  "start_url": "/",
+  "start_url": "https://drkimogad.github.io/kimo/index.html",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#FFD700",
