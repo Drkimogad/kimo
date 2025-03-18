@@ -6,7 +6,7 @@
   <title>kimo AI - Offline</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body data-theme="light">
+<body class="offline-mode">
   <header>
     <h1>kimo AI</h1>
   </header>
@@ -14,7 +14,7 @@
   <main>
     <div class="offline-container">
       <div class="offline-content">
-        <div class="offline-icon">📶</div>
+        <div class="offline-icon">🚫</div> <!-- Better icon -->
         <h2>Oops! You're Offline</h2>
         <p>Don't worry, some features might still work!</p>
         <button id="reload-btn" class="offline-button">
@@ -29,15 +29,15 @@
   </footer>
 
   <script>
-    // Simple reload functionality
+    // Reload page when user clicks "Try Again"
     document.getElementById('reload-btn').addEventListener('click', () => {
       window.location.reload();
     });
 
-    // Check network status periodically
-    setInterval(() => {
-      if(navigator.onLine) window.location.reload();
-    }, 5000);
+    // Refresh once when online
+    window.addEventListener('online', () => {
+      window.location.reload();
+    });
   </script>
 </body>
 </html>
