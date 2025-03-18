@@ -24,7 +24,12 @@ const CACHE_ASSETS = [
   'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard2of5.bin',
   'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard3of5.bin',
   'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard4of5.bin',
-  'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard5of5.bin'
+  'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard5of5.bin',
+
+  // Universal Sentence Encoder files
+  'https://storage.googleapis.com/tfjs-models/tfjs/universal-sentence-encoder/model.json',
+  'https://storage.googleapis.com/tfjs-models/tfjs/universal-sentence-encoder/group1-shard1of2',
+  'https://storage.googleapis.com/tfjs-models/tfjs/universal-sentence-encoder/group1-shard2of2'
 ];
 
 // ✅ Install Service Worker & Cache Assets
