@@ -1,3 +1,4 @@
+/* Root Variables (Colors & Borders) */
 :root {
   --bg-color: #ffffff;
   --text-color: #000000;
@@ -11,21 +12,40 @@
   --accent: #FFD700;
 }
 
+/* General Page Styling */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: var(--bg-color);
   color: var(--text-color);
   transition: background 0.3s, color 0.3s;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-header, footer {
+/* Header (Sticky & Hides on Scroll) */
+header {
   background: var(--accent);
   padding: 1rem;
   text-align: center;
   border-bottom: var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: top 0.3s ease-in-out;
 }
 
+/* Footer (Always at Bottom) */
+footer {
+  background: var(--accent);
+  padding: 1rem;
+  text-align: center;
+  border-top: var(--border);
+  margin-top: auto;
+}
+
+/* Theme Toggle Button */
 #theme-toggle {
   position: absolute;
   top: 1rem;
@@ -35,12 +55,15 @@ header, footer {
   cursor: pointer;
 }
 
+/* Main Content */
 main {
   padding: 1rem;
   max-width: 800px;
-  margin: 0 auto;
+  margin: auto;
+  flex-grow: 1;
 }
 
+/* Input Fields & Buttons */
 .input-group {
   margin: 1rem 0;
 }
@@ -68,6 +91,7 @@ button {
   border-radius: 4px;
 }
 
+/* Response Area */
 #response-area {
   margin-top: 1rem;
   padding: 1rem;
@@ -75,4 +99,50 @@ button {
   border-radius: 4px;
   min-height: 100px;
 }
- // to add offline styling and responsive designs for ldesktop, tablets and phones
+
+/* ✅ Offline Mode Banner */
+#offline-banner {
+  display: none;
+  background: red;
+  color: white;
+  text-align: center;
+  padding: 0.5rem;
+  font-weight: bold;
+}
+
+/* 📱 Responsive Design */
+@media (max-width: 1024px) {
+  main {
+    max-width: 90%;
+  }
+
+  #theme-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    font-size: 0.9rem;
+  }
+
+  button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  textarea {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 0.5rem;
+  }
+
+  button {
+    font-size: 0.8rem;
+  }
+}
