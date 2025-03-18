@@ -1,24 +1,17 @@
-// MobileNet Model Idocument.addEventListener('DOMContentLoaded', () => {
-  // ====================
-  // 1. INITIALIZATIONS
-  // ====================
+document.addEventListener('DOMContentLoaded', () => {
+  // ************** INITIALIZATIONS **************
   let isListening = false;
   let recognition;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
   let imageModel; // MobileNet instance
 
-  // ====================
-  // 2. MODEL MANAGEMENT
-  // ====================
+  // ************** MODEL MANAGEMENT **************
   async function initializeModels() {
     try {
-      // Load MobileNet
-      imageModel = await mobilenet.load({
-        version: 2,
-        alpha: 1.0
-      });
+      // Initialize MobileNet
+      imageModel = await mobilenet.load({ version: 2, alpha: 1.0 });
       
-      // Load other models
+      // Initialize other models
       await Promise.all([
         recognizeHandwriting.init(),
         image.init(),
@@ -32,28 +25,25 @@
     }
   }
 
-  // ====================
-  // 3. IMAGE PROCESSING
-  // ====================
+  // ************** IMAGE PROCESSING **************
   async function handleImageUpload(file) {
     try {
       showLoading();
       const img = await loadImage(file);
-      
-      // Get predictions from MobileNet
       const predictions = await imageModel.classify(img);
       
-      // Format results
       const resultText = predictions
         .map(p => `${p.className} (${Math.round(p.probability * 100)}%)`)
         .join('\n');
       
       displayResponse(`Image Analysis:\n${resultText}`);
-      addToHistory({
+      sessionHistory.push({
         type: 'image',
         file: file.name,
-        results: predictions
+        results: predictions,
+        timestamp: new Date().toISOString()
       });
+      localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
 
     } catch (error) {
       console.error('Image processing error:', error);
@@ -63,85 +53,42 @@
     }
   }
 
-  // ====================
-  // 4. UPDATED FILE UPLOAD HANDLER
-  // ====================
+  // ************** FILE UPLOAD HANDLER **************
   document.getElementById('file-upload').addEventListener('change', async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     try {
+      showLoading();
+      
       if (file.type.startsWith('image/')) {
         await handleImageUpload(file);
       } else if (file.type === 'text/plain') {
         const textContent = await file.text();
         const plagiarismResult = await text.checkPlagiarism(textContent);
-        displayResponse(`Plagiarism Score: ${plagiarismResult.score}%`);
+        
+        displayResponse(
+          `Plagiarism Score: ${plagiarismResult.score.toFixed(1)}%\n` +
+          `Possible plagiarism: ${plagiarismResult.isPlagiarized ? 'Yes' : 'No'}`
+        );
+        
+        sessionHistory.push({
+          type: 'text',
+          content: textContent,
+          score: plagiarismResult.score,
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
       }
     } catch (error) {
       console.error('File processing error:', error);
       displayResponse('Error processing file', true);
+    } finally {
+      hideLoading();
     }
   });
 
-  // ====================
-  // 5. SERVICE WORKER CONFIG
-  // ====================
-  const MODEL_CACHE = [
-    // MobileNet files
-    'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/model.json',
-    'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard*.bin',
-    // Your existing model files
-    'https://drkimogad.github.io/kimo/models/handwritingModel.js',
-    'https://drkimogad.github.io/kimo/models/image-model.js',
-    'https://drkimogad.github.io/kimo/models/text-model.js'
-  ];
-
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('SW registered');
-        // Update check logic remains
-      });
-  }
-
-  // ====================
-  // 6. INITIALIZE APP
-  // ====================
-  initializeModels();
-  
-  // Rest of your existing code remains unchanged below...
-  // [Keep all your voice, theme, search, and other handlers]
-
-  // PWA Install Prompt
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('install-btn').style.display = 'block';
-  });
-
-  document.getElementById('install-btn').addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User ${outcome} the install prompt`);
-      deferredPrompt = null;
-    }
-  });
-
-  // 🌙 Theme Toggle with localStorage
-  const themeToggle = document.getElementById('theme-toggle');
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  document.body.dataset.theme = currentTheme;
-
-  themeToggle.addEventListener('click', () => {
-    const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-    document.body.dataset.theme = newTheme;
-    localStorage.setItem('theme', newTheme);
-  });
-
-  // 🎤 Enhanced Voice Input
+  // ************** VOICE INPUT HANDLING **************
   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
     recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.continuous = false;
@@ -181,28 +128,18 @@
     }
   });
 
-  // 📂 File Upload with error handling
-  document.getElementById('file-upload').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  // ************** THEME MANAGEMENT **************
+  const themeToggle = document.getElementById('theme-toggle');
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  document.body.dataset.theme = currentTheme;
 
-    try {
-      if (file.type.startsWith('image/')) {
-        const img = await loadImage(file);
-        const handwritingText = await recognizeHandwriting(img);
-        displayResponse(`Recognized text: ${handwritingText}`);
-      } else if (file.type === 'text/plain') {
-        const textContent = await file.text();
-        const plagiarismResult = await checkPlagiarism(textContent);
-        displayResponse(`Plagiarism Likelihood: ${plagiarismResult.score}%`);
-      }
-    } catch (error) {
-      console.error('File processing error:', error);
-      displayResponse('Error processing file. Please try again.');
-    }
+  themeToggle.addEventListener('click', () => {
+    const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.body.dataset.theme = newTheme;
+    localStorage.setItem('theme', newTheme);
   });
 
-  // 🚀 Enhanced Query Handling
+  // ************** SEARCH/QUERY HANDLING **************
   document.getElementById('submit-btn').addEventListener('click', async () => {
     const input = document.getElementById('user-input').value.trim();
     if (!input) return;
@@ -212,11 +149,21 @@
       
       if (isSearchQuery(input)) {
         const searchResults = await fetchDuckDuckGoResults(input);
-        sessionHistory.push({ type: 'search', query: input, results: searchResults });
+        sessionHistory.push({ 
+          type: 'search', 
+          query: input, 
+          results: searchResults,
+          timestamp: new Date().toISOString()
+        });
         displayResponse(searchResults.AbstractText || "No results found.");
       } else {
         const aiResponse = await generateAIResponse(input);
-        sessionHistory.push({ type: 'ai', query: input, response: aiResponse });
+        sessionHistory.push({ 
+          type: 'ai', 
+          query: input, 
+          response: aiResponse,
+          timestamp: new Date().toISOString()
+        });
         displayResponse(aiResponse);
       }
       
@@ -227,76 +174,46 @@
     }
   });
 
-  // 🔍 Enhanced Search with fallback
-  async function fetchDuckDuckGoResults(query) {
-    try {
-      const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
-      if (!response.ok) throw new Error('Network response was not OK');
-      return await response.json();
-    } catch (error) {
-      console.error("Search failed:", error);
-      return { AbstractText: "Search unavailable. Showing local results...", RelatedTopics: [] };
-    }
+  // ************** UTILITY FUNCTIONS **************
+  function loadImage(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
-  // 📝 Humanize with AI model
-  async function humanizeText(text) {
-    try {
-      return await text.humanize(text);
-    } catch (error) {
-      console.error('Humanization failed:', error);
-      return text; // Return original as fallback
-    }
+  function showLoading() {
+    document.getElementById('loading').classList.remove('loading-hidden');
   }
 
-  // 💾 Enhanced Save with filename
-  document.getElementById('save-btn').addEventListener('click', () => {
-    const text = document.getElementById('response-area').innerText;
-    if (text) {
-      const filename = `kimo_${new Date().toISOString().slice(0,10)}.txt`;
-      saveToFile(text, filename);
-    }
-  });
+  function hideLoading() {
+    document.getElementById('loading').classList.add('loading-hidden');
+  }
 
-  // Helper functions
   function displayResponse(content, clear = false) {
     const responseArea = document.getElementById('response-area');
     if (clear) responseArea.innerHTML = '';
     responseArea.innerHTML += `<div class="response">${content}</div>`;
   }
 
-  function isSearchQuery(input) {
-    return input.startsWith('search:') || input.split(' ').length < 5;
-  }
-
-  function saveToFile(content, filename) {
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-
-  // Service Worker with update check
+  // ************** SERVICE WORKER **************
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('https://drkimogad.github.io/kimo/sw.js')
+    navigator.serviceWorker.register('/sw.js')
       .then(registration => {
         console.log('SW registered');
-        registration.addEventListener('updatefound', () => {
-          console.log('New SW version found');
-        });
+        setInterval(() => registration.update(), 3600000);
       })
       .catch(err => console.log('SW registration failed:', err));
-    
-    // Check for updates hourly
-    setInterval(() => {
-      navigator.serviceWorker.getRegistration().then(registration => {
-        if (registration) registration.update();
-      });
-    }, 3600000);
   }
+
+  // ************** INITIALIZE APP **************
+  initializeModels();
 });
