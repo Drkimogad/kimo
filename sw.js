@@ -13,9 +13,9 @@ const CACHE_ASSETS = [
     'icons/icon-128.png',
     'icons/icon-64.png',
     '/favicon.ico',
-    '/models/text_model/model.json',
-    '/models/image_model/model.json',
-    '/models/handwriting_model/model.json'
+    '/models/text-model.js',
+    '/models/image-model.js',
+    '/models/handwritingModel.js'
 ];
 
 // ✅ Install Service Worker & Cache Assets
