@@ -146,6 +146,23 @@ button {
   color: white;
   border-radius: 4px;
 }
-canvas {
+
+.canvas {
   display: none; /* Hide processing canvas */
+}
+
+.canvas-container {
+  margin: 1rem 0;
+  border: 2px solid #ccc;
+  padding: 1rem;
+}
+
+#drawing-canvas {
+  border: 1px solid #888;
+  background: white;
+}
+
+#clear-canvas {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
 }
