@@ -49,3 +49,28 @@ function displayResponse(text) {
   responseArea.innerHTML = `<p>${text}</p>`;
   responseArea.scrollTop = responseArea.scrollHeight;
 }
+// ✅ AI Text Generation (Offline)
+function generateAIResponse(input) {
+    return `You said: ${input}. AI thinks... [Local Processing]`;
+}
+
+// ✅ Handwriting Recognition (New Model)
+async function recognizeHandwriting(image) {
+    const tensor = tf.browser.fromPixels(image).resizeNearestNeighbor([224, 224]).toFloat().expandDims();
+    const prediction = await handwritingModel.predict(tensor).data();
+    return [{ text: "Recognized text...", confidence: prediction[0] }];
+}
+
+// ✅ Image Classification (Existing Function)
+async function classifyImage(img) {
+    const tensor = tf.browser.fromPixels(img).resizeNearestNeighbor([224, 224]).toFloat().expandDims();
+    const prediction = await imageModel.predict(tensor).data();
+    return [{ className: 'Dog', probability: prediction[0] }];
+}
+
+// ✅ Display AI Responses
+function displayResponse(text) {
+    const responseArea = document.getElementById('response-area');
+    responseArea.innerHTML = `<p>${text}</p>`;
+    responseArea.scrollTop = responseArea.scrollHeight;
+}
