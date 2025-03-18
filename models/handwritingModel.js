@@ -1,44 +1,38 @@
-// Load Handwriting Recognition Model
-async function loadHandwritingModel() {
+// models/handwritingModel.js
+export const recognizeHandwriting = {
+  model: null,
+  
+  async init() {
     try {
-        const modelURL = './models/handwriting_model/model.json';
-        handwritingModel = await tf.loadLayersModel(modelURL);
-        console.log("📝 Handwriting Model Loaded Successfully!");
+      // Load pre-trained handwriting model
+      this.model = await tf.loadLayersModel('/models/handwriting/model.json');
+      console.log('Handwriting model loaded');
     } catch (error) {
-        console.error("❌ Error loading handwriting model:", error);
+      console.error('Handwriting model failed to load:', error);
+      throw new Error('Handwriting recognition unavailable');
     }
-}
+  },
 
-// Recognize Handwriting from an Image
-async function recognizeHandwriting(image) {
-    try {
-        if (!handwritingModel) {
-            throw new Error("Model not loaded yet!");
-        }
+  async recognize(canvas) {
+    if (!this.model) await this.init();
+    
+    // Preprocess image
+    const tensor = tf.tidy(() => {
+      return tf.browser.fromPixels(canvas)
+        .resizeNearestNeighbor([28, 28])
+        .mean(2)
+        .expandDims(2)
+        .expandDims()
+        .toFloat()
+        .div(255.0);
+    });
 
-        // Convert Image to Tensor
-        const tensor = tf.browser.fromPixels(image)
-            .resizeNearestNeighbor([28, 28]) // Adjust for your model's expected input size
-            .mean(2) // Convert to grayscale
-            .toFloat()
-            .expandDims(0)
-            .expandDims(-1)
-            .div(255.0); // Normalize pixels
-
-        // Make Prediction
-        const prediction = await handwritingModel.predict(tensor).data();
-
-        // Release Memory
-        tf.dispose(tensor);
-
-        // Return the Most Likely Character
-        const predictedIndex = prediction.indexOf(Math.max(...prediction));
-        return { text: String.fromCharCode(65 + predictedIndex), confidence: prediction[predictedIndex] };
-    } catch (error) {
-        console.error("❌ Handwriting recognition error:", error);
-        return { text: "Unknown", confidence: 0 };
-    }
-}
-
-// Load model when script runs
-loadHandwritingModel();
+    // Predict
+    const prediction = this.model.predict(tensor);
+    const results = await prediction.data();
+    
+    // Map to characters (A-Z)
+    const charCode = 65 + results.indexOf(Math.max(...results));
+    return String.fromCharCode(charCode);
+  }
+};
