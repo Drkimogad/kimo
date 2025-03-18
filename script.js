@@ -71,3 +71,52 @@ if ('serviceWorker' in navigator) {
     .then(() => console.log('Service Worker Registered'))
     .catch(err => console.log('SW Registration Failed:', err));
 }
+
+// ✅ AI Processing & Online Search in One Place
+document.getElementById('submit-btn').addEventListener('click', async () => {
+    const input = document.getElementById('user-input').value.trim();
+    if (!input) return;
+
+    displayResponse("Processing...");
+
+    if (isSearchQuery(input)) {
+        // 🔹 DuckDuckGo Online Search
+        const searchResults = await fetchDuckDuckGoResults(input);
+        displayResponse(searchResults || "No results found.");
+    } else {
+        // 🔹 Local AI Generation (Offline)
+        const aiResponse = generateAIResponse(input);
+        displayResponse(aiResponse);
+    }
+});
+
+// ✅ Online Search via DuckDuckGo API
+async function fetchDuckDuckGoResults(query) {
+    try {
+        const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
+        const data = await response.json();
+        return data.AbstractText || "No detailed summary found.";
+    } catch (error) {
+        console.error("Search failed:", error);
+        return "Search error. Try again.";
+    }
+}
+
+// ✅ Basic Search Detection (Modify as Needed)
+function isSearchQuery(text) {
+    return text.toLowerCase().includes("search for") || text.toLowerCase().includes("what is");
+}
+
+// ✅ Local Save Functionality
+document.getElementById('save-btn').addEventListener('click', () => {
+    const text = document.getElementById('response-area').innerText;
+    if (text) saveToFile(text, "ai_generated.txt");
+});
+
+function saveToFile(content, filename) {
+    const blob = new Blob([content], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+}
