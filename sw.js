@@ -8,6 +8,11 @@ const CACHE_ASSETS = [
     '/utils.js',
     '/models.js',
     '/offline.html',
+    '/icons/icon-512.png', 
+    '/icons/icon-192.png', 
+    'icons/icon-128.png',
+    'icons/icon-64.png',
+    '/favicon.ico',
     '/models/text_model/model.json',
     '/models/image_model/model.json',
     '/models/handwriting_model/model.json'
