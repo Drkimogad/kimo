@@ -3,23 +3,14 @@ export const recognizeHandwriting = {
   model: null,
   
   async init() {
-    try {
-      // Load pre-trained handwriting model
-      this.model = await tf.loadLayersModel('/models/handwriting/model.json');
-      console.log('Handwriting model loaded');
-    } catch (error) {
-      console.error('Handwriting model failed to load:', error);
-      throw new Error('Handwriting recognition unavailable');
-    }
+    this.model = await tf.loadGraphModel('/models/crnn/model.json');
   },
 
   async recognize(canvas) {
-    if (!this.model) await this.init();
-    
-    // Preprocess image
+    // Preprocess for CRNN model
     const tensor = tf.tidy(() => {
       return tf.browser.fromPixels(canvas)
-        .resizeNearestNeighbor([28, 28])
+        .resizeNearestNeighbor([32, 128])
         .mean(2)
         .expandDims(2)
         .expandDims()
@@ -27,12 +18,17 @@ export const recognizeHandwriting = {
         .div(255.0);
     });
 
-    // Predict
     const prediction = this.model.predict(tensor);
-    const results = await prediction.data();
-    
-    // Map to characters (A-Z)
-    const charCode = 65 + results.indexOf(Math.max(...results));
-    return String.fromCharCode(charCode);
+    const sequence = await processCRNNOutput(prediction);
+    return sequence;
   }
 };
+
+// CRNN output decoder
+const CHAR_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+function processCRNNOutput(prediction) {
+  const [output] = prediction.dataSync();
+  return Array.from(output)
+    .map(idx => CHAR_SET[idx] || '')
+    .join('');
+}
