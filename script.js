@@ -1,12 +1,15 @@
-let isListening = false;
-let recognition;
-let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
 // PWA Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   console.log('PWA installation available');
 });
+
+import { recognizeHandwriting } from './models/handwriting-model.js';
+
+let isListening = false;
+let recognition;
+let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
 // Load AI models
 loadModels();
