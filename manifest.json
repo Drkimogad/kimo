@@ -1,26 +1,20 @@
 {
-  "name": "Kimo",
-  "short_name": "KimoAI",
+  "name": "Kimo AI",
+  "short_name": "Kimo",
   "start_url": "https://drkimogad.github.io/kimo/index.html",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#FFD700",
-  "description": "An intelligent AI agent for text and image analysis",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
-  ],
-  "scope": "/",
-  "categories": ["productivity", "education", "utilities"]
+  ]
 }
