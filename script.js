@@ -110,7 +110,26 @@ function humanizeResponse(text) {
     .replace(/automatically/g, "carefully")
     .replace(/(\w)(\1{2,})/g, "$1"); // Basic stutter remover
 }
+// added to test snippet
+// Test MobileNet
+async function testImageModel() {
+  const model = await mobilenet.load();
+  const img = document.createElement('img');
+  img.src = 'https://i.imgur.com/9I6NrZr.png'; // Test image
+  const predictions = await model.classify(img);
+  console.log('Image predictions:', predictions);
+}
 
+// Test Universal Sentence Encoder
+async function testTextModel() {
+  const model = await use.load();
+  const embeddings = await model.embed(['Hello world']);
+  console.log('Text embeddings:', embeddings);
+}
+
+// Run tests
+testImageModel();
+testTextModel();
 function displayResponse(text) {
   const responseArea = document.getElementById('response-area');
   responseArea.innerHTML = `<p>${text}</p>`;
