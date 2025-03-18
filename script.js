@@ -2,11 +2,9 @@ let isListening = false;
 let recognition;
 let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
-// Add to script.js
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   console.log('PWA installation available');
-  // You can add an install button later
 });
 
 // Load models
@@ -14,10 +12,11 @@ let plagiarismModel;
 let imageModel;
 
 async function loadModels() {
-  // Load Universal Sentence Encoder for plagiarism detection
-  plagiarismModel = await use.load();
-  // Load MobileNet for image classification
-  imageModel = await tf.loadLayersModel('https://tfhub.dev/google/tfjs-model/imagenet/mobilenet_v2_100_224/classification/4/default/1');
+  // Load MobileNet model using ml5.js
+  imageModel = await ml5.imageClassifier('MobileNet');
+  console.log("Image classification model loaded.");
+
+  console.log("Models initialized.");
 }
 
 // Theme toggle
@@ -25,9 +24,10 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
   document.body.dataset.theme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
 });
 
-// Voice input
-if ('webkitSpeechRecognition' in window) {
-  recognition = new webkitSpeechRecognition();
+// Voice input using cross-browser SpeechRecognition API
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
   recognition.continuous = false;
   recognition.interimResults = false;
 
@@ -47,7 +47,7 @@ document.getElementById('voice-btn').addEventListener('click', () => {
   }
 });
 
-// File upload
+// File upload for images and text
 document.getElementById('file-upload').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (file.type.startsWith('image/')) {
@@ -66,11 +66,9 @@ document.getElementById('submit-btn').addEventListener('click', async () => {
   const input = document.getElementById('user-input').value;
   if (!input) return;
 
-  // Save to session history
   sessionHistory.push(input);
   localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
 
-  // Get AI response
   try {
     const response = await getAIResponse(input);
     const humanized = humanizeResponse(response);
@@ -88,27 +86,42 @@ async function getAIResponse(input) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt: input })
   });
-  
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
-  
+
   const data = await response.json();
   return data.response || "No response generated";
 }
 
 async function checkPlagiarism(text) {
-  const sample = "Original text for comparison...";
-  const embeddings = await plagiarismModel.embed([text, sample]);
-  const similarity = tf.matMul(embeddings[0], embeddings[1], false, true).dataSync()[0];
-  return similarity > 0.8;
+  const apiKey = "YOUR_OPENAI_API_KEY"; // Replace with your actual API key
+  const response = await fetch('https://api.openai.com/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      input: text,
+      model: 'text-embedding-ada-002'
+    })
+  });
+
+  const data = await response.json();
+  return data && data.data ? data.data.length > 0 : false;
+}
+
+async function classifyImage(image) {
+  return await imageModel.classify(image);
 }
 
 function humanizeResponse(text) {
   return text
     .replace(/AI/g, "this agent")
     .replace(/automatically/g, "carefully")
-    .replace(/(\w)(\1{2,})/g, "$1"); // Basic stutter remover
+    .replace(/(\w)(\1{2,})/g, "$1");
 }
 
 function displayResponse(text) {
@@ -117,12 +130,11 @@ function displayResponse(text) {
   responseArea.scrollTop = responseArea.scrollHeight;
 }
 
-// Initialize
+// Initialize models
 loadModels().catch(error => {
   console.error("Model loading failed:", error);
   displayResponse("Failed to initialize AI models. Please refresh.");
 });
-
 
 // Register service worker
 if ('serviceWorker' in navigator) {
