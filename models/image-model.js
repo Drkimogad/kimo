@@ -1,54 +1,73 @@
-// image-model.js
+// models/image-model.js
+import * as tf from '@tensorflow/tfjs';
+
 export const image = {
   model: null,
   classes: ["dog", "cat", "bird", "car", "tree", "building"],
   threshold: 0.7,
 
   async init() {
-    // 1. Load model from IndexedDB (offline-first)
-    const cachedModel = await this.loadCachedModel();
-    
-    if(cachedModel) {
-      this.model = cachedModel;
-    } else {
-      // 2. Load from local bundled model
-      this.model = await tf.loadLayersModel('models/image-model.json');
+    try {
+      // Try loading from IndexedDB first
+      this.model = await this.loadCachedModel();
       
-      // 3. Cache for future offline use
-      await this.cacheModel();
+      if (!this.model) {
+        // Load from local files
+        this.model = await tf.loadLayersModel('/models/image-model.json');
+        await this.cacheModel();
+      }
+    } catch (error) {
+      console.error('Model initialization failed:', error);
+      throw new Error('Failed to load image classification model');
     }
   },
 
-  async classify(imgElement) {
+  async classify(imageElement) {
+    if (!this.model) await this.init();
+
     // Preprocess image
-    const tensor = tf.browser.fromPixels(imgElement)
-      .resizeNearestNeighbor([224, 224])
-      .toFloat()
-      .div(255)
-      .expandDims();
+    const tensor = tf.tidy(() => {
+      return tf.browser.fromPixels(imageElement)
+        .resizeNearestNeighbor([224, 224])
+        .toFloat()
+        .div(255.0)
+        .expandDims();
+    });
 
     // Predict
     const predictions = await this.model.predict(tensor);
-    const results = Array.from(predictions.dataSync());
+    const data = await predictions.data();
+    tensor.dispose();
+    predictions.dispose();
 
-    // Map to classes
-    return this.classes
-      .map((className, index) => ({
-        class: className,
-        confidence: results[index]
-      }))
-      .filter(item => item.confidence >= this.threshold);
+    // Process results
+    return this.processPredictions(data);
   },
 
-  // IndexedDB caching implementation
+  processPredictions(predictions) {
+    return this.classes
+      .map((className, index) => ({
+        className,
+        confidence: predictions[index],
+        timestamp: new Date().toISOString()
+      }))
+      .filter(item => item.confidence >= this.threshold)
+      .sort((a, b) => b.confidence - a.confidence);
+  },
+
   async cacheModel() {
-    const modelArtifacts = await this.model.save('indexeddb://my-image-model');
+    const saveResult = await this.model.save('indexeddb://image-model-v1');
+    console.log('Model cached successfully');
+    return saveResult;
   },
 
   async loadCachedModel() {
     try {
-      return await tf.loadLayersModel('indexeddb://my-image-model');
-    } catch(error) {
+      const model = await tf.loadLayersModel('indexeddb://image-model-v1');
+      console.log('Loaded model from cache');
+      return model;
+    } catch (error) {
+      console.log('No cached model found');
       return null;
     }
   }
