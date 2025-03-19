@@ -1,16 +1,12 @@
-
 document.addEventListener('DOMContentLoaded', async () => {
   // ************** INITIALIZATIONS **************
   let isListening = false;
   let recognition;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
-  // Removed duplicate imageModel declaration
-  // let imageModel; // MobileNet instance
-
   // ************** MODEL INITIALIZATION **************
   try {
-    await loadModels();
+    await loadModels(); // Load all models at the start
     console.log('All models loaded successfully');
   } catch (error) {
     console.error('Model initialization failed:', error);
@@ -22,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       showLoading();
       const img = await loadImage(file);
-      const predictions = await imageModel.classify(img);
+      const predictions = await mobilenetModel.classify(img);
       
       const resultText = predictions
         .map(p => `${p.className} (${Math.round(p.probability * 100)}%)`)
@@ -64,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
       } else if (file.type === 'text/plain') {
         const textContent = await file.text();
-        const plagiarismResult = await textModel.checkPlagiarism(textContent);
+        const plagiarismResult = await useModel.checkPlagiarism(textContent);
         displayResponse(`Plagiarism Score: ${plagiarismResult.score.toFixed(1)}%`);
         updateSessionHistory('text', { content: textContent, score: plagiarismResult.score });
       }
