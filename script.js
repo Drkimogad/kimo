@@ -1,28 +1,19 @@
-document.addEventListener('DOMContentLoaded', () => {
+import { loadModels, textModel, imageModel, recognizeHandwriting } from './models.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
   // ************** INITIALIZATIONS **************
   let isListening = false;
   let recognition;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
   let imageModel; // MobileNet instance
 
-  // ************** MODEL MANAGEMENT **************
-  async function initializeModels() {
-    try {
-      // Initialize MobileNet
-      imageModel = await mobilenet.load({ version: 2, alpha: 1.0 });
-      
-      // Initialize other models
-      await Promise.all([
-        recognizeHandwriting.init(),
-        image.init(),
-        text.init()
-      ]);
-      
-      console.log('All models loaded successfully');
-    } catch (error) {
-      console.error('Model initialization failed:', error);
-      displayResponse('Some features might be unavailable', true);
-    }
+  // ************** MODEL INITIALIZATION **************
+  try {
+    await loadModels();
+    console.log('All models loaded successfully');
+  } catch (error) {
+    console.error('Model initialization failed:', error);
+    displayResponse('Some features might be unavailable', true);
   }
 
   // ************** IMAGE PROCESSING **************
@@ -37,14 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .join('\n');
       
       displayResponse(`Image Analysis:\n${resultText}`);
-      sessionHistory.push({
-        type: 'image',
-        file: file.name,
-        results: predictions,
-        timestamp: new Date().toISOString()
-      });
-      localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
-
+      updateSessionHistory('image', { file: file.name, results: predictions });
     } catch (error) {
       console.error('Image processing error:', error);
       displayResponse('Failed to analyze image', true);
@@ -53,41 +37,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ************** FILE UPLOAD HANDLER **************
- document.getElementById('file-upload').addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  // ************** UNIFIED FILE UPLOAD HANDLER **************
+  document.getElementById('file-upload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  try {
-    showLoading();
-    
-    if (file.type.startsWith('image/')) {
-      const img = await loadImage(file);
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+    try {
+      showLoading();
       
-      const recognizedText = await recognizeHandwriting.recognize(canvas);
-      displayResponse(`Handwriting Recognition: ${recognizedText}`);
+      if (file.type.startsWith('image/')) {
+        // Handle image classification
+        await handleImageUpload(file);
+        
+        // Handle handwriting recognition
+        const img = await loadImage(file);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        const recognizedText = await recognizeHandwriting.recognize(canvas);
+        displayResponse(`Handwriting Recognition: ${recognizedText}`);
+        updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
+        
+      } else if (file.type === 'text/plain') {
+        const textContent = await file.text();
+        const plagiarismResult = await textModel.checkPlagiarism(textContent);
+        displayResponse(`Plagiarism Score: ${plagiarismResult.score.toFixed(1)}%`);
+        updateSessionHistory('text', { content: textContent, score: plagiarismResult.score });
+      }
       
-      sessionHistory.push({
-        type: 'handwriting',
-        file: file.name,
-        text: recognizedText,
-        timestamp: new Date().toISOString()
-      });
-      localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
+    } catch (error) {
+      console.error('File processing error:', error);
+      displayResponse('Error processing file', true);
+    } finally {
+      hideLoading();
     }
-    // Existing text/plain handling...
-  } catch (error) {
-    console.error('File processing error:', error);
-    displayResponse('Error processing file', true);
-  } finally {
-    hideLoading();
-  }
-});
+  });
 
   // ************** VOICE INPUT HANDLING **************
   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
@@ -129,55 +116,91 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-// Canvas Drawing Implementation
-let isDrawing = false;
-let lastX = 0;
-let lastY = 0;
-const canvas = document.getElementById('drawing-canvas');
-const ctx = canvas.getContext('2d');
+  // ************** CANVAS DRAWING IMPLEMENTATION **************
+  const canvas = document.getElementById('drawing-canvas');
+  const ctx = canvas.getContext('2d');
+  let isDrawing = false;
+  let lastX = 0;
+  let lastY = 0;
 
-// Set canvas size
-canvas.width = 800;
-canvas.height = 200;
+  // Canvas setup
+  canvas.width = 800;
+  canvas.height = 200;
 
-// Drawing functions
-function startDrawing(e) {
-  isDrawing = true;
-  [lastX, lastY] = [e.offsetX, e.offsetY];
-}
+  // Drawing event handlers
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDrawing);
+  canvas.addEventListener('mouseout', endDrawing);
 
-function draw(e) {
-  if (!isDrawing) return;
-  ctx.beginPath();
-  ctx.moveTo(lastX, lastY);
-  ctx.lineTo(e.offsetX, e.offsetY);
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  [lastX, lastY] = [e.offsetX, e.offsetY];
-}
+  document.getElementById('clear-canvas').addEventListener('click', () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
 
-function endDrawing() {
-  isDrawing = false;
-}
+  document.getElementById('recognize-btn').addEventListener('click', async () => {
+    const recognizedText = await recognizeHandwriting.recognize(canvas);
+    displayResponse(`Handwriting: ${recognizedText}`);
+    updateSessionHistory('drawing', { text: recognizedText });
+  });
 
-// Event listeners
-canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', endDrawing);
-canvas.addEventListener('mouseout', endDrawing);
+  // ************** IMPROVED FETCH WITH TIMEOUT **************
+  async function fetchDuckDuckGoResults(query) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-document.getElementById('clear-canvas').addEventListener('click', () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-});
+    try {
+      const response = await fetch(
+        `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`,
+        { signal: controller.signal }
+      );
+      if (!response.ok) throw new Error('Network response was not OK');
+      return await response.json();
+    } catch (error) {
+      console.error("Search failed:", error);
+      return { AbstractText: "Search unavailable. Showing local results...", RelatedTopics: [] };
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
 
-// Add recognize button handler
-document.getElementById('recognize-btn').addEventListener('click', async () => {
-  const recognizedText = await recognizeHandwriting.recognize(canvas);
-  displayResponse(`Handwriting: ${recognizedText}`);
-});
+  // ************** HELPER FUNCTIONS **************
+  function updateSessionHistory(type, data) {
+    const entry = {
+      type,
+      ...data,
+      timestamp: new Date().toISOString()
+    };
+    sessionHistory.push(entry);
+    localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
+  }
 
-  
+  function startDrawing(e) {
+    isDrawing = true;
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(e.offsetX, e.offsetY);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    [lastX, lastY] = [e.offsetX, e.offsetY];
+  }
+
+  function endDrawing() {
+    isDrawing = false;
+  }
+
+  function toggleListeningUI(listening) {
+    const voiceBtn = document.getElementById('voice-btn');
+    voiceBtn.classList.toggle('recording', listening);
+    isListening = listening;
+  }
+
+  // ************** REMAINING CORE FUNCTIONALITY **************
   // ************** THEME MANAGEMENT **************
   const themeToggle = document.getElementById('theme-toggle');
   const currentTheme = localStorage.getItem('theme') || 'light';
@@ -252,18 +275,8 @@ document.getElementById('recognize-btn').addEventListener('click', async () => {
     const responseArea = document.getElementById('response-area');
     if (clear) responseArea.innerHTML = '';
     responseArea.innerHTML += `<div class="response">${content}</div>`;
+    responseArea.scrollTop = responseArea.scrollHeight;
   }
-  
-  // timeout handling 
-const controller = new AbortController();
-const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-try {
-  const response = await fetch(`...`, { signal: controller.signal });
-  // ...
-} finally {
-  clearTimeout(timeoutId);
-}
   
   // ************** SERVICE WORKER **************
   if ('serviceWorker' in navigator) {
