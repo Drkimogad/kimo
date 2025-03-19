@@ -2,27 +2,36 @@ import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
 import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/models/handwritingModel.js';
 
-// Shared model instances
-export let textModel, imageModel;
+let mobilenetModel;
+let useModel;
+let handwritingModelInitialized = false;
 
-// Model initialization
-export async function loadModels() {
-  try {
-    // Load MobileNet
-    imageModel = await mobilenet.load({ version: 2, alpha: 1.0 });
-    
-    // Load Universal Sentence Encoder
-    textModel = await use.load();
-    
-    // Initialize handwriting model
-    await recognizeHandwriting.init();
-    
-    console.log('All models loaded');
-  } catch (error) {
-    console.error('Model loading failed:', error);
-    throw error; // Throw to handle in script.js
+export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwriting']) {
+  const loadPromises = [];
+
+  if (modelsToLoad.includes('mobilenet')) {
+    loadPromises.push(mobilenet.load().then(model => {
+      mobilenetModel = model;
+      console.log('MobileNet model loaded');
+    }));
   }
+
+  if (modelsToLoad.includes('use')) {
+    loadPromises.push(use.load().then(model => {
+      useModel = model;
+      console.log('Universal Sentence Encoder model loaded');
+    }));
+  }
+
+  if (modelsToLoad.includes('handwriting')) {
+    loadPromises.push(recognizeHandwriting.initialize().then(() => {
+      handwritingModelInitialized = true;
+      console.log('Handwriting model initialized');
+    }));
+  }
+
+  await Promise.all(loadPromises);
+  console.log('All specified models loaded successfully');
 }
 
-// Ensure recognizeHandwriting is exported
-export { recognizeHandwriting };
+export { mobilenetModel, useModel, recognizeHandwriting };
