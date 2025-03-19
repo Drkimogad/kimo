@@ -253,7 +253,18 @@ document.getElementById('recognize-btn').addEventListener('click', async () => {
     if (clear) responseArea.innerHTML = '';
     responseArea.innerHTML += `<div class="response">${content}</div>`;
   }
+  
+  // timeout handling 
+const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 5000);
 
+try {
+  const response = await fetch(`...`, { signal: controller.signal });
+  // ...
+} finally {
+  clearTimeout(timeoutId);
+}
+  
   // ************** SERVICE WORKER **************
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
