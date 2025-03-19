@@ -38,17 +38,66 @@ const CACHE_ASSETS = [
 ];
 
 // ✅ Install Service Worker & Cache Assets
-self.addEventListener('install', event => {
+self.addEventListener('install', function(event) {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(CACHE_ASSETS))
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
-// ✅ Serve Cached Content First (existing logic remains unchanged)
-self.addEventListener('fetch', event => {
+//✅ Fetch resources from cache or network
+self.addEventListener('fetch', function(event) {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request).catch(() => caches.match(OFFLINE_URL));
+    caches.match(event.request)
+      .then(function(response) {
+        // If the request is in the cache, return it
+        if (response) {
+          return response;
+        }
+        
+        // Clone the request to fetch it from the network
+        const fetchRequest = event.request.clone();
+        
+        return fetch(fetchRequest).then(
+          function(networkResponse) {
+            // Check if we received a valid response
+            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+              return networkResponse;
+            }
+            
+            // Clone the response to cache it
+            const responseToCache = networkResponse.clone();
+            
+            caches.open(CACHE_NAME)
+              .then(function(cache) {
+                cache.put(event.request, responseToCache);
+              });
+            
+            return networkResponse;
+          }
+        );
+      }).catch(function() {
+        // Fallback to index.html in case of failure
+        return caches.match('/index.html');
+      })
+  );
+});
+
+// ✅ Activate service worker and remove old caches
+self.addEventListener('activate', function(event) {
+  const cacheWhitelist = [CACHE_NAME];
+  
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
     })
   );
 });
