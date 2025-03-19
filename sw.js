@@ -18,17 +18,17 @@ const CACHE_ASSETS = [
   'https://drkimogad.github.io/kimo/models/handwritingModel.js',
 
   // New MobileNet model files
-  'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/model.json',
-  'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard1of5.bin',
-  'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard2of5.bin',
-  'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard3of5.bin',
-  'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard4of5.bin',
-  'https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v2_1.0_224/group1-shard5of5.bin',
+  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
+  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard1of5.bin',
+  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard2of5.bin',
+  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard3of5.bin',
+  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard4of5.bin',
+  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard5of5.bin',
 
   // Universal Sentence Encoder files
-  'https://storage.googleapis.com/tfjs-models/tfjs/universal-sentence-encoder/model.json',
-  'https://storage.googleapis.com/tfjs-models/tfjs/universal-sentence-encoder/group1-shard1of2',
-  'https://storage.googleapis.com/tfjs-models/tfjs/universal-sentence-encoder/group1-shard2of2',
+  'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/model.json',
+  'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
+  'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
    // Handwriting model files
   '/models/handwriting/model.json',
   '/models/handwriting/group1-shard1of1.bin', 
