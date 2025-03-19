@@ -1,4 +1,3 @@
-import { loadModels, textModel, imageModel, recognizeHandwriting } from 'https://drkimogad.github.io/kimo/models.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ************** INITIALIZATIONS **************
