@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   let isListening = false;
   let recognition;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
-  let imageModel; // MobileNet instance
+
+  // Removed duplicate imageModel declaration
+  // let imageModel; // MobileNet instance
 
   // ************** MODEL INITIALIZATION **************
   try {
@@ -296,5 +298,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ************** INITIALIZE APP **************
-  initializeModels();
+  // Assuming initializeModels is a custom function
+  // Ensure it is defined and called once
+  async function initializeModels() {
+    try {
+      await loadModels();
+      console.log('Models initialized');
+    } catch (error) {
+      console.error('Failed to initialize models:', error);
+    }
+  }
+
+  initializeModels(); // Ensure this is called once
 });
