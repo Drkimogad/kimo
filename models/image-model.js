@@ -1,10 +1,18 @@
-// models/image-model.js (Placeholder Version)
+import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
+import * as tf from '@tensorflow/tfjs';
+
 export const image = {
   model: null,
   
   async init() {
-    // Load MobileNet from CDN
-    this.model = await mobilenet.load({ version: 2, alpha: 1.0 });
+    try {
+      // Load MobileNet from CDN
+      this.model = await mobilenet.load({ version: 2, alpha: 1.0 });
+      console.log('Image model loaded');
+    } catch (error) {
+      console.error('Image model failed:', error);
+      throw new Error('Image classification unavailable');
+    }
   },
 
   async classify(imgElement) {
