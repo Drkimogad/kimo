@@ -1,7 +1,7 @@
 // models.js - Keep this version
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import * as use from '@tensorflow-models/universal-sentence-encoder';
-import { recognizeHandwriting } from './handwritingModel.js';
+import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/handwritingModel.js';
 
 // Shared model instances
 export let textModel, imageModel;
