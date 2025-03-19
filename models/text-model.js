@@ -1,4 +1,6 @@
-// models/text-model.js
+import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
+import * as tf from '@tensorflow/tfjs';
+
 export const text = {
   model: null,
   
@@ -15,6 +17,9 @@ export const text = {
   async checkPlagiarism(content) {
     if (!this.model) await this.init();
     
+    // Ensure sessionHistory is defined and accessible
+    const sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
+
     // Compare with history
     const currentEmbedding = await this.model.embed(content);
     const similarities = await Promise.all(
