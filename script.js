@@ -1,4 +1,4 @@
-import { loadModels, textModel, imageModel, recognizeHandwriting } from './models.js';
+import { loadModels, textModel, imageModel, recognizeHandwriting } from 'https://drkimogad.github.io/kimo/models.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ************** INITIALIZATIONS **************
@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // ************** SERVICE WORKER **************
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('https://drkimogad.github.io/kimo/sw.js')
       .then(registration => {
         console.log('SW registered');
         setInterval(() => registration.update(), 3600000);
