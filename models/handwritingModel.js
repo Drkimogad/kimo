@@ -3,7 +3,7 @@ export const recognizeHandwriting = {
   model: null,
   
   async init() {
-    this.model = await tf.loadGraphModel('/models/crnn/model.json');
+    this.model = await tf.loadGraphModel('https://drkimogad.github.io/kimo/models/crnn/model.json');
   },
 
   async recognize(canvas) {
