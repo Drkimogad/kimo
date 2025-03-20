@@ -8,6 +8,7 @@ const CACHE_ASSETS = [
   'https://drkimogad.github.io/kimo/script.js',
   'https://drkimogad.github.io/kimo/models.js',
   'https://drkimogad.github.io/kimo/ocr.js',
+  'https://drkimogad.github.io/kimo/tf.js', // main tf file to avoid calling tf.js multiple times vip //
   'https://drkimogad.github.io/kimo/offline.html',
   'https://drkimogad.github.io/kimo/icons/icon-512.png', 
   'https://drkimogad.github.io/kimo/icons/icon-192.png', 
@@ -29,10 +30,6 @@ const CACHE_ASSETS = [
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/model.json',
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
-  
-  // Canvas implementation files
-  'https://drkimogad.github.io/kimo/models/crnn/model.json',
-  'https://drkimogad.github.io/kimo/models/crnn/group1-shard1of1.bin',
 
   // Tesseract.js handwriting library files
   'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/tesseract.min.js',  // Tesseract.js library  
