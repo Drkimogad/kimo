@@ -1,12 +1,29 @@
-import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
-import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
-// HANDWRITING RECOGNITION FUNCTION FROM OCR.JS
-import { recognizeHandwriting } from './ocr.js';
+//Handwriting for OCR.JS 
+import Tesseract from 'tesseract.js';
+
+// Function to recognize handwriting from an image
+export const recognizeHandwriting = (imagePath) => {
+  Tesseract.recognize(
+    imagePath,
+    'eng',
+    {
+      logger: (m) => console.log(m) // Log progress
+    }
+  ).then(({ data: { text } }) => {
+    console.log(text); // Output recognized text
+  }).catch(err => {
+    console.error(err); // Handle errors
+  });
+};
+
+// Example usage within models.js
 const imagePath = 'images/handwritten.jpg'; // Path to the image
 recognizeHandwriting(imagePath); // Run OCR on the image
-let mobilenetModel;
-let useModel;
-let handwritingModelInitialized = false;
+
+// other import functions
+import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
+import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
+
 
 export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwriting']) {
   const loadPromises = [];
