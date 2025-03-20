@@ -1,5 +1,21 @@
-import { loadModels } from 'https://drkimogad.github.io/kimo/models.js';  // Add this import line at the top of your script.js
-import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/ocr.js';  // Import the handwriting recognition function
+// Add this import line at the top of your script.js
+import { loadModels } from 'https://drkimogad.github.io/kimo/models.js';  
+// Import the handwriting recognition function
+import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/ocr.js';  
+document.getElementById("ocr-submit-btn").addEventListener("click", async () => {
+  const fileInput = document.getElementById("ocr-image-upload");
+  
+  if (fileInput.files.length > 0) {
+    try {
+      const text = await recognizeHandwriting(fileInput.files[0]);
+      document.getElementById("response-area").innerText = text; // Display extracted text
+    } catch (error) {
+      console.error("OCR Processing Failed:", error);
+    }
+  } else {
+    console.error("No file selected for OCR.");
+  }
+});
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ************** INITIALIZATIONS **************
