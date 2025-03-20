@@ -22,3 +22,9 @@ export const recognizeHandwriting = (imageSource) => {
     console.error('Error:', err); // Handle errors
   });
 };
+
+// Wrap Tesseract usage inside an event listener
+window.addEventListener('load', () => {
+    console.log("Window loaded. Checking Tesseract...");
+    console.log(window.Tesseract);  // Should print an object if loaded correctly
+});
