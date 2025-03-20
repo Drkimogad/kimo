@@ -1,6 +1,4 @@
 // Handwriting for OCR.JS 
-import Tesseract from 'tesseract.js';
-
 // Declare the variables to be exported
 let mobilenetModel;
 let useModel;
