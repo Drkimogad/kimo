@@ -69,6 +69,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     return canvas;
   }
 
+  // Function to load image as a Promise
+  function loadImage(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
   // ************** IMAGE UPLOAD HANDLER **************
   async function handleImageUpload(file) {
     try {
@@ -151,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ************** CROPPING TOOL **************
   function enableCropping(canvas) {
     const cropButton = document.getElementById('crop-btn');
-    cropButton.addEventListener('click', () => {
+    cropButton.addEventListener('click', async () => {
       const ctx = canvas.getContext('2d');
       const cropWidth = 200;  // Define crop width
       const cropHeight = 100; // Define crop height
