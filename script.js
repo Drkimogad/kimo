@@ -1,5 +1,5 @@
 // Import external scripts
-import { loadModels } from 'https://drkimogad.github.io/kimo/models.js';
+import { loadModels, classifyImage, processText } from 'https://drkimogad.github.io/kimo/models.js';
 import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/ocr.js';
 
 // Wait for DOM to load
@@ -51,32 +51,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     isListening = listening;
   }
 
-  // ************** IMAGE PREPROCESSING **************
-  function preprocessImage(img) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
-
-    // Convert to grayscale
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      const avg = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
-      imageData.data[i] = imageData.data[i + 1] = imageData.data[i + 2] = avg;
+  // ************** IMAGE CLASSIFICATION **************
+  async function classifyUploadedImage(file) {
+    try {
+      showLoading();
+      const img = await loadImage(file);
+      const results = await classifyImage(img);
+      displayResponse(`Image Classification: ${results}`);
+      updateSessionHistory('image-classification', { file: file.name, classification: results });
+    } catch (error) {
+      console.error('Image classification error:', error);
+      displayResponse('Failed to classify image.', true);
+    } finally {
+      hideLoading();
     }
-
-    ctx.putImageData(imageData, 0, 0);
-    return canvas;
   }
 
-  async function loadImage(file) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
-    });
+  // ************** TEXT PROCESSING **************
+  async function processUserText(text) {
+    try {
+      showLoading();
+      const processedText = await processText(text);
+      displayResponse(`Processed Text: ${processedText}`);
+      updateSessionHistory('text-processing', { input: text, processed: processedText });
+    } catch (error) {
+      console.error('Text processing error:', error);
+      displayResponse('Failed to process text.', true);
+    } finally {
+      hideLoading();
+    }
   }
 
   // ************** OCR HANDLING **************
@@ -84,13 +87,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       showLoading();
       const img = await loadImage(file);
-      const processedCanvas = preprocessImage(img);
-      const recognizedText = await recognizeHandwriting(processedCanvas);
+      const recognizedText = await recognizeHandwriting(img);
       displayResponse(`Recognized Text: ${recognizedText}`);
       updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
     } catch (error) {
       console.error('Image processing error:', error);
-      displayResponse('Failed to analyze image', true);
+      displayResponse('Failed to analyze image.', true);
     } finally {
       hideLoading();
     }
@@ -118,11 +120,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       showLoading();
       if (file.type.startsWith('image/')) {
-        await handleImageUpload(file);
+        await classifyUploadedImage(file); // Image classification
+        await handleImageUpload(file); // OCR
       } else if (file.type === 'text/plain') {
         const textContent = await file.text();
-        displayResponse(`Uploaded Text: ${textContent}`);
-        updateSessionHistory('text', { content: textContent });
+        await processUserText(textContent); // Text processing
       }
     } catch (error) {
       console.error('File processing error:', error);
@@ -132,47 +134,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // ************** CANVAS DRAWING **************
-  const canvas = $('drawing-canvas');
-  if (canvas) {
-    const ctx = canvas.getContext('2d');
-    let isDrawing = false;
-    let lastX = 0, lastY = 0;
+  // ************** SEARCH HANDLING **************
+  $('submit-btn')?.addEventListener('click', async () => {
+    const input = $('user-input')?.value.trim();
+    if (!input) return;
+    await processUserText(input);
+  });
 
-    canvas.width = 800;
-    canvas.height = 200;
+  // ************** SAVE BUTTON FUNCTIONALITY **************
+  $('save-btn')?.addEventListener('click', () => {
+    const responseArea = $('response-area');
+    if (!responseArea || !responseArea.innerText.trim()) return;
 
-    function startDrawing(e) {
-      isDrawing = true;
-      [lastX, lastY] = [e.offsetX, e.offsetY];
-    }
-
-    function draw(e) {
-      if (!isDrawing) return;
-      ctx.beginPath();
-      ctx.moveTo(lastX, lastY);
-      ctx.lineTo(e.offsetX, e.offsetY);
-      ctx.strokeStyle = '#000';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      [lastX, lastY] = [e.offsetX, e.offsetY];
-    }
-
-    function endDrawing() {
-      isDrawing = false;
-    }
-
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', endDrawing);
-    canvas.addEventListener('mouseout', endDrawing);
-
-    $('clear-canvas')?.addEventListener('click', () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
-
-    $('recognize-btn')?.addEventListener('click', () => handleCanvasOCR(canvas));
-  }
+    const savedData = responseArea.innerText.trim();
+    const blob = new Blob([savedData], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'saved_output.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    displayResponse('Saved successfully.');
+  });
 
   // ************** THEME TOGGLE **************
   const themeToggle = $('theme-toggle');
@@ -186,19 +168,4 @@ document.addEventListener('DOMContentLoaded', async () => {
       localStorage.setItem('theme', newTheme);
     });
   }
-
-  // ************** SEARCH HANDLING **************
-  $('submit-btn')?.addEventListener('click', async () => {
-    const input = $('user-input')?.value.trim();
-    if (!input) return;
-
-    try {
-      displayResponse('Searching...', true);
-      const searchResults = await fetchDuckDuckGoResults(input);
-      displayResponse(searchResults.AbstractText);
-    } catch (error) {
-      console.error('Search error:', error);
-      displayResponse('Failed to fetch search results.', true);
-    }
-  });
 });
