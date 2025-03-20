@@ -74,4 +74,4 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwritin
   console.log('All specified models loaded successfully');
 }
 
-export { loadModels };
+export default loadModels;
