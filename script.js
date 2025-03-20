@@ -24,19 +24,66 @@ document.addEventListener('DOMContentLoaded', async () => {
     responseArea.scrollTop = responseArea.scrollHeight;
   }
 
-  // ************** IMAGE PROCESSING **************
+  // ************** IMAGE PREPROCESSING **************
+  function preprocessImage(img) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+
+    // Apply Grayscale
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+      data[i] = avg;      // Red
+      data[i + 1] = avg;  // Green
+      data[i + 2] = avg;  // Blue
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
+  }
+
+  function adjustImageContrast(img, contrast = 100) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+
+    // Apply Contrast
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = factor * (data[i] - 128) + 128;     // Red
+      data[i + 1] = factor * (data[i + 1] - 128) + 128; // Green
+      data[i + 2] = factor * (data[i + 2] - 128) + 128; // Blue
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
+  }
+
+  // ************** IMAGE UPLOAD HANDLER **************
   async function handleImageUpload(file) {
     try {
       showLoading();
       const img = await loadImage(file);
-      const predictions = await mobilenetModel.classify(img);
       
-      const resultText = predictions
-        .map(p => `${p.className} (${Math.round(p.probability * 100)}%)`)
-        .join('\n');
+      // Preprocess the image
+      const preprocessedCanvas = preprocessImage(img);
+      const contrastAdjustedCanvas = adjustImageContrast(preprocessedCanvas, 50); // Adjust contrast
+
+      // Call OCR on the preprocessed image
+      const recognizedText = await recognizeHandwriting(contrastAdjustedCanvas);  // Call the OCR function
+      displayResponse(`Handwriting Recognition: ${recognizedText}`);
+      updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
       
-      displayResponse(`Image Analysis:\n${resultText}`);
-      updateSessionHistory('image', { file: file.name, results: predictions });
     } catch (error) {
       console.error('Image processing error:', error);
       displayResponse('Failed to analyze image', true);
@@ -52,22 +99,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       showLoading();
-      
+
       if (file.type.startsWith('image/')) {
         // Handle image classification
         await handleImageUpload(file);
-        
-        // Handle handwriting recognition (new addition)
-        const img = await loadImage(file);
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-        
-        const recognizedText = await recognizeHandwriting(canvas);  // Call the OCR function
-        displayResponse(`Handwriting Recognition: ${recognizedText}`);
-        updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
         
       } else if (file.type === 'text/plain') {
         const textContent = await file.text();
@@ -112,6 +147,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateSessionHistory('drawing', { text: recognizedText });
     hideLoading();  // Hide loading spinner after processing
   });
+
+  // ************** CROPPING TOOL **************
+  function enableCropping(canvas) {
+    const cropButton = document.getElementById('crop-btn');
+    cropButton.addEventListener('click', () => {
+      const ctx = canvas.getContext('2d');
+      const cropWidth = 200;  // Define crop width
+      const cropHeight = 100; // Define crop height
+      const cropX = 100;      // Define starting X position
+      const cropY = 50;       // Define starting Y position
+
+      const croppedCanvas = document.createElement('canvas');
+      croppedCanvas.width = cropWidth;
+      croppedCanvas.height = cropHeight;
+      const croppedCtx = croppedCanvas.getContext('2d');
+      
+      croppedCtx.drawImage(canvas, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      
+      // Proceed with OCR on the cropped section
+      const recognizedText = await recognizeHandwriting(croppedCanvas);
+      displayResponse(`Cropped Handwriting: ${recognizedText}`);
+      updateSessionHistory('cropped', { text: recognizedText });
+    });
+  }
 
   // ************** HELPER FUNCTIONS **************
   function updateSessionHistory(type, data) {
