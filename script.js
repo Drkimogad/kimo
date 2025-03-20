@@ -1,4 +1,5 @@
 import { loadModels } from './models.js';  // Add this import line at the top of your script.js
+import { recognizeHandwriting } from './ocr.js';  // Import the handwriting recognition function
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ************** INITIALIZATIONS **************
@@ -14,14 +15,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Model initialization failed:', error);
     displayResponse('Some features might be unavailable', true);
   }
-// function to response-box
-function displayResponse(content, clear = false) {
-  const responseArea = document.getElementById('response-area');
-  if (clear) responseArea.innerHTML = '';
-  responseArea.innerHTML += `<div class="response">${content}</div>`;
-  responseArea.scrollTop = responseArea.scrollHeight;
-}
-  
+
+  // function to response-box
+  function displayResponse(content, clear = false) {
+    const responseArea = document.getElementById('response-area');
+    if (clear) responseArea.innerHTML = '';
+    responseArea.innerHTML += `<div class="response">${content}</div>`;
+    responseArea.scrollTop = responseArea.scrollHeight;
+  }
+
   // ************** IMAGE PROCESSING **************
   async function handleImageUpload(file) {
     try {
@@ -55,7 +57,7 @@ function displayResponse(content, clear = false) {
         // Handle image classification
         await handleImageUpload(file);
         
-        // Handle handwriting recognition
+        // Handle handwriting recognition (new addition)
         const img = await loadImage(file);
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -63,7 +65,7 @@ function displayResponse(content, clear = false) {
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
         
-        const recognizedText = await recognizeHandwriting.recognize(canvas);
+        const recognizedText = await recognizeHandwriting(canvas);  // Call the OCR function
         displayResponse(`Handwriting Recognition: ${recognizedText}`);
         updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
         
@@ -79,46 +81,6 @@ function displayResponse(content, clear = false) {
       displayResponse('Error processing file', true);
     } finally {
       hideLoading();
-    }
-  });
-
-  // ************** VOICE INPUT HANDLING **************
-  if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      document.getElementById('user-input').value = transcript;
-      toggleListeningUI(false);
-    };
-
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      toggleListeningUI(false);
-    };
-
-    recognition.onend = () => {
-      isListening = false;
-      toggleListeningUI(false);
-    };
-  }
-
-  function toggleListeningUI(listening) {
-    const voiceBtn = document.getElementById('voice-btn');
-    voiceBtn.classList.toggle('recording', listening);
-    isListening = listening;
-  }
-
-  document.getElementById('voice-btn')?.addEventListener('click', () => {  // Safely add event listener
-    if (!isListening) {
-      recognition.start();
-      toggleListeningUI(true);
-    } else {
-      recognition.stop();
-      toggleListeningUI(false);
     }
   });
 
@@ -144,30 +106,12 @@ function displayResponse(content, clear = false) {
   });
 
   document.getElementById('recognize-btn')?.addEventListener('click', async () => {
-    const recognizedText = await recognizeHandwriting.recognize(canvas);
+    showLoading();  // Show loading spinner while processing
+    const recognizedText = await recognizeHandwriting(canvas);  // Call OCR on canvas
     displayResponse(`Handwriting: ${recognizedText}`);
     updateSessionHistory('drawing', { text: recognizedText });
+    hideLoading();  // Hide loading spinner after processing
   });
-
-  // ************** IMPROVED FETCH WITH TIMEOUT **************
-  async function fetchDuckDuckGoResults(query) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-    try {
-      const response = await fetch(
-        `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`,
-        { signal: controller.signal }
-      );
-      if (!response.ok) throw new Error('Network response was not OK');
-      return await response.json();
-    } catch (error) {
-      console.error("Search failed:", error);
-      return { AbstractText: "Search unavailable. Showing local results...", RelatedTopics: [] };
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  }
 
   // ************** HELPER FUNCTIONS **************
   function updateSessionHistory(type, data) {
@@ -206,7 +150,6 @@ function displayResponse(content, clear = false) {
     isListening = listening;
   }
 
-  // ************** REMAINING CORE FUNCTIONALITY **************
   // ************** THEME MANAGEMENT **************
   const themeToggle = document.getElementById('theme-toggle');
   const currentTheme = localStorage.getItem('theme') || 'light';
