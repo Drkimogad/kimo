@@ -1,5 +1,5 @@
 const CACHE_NAME = 'kimo-ai-cache-v2'; // Incremented version
-const OFFLINE_URL = '/offline.html';
+const OFFLINE_URL = 'https://drkimogad.github.io/kimo/offline.html';
 const CACHE_ASSETS = [
   // Existing assets
   'https://drkimogad.github.io/kimo/',
@@ -42,12 +42,12 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        return cache.addAll(urlsToCache);
+        return cache.addAll(CACHE_ASSETS); // Use CACHE_ASSETS
       })
   );
 });
 
-//✅ Fetch resources from cache or network
+// ✅ Fetch resources from cache or network
 self.addEventListener('fetch', function(event) {
   event.respondWith(
     caches.match(event.request)
@@ -56,25 +56,25 @@ self.addEventListener('fetch', function(event) {
         if (response) {
           return response;
         }
-        
+
         // Clone the request to fetch it from the network
         const fetchRequest = event.request.clone();
-        
+
         return fetch(fetchRequest).then(
           function(networkResponse) {
             // Check if we received a valid response
             if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
               return networkResponse;
             }
-            
+
             // Clone the response to cache it
             const responseToCache = networkResponse.clone();
-            
+
             caches.open(CACHE_NAME)
               .then(function(cache) {
                 cache.put(event.request, responseToCache);
               });
-            
+
             return networkResponse;
           }
         );
@@ -88,7 +88,7 @@ self.addEventListener('fetch', function(event) {
 // ✅ Activate service worker and remove old caches
 self.addEventListener('activate', function(event) {
   const cacheWhitelist = [CACHE_NAME];
-  
+
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
       return Promise.all(
