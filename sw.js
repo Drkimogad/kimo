@@ -8,7 +8,7 @@ const CACHE_ASSETS = [
   'https://drkimogad.github.io/kimo/script.js',
   'https://drkimogad.github.io/kimo/models.js',
   'https://drkimogad.github.io/kimo/ocr.js',
-  'https://drkimogad.github.io/kimo/tf.js', // main tf file to avoid calling tf.js multiple times vip //
+  'https://drkimogad.github.io/kimo/tf.js',
   'https://drkimogad.github.io/kimo/offline.html',
   'https://drkimogad.github.io/kimo/icons/icon-512.png', 
   'https://drkimogad.github.io/kimo/icons/icon-192.png', 
