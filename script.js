@@ -1,5 +1,5 @@
-import { loadModels } from './models.js';  // Add this import line at the top of your script.js
-import { recognizeHandwriting } from './ocr.js';  // Import the handwriting recognition function
+import { loadModels } from 'https://drkimogad.github.io/kimo/models.js';  // Add this import line at the top of your script.js
+import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/ocr.js';  // Import the handwriting recognition function
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ************** INITIALIZATIONS **************
