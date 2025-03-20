@@ -6,17 +6,17 @@ const CACHE_ASSETS = [
   'https://drkimogad.github.io/kimo/index.html',
   'https://drkimogad.github.io/kimo/styles.css',
   'https://drkimogad.github.io/kimo/script.js',
-  '/https://drkimogad.github.io/kimo/models.js',
+  'https://drkimogad.github.io/kimo/models.js',
+  'https://drkimogad.github.io/kimo/ocr.js',
   'https://drkimogad.github.io/kimo/offline.html',
   'https://drkimogad.github.io/kimo/icons/icon-512.png', 
   'https://drkimogad.github.io/kimo/icons/icon-192.png', 
-  '/https://drkimogad.github.io/kimoicons/icon-128.png',
+  'https://drkimogad.github.io/kimo/icons/icon-128.png',
   'https://drkimogad.github.io/kimo/icons/icon-64.png',
   'https://drkimogad.github.io/kimo/favicon.ico',
   'https://drkimogad.github.io/kimo/models/text-model.js',
   'https://drkimogad.github.io/kimo/models/image-model.js',
-  'https://drkimogad.github.io/kimo/models/handwritingModel.js',
-
+  
   // New MobileNet model files
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard1of5.bin',
@@ -29,14 +29,13 @@ const CACHE_ASSETS = [
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/model.json',
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
-   // Handwriting model files
-  'https://drkimogad.github.io/kimo/models/handwriting/model.json',
-  'https://drkimogad.github.io/kimo/models/handwriting/group1-shard1of1.bin', 
-  // canvas implementation files
+  
+  // Canvas implementation files
   'https://drkimogad.github.io/kimo/models/crnn/model.json',
-  'https://drkimogad.github.io/kimo/models/crnn/group1-shard1of1.bin'
-  // tesseract.js handwriting library files
-  'https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js'; // library file
+  'https://drkimogad.github.io/kimo/models/crnn/group1-shard1of1.bin',
+
+  // Tesseract.js handwriting library files
+  'https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js', // core library file
   'https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/lang/eng.traineddata', // English language file
 ];
 
@@ -82,8 +81,8 @@ self.addEventListener('fetch', function(event) {
           }
         );
       }).catch(function() {
-        // Fallback to index.html in case of failure
-        return caches.match('/index.html');
+        // Fallback to offline.html in case of failure
+        return caches.match(OFFLINE_URL);
       })
   );
 });
@@ -97,7 +96,7 @@ self.addEventListener('activate', function(event) {
       return Promise.all(
         cacheNames.map(function(cacheName) {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
+            return caches.delete(cacheName); // Delete outdated caches
           }
         })
       );
