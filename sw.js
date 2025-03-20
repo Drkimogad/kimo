@@ -35,6 +35,9 @@ const CACHE_ASSETS = [
   // canvas implementation files
   'https://drkimogad.github.io/kimo/models/crnn/model.json',
   'https://drkimogad.github.io/kimo/models/crnn/group1-shard1of1.bin'
+  // tesseract.js handwriting library files
+  'https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js'; // library file
+  'https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/lang/eng.traineddata', // English language file
 ];
 
 // ✅ Install Service Worker & Cache Assets
