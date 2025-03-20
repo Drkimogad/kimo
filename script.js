@@ -14,7 +14,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Model initialization failed:', error);
     displayResponse('Some features might be unavailable', true);
   }
-
+// function to response-box
+function displayResponse(content, clear = false) {
+  const responseArea = document.getElementById('response-area');
+  if (clear) responseArea.innerHTML = '';
+  responseArea.innerHTML += `<div class="response">${content}</div>`;
+  responseArea.scrollTop = responseArea.scrollHeight;
+}
+  
   // ************** IMAGE PROCESSING **************
   async function handleImageUpload(file) {
     try {
