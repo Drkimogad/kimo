@@ -30,11 +30,11 @@ const CACHE_ASSETS = [
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
    // Handwriting model files
-  '/models/handwriting/model.json',
-  '/models/handwriting/group1-shard1of1.bin', 
+  'https://drkimogad.github.io/kimo/models/handwriting/model.json',
+  'https://drkimogad.github.io/kimo/models/handwriting/group1-shard1of1.bin', 
   // canvas implementation files
-  '/models/crnn/model.json',
-  '/models/crnn/group1-shard1of1.bin'
+  'https://drkimogad.github.io/kimo/models/crnn/model.json',
+  'https://drkimogad.github.io/kimo/models/crnn/group1-shard1of1.bin'
 ];
 
 // ✅ Install Service Worker & Cache Assets
