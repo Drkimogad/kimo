@@ -2,7 +2,7 @@
   "name": "Kimo AI",
   "short_name": "Kimo AI",
   "description": "An AI-powered assistant for online searching, text and image analysis and other functions.",
-  "start_url": "https://drkimogad.github.io/kimo/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#FFD700",
