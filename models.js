@@ -5,34 +5,47 @@ let mobilenetModel;
 let useModel;
 let handwritingModelInitialized = false;
 
-// Function to recognize handwriting from a user-uploaded image
-export const recognizeHandwriting = (imageFile) => {
+export const recognizeHandwriting = (input) => {
   return new Promise((resolve, reject) => {
-    if (!imageFile) {
-      console.error("No image file provided for handwriting recognition.");
-      reject("No image file provided.");
+    if (!input) {
+      console.error("No image or canvas provided for handwriting recognition.");
+      reject("No image or canvas provided.");
       return;
     }
 
-    // Convert file to a Base64 data URL
-    const reader = new FileReader();
-    reader.onload = () => {
-      const imageData = reader.result; // Base64 format
+    let imageData;
 
-      Tesseract.recognize(imageData, 'eng', { logger: (m) => console.log(m) })
-        .then(({ data: { text } }) => {
-          console.log("Recognized Text:", text);
-          resolve(text); // Return recognized text
-        })
-        .catch(err => {
-          console.error("Error in OCR:", err);
-          reject(err);
-        });
-    };
-
-    reader.readAsDataURL(imageFile);
+    if (input instanceof File) {
+      // If input is a file, convert to Base64
+      const reader = new FileReader();
+      reader.onload = () => {
+        imageData = reader.result; // Base64 format
+        processOCR(imageData, resolve, reject);
+      };
+      reader.readAsDataURL(input);
+    } else if (input instanceof HTMLCanvasElement) {
+      // If input is a canvas, extract image data
+      imageData = input.toDataURL(); // Convert to Base64
+      processOCR(imageData, resolve, reject);
+    } else {
+      console.error("Unsupported input type for OCR.");
+      reject("Unsupported input type.");
+    }
   });
 };
+
+// Helper function to run OCR
+function processOCR(imageData, resolve, reject) {
+  Tesseract.recognize(imageData, 'eng', { logger: (m) => console.log(m) })
+    .then(({ data: { text } }) => {
+      console.log("Recognized Text:", text);
+      resolve(text);
+    })
+    .catch(err => {
+      console.error("Error in OCR:", err);
+      reject(err);
+    });
+}
 
 // Load AI models dynamically
 export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwriting']) {
