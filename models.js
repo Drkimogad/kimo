@@ -1,6 +1,11 @@
 // Handwriting for OCR.JS 
 import Tesseract from 'tesseract.js';
 
+// Declare the variables to be exported
+let mobilenetModel;
+let useModel;
+let handwritingModelInitialized = false;
+
 // Function to recognize handwriting from an image
 export const recognizeHandwriting = (imagePath) => {
   Tesseract.recognize(
