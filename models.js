@@ -1,7 +1,9 @@
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
-import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/models/handwritingModel.js';
-
+// HANDWRITING RECOGNITION FUNCTION FROM OCR.JS
+import { recognizeHandwriting } from './ocr.js';
+const imagePath = 'images/handwritten.jpg'; // Path to the image
+recognizeHandwriting(imagePath); // Run OCR on the image
 let mobilenetModel;
 let useModel;
 let handwritingModelInitialized = false;
