@@ -1,32 +1,40 @@
-// Handwriting for OCR.JS 
-// Declare the variables to be exported
+import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
+import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
+
 let mobilenetModel;
 let useModel;
 let handwritingModelInitialized = false;
 
-// Function to recognize handwriting from an image
-export const recognizeHandwriting = (imagePath) => {
-  Tesseract.recognize(
-    imagePath,
-    'eng',
-    {
-      logger: (m) => console.log(m) // Log progress
+// Function to recognize handwriting from a user-uploaded image
+export const recognizeHandwriting = (imageFile) => {
+  return new Promise((resolve, reject) => {
+    if (!imageFile) {
+      console.error("No image file provided for handwriting recognition.");
+      reject("No image file provided.");
+      return;
     }
-  ).then(({ data: { text } }) => {
-    console.log(text); // Output recognized text
-  }).catch(err => {
-    console.error(err); // Handle errors
+
+    // Convert file to a Base64 data URL
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageData = reader.result; // Base64 format
+
+      Tesseract.recognize(imageData, 'eng', { logger: (m) => console.log(m) })
+        .then(({ data: { text } }) => {
+          console.log("Recognized Text:", text);
+          resolve(text); // Return recognized text
+        })
+        .catch(err => {
+          console.error("Error in OCR:", err);
+          reject(err);
+        });
+    };
+
+    reader.readAsDataURL(imageFile);
   });
 };
 
-// Example usage within models.js
-const imagePath = 'images/handwritten.jpg'; // Path to the image
-recognizeHandwriting(imagePath); // Run OCR on the image
-
-// other import functions
-import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
-import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
-
+// Load AI models dynamically
 export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwriting']) {
   const loadPromises = [];
 
@@ -45,10 +53,8 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwritin
   }
 
   if (modelsToLoad.includes('handwriting')) {
-    loadPromises.push(recognizeHandwriting().then(() => {
-      handwritingModelInitialized = true;
-      console.log('Handwriting model initialized');
-    }));
+    handwritingModelInitialized = true;
+    console.log('Handwriting recognition ready (handled dynamically)');
   }
 
   await Promise.all(loadPromises);
