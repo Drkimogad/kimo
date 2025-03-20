@@ -1,7 +1,7 @@
 // Import external scripts
 import tf from './main.js';
-import loadModels from 'https://drkimogad.github.io/kimo/models.js';
-import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/ocr.js';
+import loadModels from './models.js';
+import { recognizeHandwriting } from './ocr.js';
 
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', async () => {
