@@ -1,5 +1,5 @@
 // import functions for tensorflow  //
-import tf from './tf.js';
+import tf from 'https://drkimogad.github.io/kimo/tf.js';
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
 
