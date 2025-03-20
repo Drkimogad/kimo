@@ -46,15 +46,14 @@
 <script src="https://unpkg.com/tesseract.js"></script>
 <script type="module" src="ocr.js"></script>
 <script type="module" src="script.js"></script>
+<script type="module" src="tf.js"></script>
 <script type="module" src="models.js"></script>  
-<script src="tf.js"></script>
   
 // serviceworker
 <script>
-        // Register the service worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('https://drkimogad.github.io/kimo/sw.js')
+                navigator.serviceWorker.register('https://drkimogad.github.io/kimo/service-worker.js')
                     .then((registration) => {
                         console.log('Service Worker registered:', registration);
                     })
