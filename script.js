@@ -35,43 +35,48 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ************** UNIFIED FILE UPLOAD HANDLER **************
-  document.getElementById('file-upload').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const fileUpload = document.getElementById('file-upload');
+  if (fileUpload) {
+    fileUpload.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
 
-    try {
-      showLoading();
-      
-      if (file.type.startsWith('image/')) {
-        // Handle image classification
-        await handleImageUpload(file);
+      try {
+        showLoading();
         
-        // Handle handwriting recognition
-        const img = await loadImage(file);
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
+        if (file.type.startsWith('image/')) {
+          // Handle image classification
+          await handleImageUpload(file);
+          
+          // Handle handwriting recognition
+          const img = await loadImage(file);
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          
+          const recognizedText = await recognizeHandwriting.recognize(canvas);
+          displayResponse(`Handwriting Recognition: ${recognizedText}`);
+          updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
+          
+        } else if (file.type === 'text/plain') {
+          const textContent = await file.text();
+          const plagiarismResult = await useModel.checkPlagiarism(textContent);
+          displayResponse(`Plagiarism Score: ${plagiarismResult.score.toFixed(1)}%`);
+          updateSessionHistory('text', { content: textContent, score: plagiarismResult.score });
+        }
         
-        const recognizedText = await recognizeHandwriting.recognize(canvas);
-        displayResponse(`Handwriting Recognition: ${recognizedText}`);
-        updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
-        
-      } else if (file.type === 'text/plain') {
-        const textContent = await file.text();
-        const plagiarismResult = await useModel.checkPlagiarism(textContent);
-        displayResponse(`Plagiarism Score: ${plagiarismResult.score.toFixed(1)}%`);
-        updateSessionHistory('text', { content: textContent, score: plagiarismResult.score });
+      } catch (error) {
+        console.error('File processing error:', error);
+        displayResponse('Error processing file', true);
+      } finally {
+        hideLoading();
       }
-      
-    } catch (error) {
-      console.error('File processing error:', error);
-      displayResponse('Error processing file', true);
-    } finally {
-      hideLoading();
-    }
-  });
+    });
+  } else {
+    console.error('File upload element not found');
+  }
 
   // ************** VOICE INPUT HANDLING **************
   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
@@ -197,7 +202,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     isListening = listening;
   }
 
-  // ************** REMAINING CORE FUNCTIONALITY **************
   // ************** THEME MANAGEMENT **************
   const themeToggle = document.getElementById('theme-toggle');
   const currentTheme = localStorage.getItem('theme') || 'light';
@@ -245,64 +249,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // ************** UTILITY FUNCTIONS **************
-  function loadImage(file) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = e.target.result;
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  function displayResponse(text, isError = false) {
+    const responseBox = document.getElementById('response-box');
+    responseBox.textContent = text;
+    responseBox.classList.toggle('error', isError);
+  }
+
+  function isSearchQuery(query) {
+    return query.startsWith('search:');
   }
 
   function showLoading() {
-    document.getElementById('loading').classList.remove('loading-hidden');
+    document.getElementById('loading').style.display = 'block';
   }
 
   function hideLoading() {
-    document.getElementById('loading').classList.add('loading-hidden');
+    document.getElementById('loading').style.display = 'none';
   }
-
-  function displayResponse(content, clear = false) {
-    const responseArea = document.getElementById('response-area');
-    if (clear) responseArea.innerHTML = '';
-    responseArea.innerHTML += `<div class="response">${content}</div>`;
-    responseArea.scrollTop = responseArea.scrollHeight;
-  }
-
-  // ************** HELPER FUNCTION FROM UTILS **************
-  function humanizeText(aiText) {
-    return aiText
-      .replace(/AI thinks.../g, "In my opinion,")
-      .replace(/\[Local Processing\]/g, "(Generated by AI, refined)");
-  }
-  
-  // ************** SERVICE WORKER **************
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('https://drkimogad.github.io/kimo/sw.js')
-      .then(registration => {
-        console.log('SW registered');
-        setInterval(() => registration.update(), 3600000);
-      })
-      .catch(err => console.log('SW registration failed:', err));
-  }
-
-  // ************** INITIALIZE APP **************
-  // Assuming initializeModels is a custom function
-  // Ensure it is defined and called once
-  async function initializeModels() {
-    try {
-      await loadModels();
-      console.log('Models initialized');
-    } catch (error) {
-      console.error('Failed to initialize models:', error);
-    }
-  }
-
-  initializeModels(); // Ensure this is called once
 });
