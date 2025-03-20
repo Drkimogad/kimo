@@ -1,5 +1,5 @@
 // Import external scripts
-import { loadModels, classifyImage, processText } from 'https://drkimogad.github.io/kimo/models.js';
+import { loadModels } from 'https://drkimogad.github.io/kimo/models.js';
 import { recognizeHandwriting } from 'https://drkimogad.github.io/kimo/ocr.js';
 
 // Wait for DOM to load
