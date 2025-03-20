@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v2'; // Incremented version
+const CACHE_NAME = 'kimo-ai-cache-v3'; // Incremented version
 const OFFLINE_URL = 'https://drkimogad.github.io/kimo/offline.html';
 const CACHE_ASSETS = [
   // Existing assets
