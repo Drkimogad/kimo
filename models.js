@@ -1,4 +1,4 @@
-//Handwriting for OCR.JS 
+// Handwriting for OCR.JS 
 import Tesseract from 'tesseract.js';
 
 // Function to recognize handwriting from an image
@@ -24,7 +24,6 @@ recognizeHandwriting(imagePath); // Run OCR on the image
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
 
-
 export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwriting']) {
   const loadPromises = [];
 
@@ -43,7 +42,7 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwritin
   }
 
   if (modelsToLoad.includes('handwriting')) {
-    loadPromises.push(recognizeHandwriting.initialize().then(() => {
+    loadPromises.push(recognizeHandwriting().then(() => {
       handwritingModelInitialized = true;
       console.log('Handwriting model initialized');
     }));
@@ -53,4 +52,4 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwritin
   console.log('All specified models loaded successfully');
 }
 
-export { mobilenetModel, useModel, recognizeHandwriting };
+export { mobilenetModel, useModel };
