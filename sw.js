@@ -59,7 +59,7 @@ self.addEventListener('fetch', function(event) {
           return response;
         }
 
-        // Clone the request to fetch it from the network
+        // If the resource is not in the cache, fetch it from the network
         const fetchRequest = event.request.clone();
 
         return fetch(fetchRequest).then(
@@ -74,15 +74,16 @@ self.addEventListener('fetch', function(event) {
 
             caches.open(CACHE_NAME)
               .then(function(cache) {
-                cache.put(event.request, responseToCache);
+                cache.put(event.request, responseToCache);  // Cache it for future use
               });
 
             return networkResponse;
           }
         );
       }).catch(function() {
-        // Fallback to offline.html in case of failure
-        return caches.match(OFFLINE_URL);
+        // Fallback to offline.html if network fetch fails
+        // This fallback only happens when there's no cached version and the network fetch fails
+        return caches.match(OFFLINE_URL);  // Serve offline page if network fails
       })
   );
 });
@@ -96,7 +97,7 @@ self.addEventListener('activate', function(event) {
       return Promise.all(
         cacheNames.map(function(cacheName) {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName); // Delete outdated caches
+            return caches.delete(cacheName);  // Delete old caches that aren't in the whitelist
           }
         })
       );
