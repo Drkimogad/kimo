@@ -1,4 +1,4 @@
-const { Tesseract } = window;  // import function
+const Tesseract = window.Tesseract; // import function
 
 export const recognizeHandwriting = (imageSource) => {
   // Check if the image source is a canvas or an image URL
