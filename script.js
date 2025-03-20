@@ -45,6 +45,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
   }
 
+  function toggleListeningUI(listening) {
+    const voiceBtn = $('voice-btn');
+    if (voiceBtn) voiceBtn.classList.toggle('recording', listening);
+    isListening = listening;
+  }
+
   // ************** IMAGE PREPROCESSING **************
   function preprocessImage(img) {
     const canvas = document.createElement('canvas');
@@ -64,8 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return canvas;
   }
 
-  // Load image from file input
-  function loadImage(file) {
+  async function loadImage(file) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
@@ -80,12 +85,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       showLoading();
       const img = await loadImage(file);
       const processedCanvas = preprocessImage(img);
-
-      // Real-time OCR processing
       const recognizedText = await recognizeHandwriting(processedCanvas);
       displayResponse(`Recognized Text: ${recognizedText}`);
       updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
-
     } catch (error) {
       console.error('Image processing error:', error);
       displayResponse('Failed to analyze image', true);
@@ -94,7 +96,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // OCR for Canvas Drawing
   async function handleCanvasOCR(canvas) {
     try {
       showLoading();
@@ -116,15 +117,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       showLoading();
-
       if (file.type.startsWith('image/')) {
-        await handleImageUpload(file); // OCR for images
+        await handleImageUpload(file);
       } else if (file.type === 'text/plain') {
         const textContent = await file.text();
         displayResponse(`Uploaded Text: ${textContent}`);
         updateSessionHistory('text', { content: textContent });
       }
-      
     } catch (error) {
       console.error('File processing error:', error);
       displayResponse('Error processing file.', true);
@@ -175,30 +174,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     $('recognize-btn')?.addEventListener('click', () => handleCanvasOCR(canvas));
   }
 
-  // ************** CROPPING TOOL **************
-  function enableCropping(canvas) {
-    const cropButton = document.getElementById('crop-btn');
-    cropButton.addEventListener('click', async () => {
-      const ctx = canvas.getContext('2d');
-      const cropWidth = 200;  // Define crop width
-      const cropHeight = 100; // Define crop height
-      const cropX = 100;      // Define starting X position
-      const cropY = 50;       // Define starting Y position
-
-      const croppedCanvas = document.createElement('canvas');
-      croppedCanvas.width = cropWidth;
-      croppedCanvas.height = cropHeight;
-      const croppedCtx = croppedCanvas.getContext('2d');
-      
-      croppedCtx.drawImage(canvas, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-      
-      // Proceed with OCR on the cropped section
-      const recognizedText = await recognizeHandwriting(croppedCanvas);
-      displayResponse(`Cropped Handwriting: ${recognizedText}`);
-      updateSessionHistory('cropped', { text: recognizedText });
-    });
-  }
-  
   // ************** THEME TOGGLE **************
   const themeToggle = $('theme-toggle');
   if (themeToggle) {
@@ -227,64 +202,3 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
-
-  function displayResponse(responseText, isError = false) {
-    const responseBox = document.getElementById('response-box');
-    if (!responseBox) {
-      console.error('response-box element not found');
-      return;
-    }
-
-    responseBox.textContent = responseText;
-    if (isError) {
-      responseBox.classList.add('error');
-    } else {
-      responseBox.classList.remove('error');
-    }
-  }
-
-  function showLoading() {
-    document.getElementById('loading-spinner').style.display = 'block';
-  }
-
-  function hideLoading() {
-    document.getElementById('loading-spinner').style.display = 'none';
-  }
-});
-
-// ************** HELPER FUNCTIONS **************
-  function updateSessionHistory(type, data) {
-    const entry = {
-      type,
-      ...data,
-      timestamp: new Date().toISOString()
-    };
-    sessionHistory.push(entry);
-    localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
-  }
-
-  function startDrawing(e) {
-    isDrawing = true;
-    [lastX, lastY] = [e.offsetX, e.offsetY];
-  }
-
-  function draw(e) {
-    if (!isDrawing) return;
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(e.offsetX, e.offsetY);
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    [lastX, lastY] = [e.offsetX, e.offsetY];
-  }
-
-  function endDrawing() {
-    isDrawing = false;
-  }
-
-  function toggleListeningUI(listening) {
-    const voiceBtn = document.getElementById('voice-btn');
-    voiceBtn.classList.toggle('recording', listening);
-    isListening = listening;
-  }
