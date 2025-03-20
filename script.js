@@ -1,3 +1,5 @@
+import { loadModels } from './models.js';  // Add this import line at the top of your script.js
+
 document.addEventListener('DOMContentLoaded', async () => {
   // ************** INITIALIZATIONS **************
   let isListening = false;
@@ -35,48 +37,43 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ************** UNIFIED FILE UPLOAD HANDLER **************
-  const fileUpload = document.getElementById('file-upload');
-  if (fileUpload) {
-    fileUpload.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+  document.getElementById('file-upload')?.addEventListener('change', async (e) => {  // Safely add event listener
+    const file = e.target.files[0];
+    if (!file) return;
 
-      try {
-        showLoading();
+    try {
+      showLoading();
+      
+      if (file.type.startsWith('image/')) {
+        // Handle image classification
+        await handleImageUpload(file);
         
-        if (file.type.startsWith('image/')) {
-          // Handle image classification
-          await handleImageUpload(file);
-          
-          // Handle handwriting recognition
-          const img = await loadImage(file);
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          
-          const recognizedText = await recognizeHandwriting.recognize(canvas);
-          displayResponse(`Handwriting Recognition: ${recognizedText}`);
-          updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
-          
-        } else if (file.type === 'text/plain') {
-          const textContent = await file.text();
-          const plagiarismResult = await useModel.checkPlagiarism(textContent);
-          displayResponse(`Plagiarism Score: ${plagiarismResult.score.toFixed(1)}%`);
-          updateSessionHistory('text', { content: textContent, score: plagiarismResult.score });
-        }
+        // Handle handwriting recognition
+        const img = await loadImage(file);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
         
-      } catch (error) {
-        console.error('File processing error:', error);
-        displayResponse('Error processing file', true);
-      } finally {
-        hideLoading();
+        const recognizedText = await recognizeHandwriting.recognize(canvas);
+        displayResponse(`Handwriting Recognition: ${recognizedText}`);
+        updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
+        
+      } else if (file.type === 'text/plain') {
+        const textContent = await file.text();
+        const plagiarismResult = await useModel.checkPlagiarism(textContent);
+        displayResponse(`Plagiarism Score: ${plagiarismResult.score.toFixed(1)}%`);
+        updateSessionHistory('text', { content: textContent, score: plagiarismResult.score });
       }
-    });
-  } else {
-    console.error('File upload element not found');
-  }
+      
+    } catch (error) {
+      console.error('File processing error:', error);
+      displayResponse('Error processing file', true);
+    } finally {
+      hideLoading();
+    }
+  });
 
   // ************** VOICE INPUT HANDLING **************
   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
@@ -108,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     isListening = listening;
   }
 
-  document.getElementById('voice-btn').addEventListener('click', () => {
+  document.getElementById('voice-btn')?.addEventListener('click', () => {  // Safely add event listener
     if (!isListening) {
       recognition.start();
       toggleListeningUI(true);
@@ -135,11 +132,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   canvas.addEventListener('mouseup', endDrawing);
   canvas.addEventListener('mouseout', endDrawing);
 
-  document.getElementById('clear-canvas').addEventListener('click', () => {
+  document.getElementById('clear-canvas')?.addEventListener('click', () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
-  document.getElementById('recognize-btn').addEventListener('click', async () => {
+  document.getElementById('recognize-btn')?.addEventListener('click', async () => {
     const recognizedText = await recognizeHandwriting.recognize(canvas);
     displayResponse(`Handwriting: ${recognizedText}`);
     updateSessionHistory('drawing', { text: recognizedText });
@@ -202,68 +199,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     isListening = listening;
   }
 
+  // ************** REMAINING CORE FUNCTIONALITY **************
   // ************** THEME MANAGEMENT **************
   const themeToggle = document.getElementById('theme-toggle');
   const currentTheme = localStorage.getItem('theme') || 'light';
   document.body.dataset.theme = currentTheme;
 
-  themeToggle.addEventListener('click', () => {
+  themeToggle?.addEventListener('click', () => {
     const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
     document.body.dataset.theme = newTheme;
     localStorage.setItem('theme', newTheme);
   });
 
   // ************** SEARCH/QUERY HANDLING **************
-  document.getElementById('submit-btn').addEventListener('click', async () => {
+  document.getElementById('submit-btn')?.addEventListener('click', async () => {
     const input = document.getElementById('user-input').value.trim();
     if (!input) return;
 
     try {
       displayResponse("Processing...", true);
       
-      if (isSearchQuery(input)) {
-        const searchResults = await fetchDuckDuckGoResults(input);
-        sessionHistory.push({ 
-          type: 'search', 
-          query: input, 
-          results: searchResults,
-          timestamp: new Date().toISOString()
-        });
-        displayResponse(searchResults.AbstractText || "No results found.");
-      } else {
-        const aiResponse = await generateAIResponse(input);
-        sessionHistory.push({ 
-          type: 'ai', 
-          query: input, 
-          response: aiResponse,
-          timestamp: new Date().toISOString()
-        });
-        displayResponse(aiResponse);
-      }
-      
-      localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
+      const searchResults = await fetchDuckDuckGoResults(input);
+      displayResponse(searchResults.AbstractText);
+
+      // Handle search results or anything else here
     } catch (error) {
-      console.error('Processing error:', error);
-      displayResponse('An error occurred. Please try again.');
+      console.error("Search error:", error);
+      displayResponse("Failed to fetch search results.", true);
     }
   });
 
-  // ************** UTILITY FUNCTIONS **************
-  function displayResponse(text, isError = false) {
+  function displayResponse(responseText, isError = false) {
     const responseBox = document.getElementById('response-box');
-    responseBox.textContent = text;
-    responseBox.classList.toggle('error', isError);
-  }
+    if (!responseBox) {
+      console.error('response-box element not found');
+      return;
+    }
 
-  function isSearchQuery(query) {
-    return query.startsWith('search:');
+    responseBox.textContent = responseText;
+    if (isError) {
+      responseBox.classList.add('error');
+    } else {
+      responseBox.classList.remove('error');
+    }
   }
 
   function showLoading() {
-    document.getElementById('loading').style.display = 'block';
+    document.getElementById('loading-spinner').style.display = 'block';
   }
 
   function hideLoading() {
-    document.getElementById('loading').style.display = 'none';
+    document.getElementById('loading-spinner').style.display = 'none';
   }
 });
