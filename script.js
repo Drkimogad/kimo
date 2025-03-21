@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const data = await response.json();
       if (data && data.RelatedTopics) {
         const results = data.RelatedTopics.map(topic => topic.Text).join('<br>');
-        displayResponse(`DuckDuckGo Search Results:<br>${results}`);
+        displayResponse(`DuckDuckGo Search Results:<br>${results}`, true);
         updateSessionHistory('search', { query, results });
       } else {
         displayResponse('No results found.', true);
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showLoading();
       const img = await loadImage(file);
       const results = await classifyImage(img);
-      displayResponse(`Image Classification: ${results}`);
+      displayResponse(`Image Classification: ${results}`, true);
       updateSessionHistory('image-classification', { file: file.name, classification: results });
     } catch (error) {
       console.error('Image classification error:', error);
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       showLoading();
       const processedText = await processText(text);
-      displayResponse(`Processed Text: ${processedText}`);
+      displayResponse(`Processed Text: ${processedText}`, true);
       updateSessionHistory('text-processing', { input: text, processed: processedText });
     } catch (error) {
       console.error('Text processing error:', error);
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       showLoading();
       const img = await loadImage(file);
       const recognizedText = await recognizeHandwriting(img);
-      displayResponse(`Recognized Text: ${recognizedText}`);
+      displayResponse(`Recognized Text: ${recognizedText}`, true);
       updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
     } catch (error) {
       console.error('Image processing error:', error);
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       showLoading();
       const recognizedText = await recognizeHandwriting(canvas);
-      displayResponse(`Canvas OCR: ${recognizedText}`);
+      displayResponse(`Canvas OCR: ${recognizedText}`, true);
       updateSessionHistory('drawing', { text: recognizedText });
     } catch (error) {
       console.error('Canvas OCR error:', error);
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }).filter(result => result !== null);
 
       if (results.length > 0) {
-        displayResponse(`Plagiarism Check Results:<br>${results.join('<br>')}`);
+        displayResponse(`Plagiarism Check Results:<br>${results.join('<br>')}`, true);
       } else {
         displayResponse('No plagiarism detected.', true);
       }
