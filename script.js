@@ -54,14 +54,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function searchDuckDuckGo(query) {
     console.log(`Searching DuckDuckGo for: ${query}`);
     try {
-      showLoading();
       const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
       if (data && data.RelatedTopics) {
-        const results = data.RelatedTopics.map(topic => topic.Text).join('<br>');
+        const results = data.RelatedTopics.map(topic => {
+          if (topic.FirstURL) {
+            return `<a href="${topic.FirstURL}" target="_blank">${topic.Text}</a>`;
+          } else {
+            return topic.Text;
+          }
+        }).join('<br>');
         return results;
       } else {
         return 'No results found on DuckDuckGo.';
@@ -78,7 +83,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
       const data = await response.json();
       if (data && data.query && data.query.search) {
-        const results = data.query.search.map(result => result.snippet).join('<br>');
+        const results = data.query.search.map(result => {
+          return `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(result.title)}" target="_blank">${result.title}</a>: ${result.snippet}`;
+        }).join('<br>');
         return results;
       } else {
         return 'No results found on Wikipedia.';
@@ -137,8 +144,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     await searchAndGenerate(input);
   });
 
-  // More Event Listeners and Functions...
-  // (Handle Image Upload, OCR, Speech Recognition, etc.)
+  // Clear Button
+  $('clear-btn')?.addEventListener('click', () => {
+    $('user-input').value = '';
+    displayResponse('', true);
+  });
 
   // File Upload Handling
   $('file-upload')?.addEventListener('change', async (e) => {
