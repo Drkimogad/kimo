@@ -4,16 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kimo AI</title>
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./favicon.ico" type="image/x-icon">    
-  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="https://drkimogad.github.io/kimo/styles.css">
+  <link rel="manifest" href="https://drkimogad.github.io/kimo/manifest.json">
+  <link rel="icon" href="https://drkimogad.github.io/kimo/favicon.ico" type="image/x-icon">    
+  <link rel="apple-touch-icon" href="https://drkimogad.github.io/kimo/icons/icon-192.png">
   <!-- Remove direct TensorFlow.js and model scripts -->
 </head>
 <body data-theme="light">
   <header>
     <h1>Kimo AI</h1>
-    <button id="theme-toggle">🌗</button>
+    <button id="theme-toggle">🌗 Toggle Mode</button>
   </header>
 
   <main>
@@ -22,8 +22,6 @@
       <button id="voice-btn">🎤 Voice Input</button>
       <input type="file" id="file-upload" accept="image/*,text/plain">
       <button id="submit-btn">🚀 Generate/Search</button>
-      <button id="save-btn">💾 Save</button>
-      <button id="humanize-btn">📝 Humanize</button>
     </div>
     <!-- Add before response-area -->
     <div class="canvas-container">
@@ -33,6 +31,10 @@
 
     <div id="response-area" class="response-container"></div>
     <div id="loading" class="loading-hidden">Processing...</div>
+    <div class="response-actions">
+      <button id="save-btn">💾 Save</button>
+      <button id="humanize-btn">📝 Humanize</button>
+    </div>
   </main>
 
   <footer>
