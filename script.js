@@ -1,6 +1,5 @@
-import * as tf from './main.js';
-import { loadModels } from './models.js';  // Import functions from models.js
-import { recognizeHandwriting } from './ocr.js';  // Import recognizeHandwriting from ocr.js
+import { loadModels } from './models.js';
+import { recognizeHandwriting } from './ocr.js';
 
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -111,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(`Handling image upload for OCR: ${file.name}`);
     try {
       showLoading();
-      const recognizedText = await recognizeHandwriting(file);  // Ensure we call recognizeHandwriting
+      const recognizedText = await recognizeHandwriting(file);
       displayResponse(`Recognized Text: ${recognizedText}`, true);
       updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
     } catch (error) {
@@ -126,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('Handling canvas OCR');
     try {
       showLoading();
-      const recognizedText = await recognizeHandwriting(canvas);  // Ensure we call recognizeHandwriting
+      const recognizedText = await recognizeHandwriting(canvas);
       displayResponse(`Canvas OCR: ${recognizedText}`, true);
       updateSessionHistory('drawing', { text: recognizedText });
     } catch (error) {
@@ -172,7 +171,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(`Checking plagiarism for: ${text}`);
     try {
       showLoading();
-      const sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
       const previousTexts = sessionHistory.filter(entry => entry.type === 'text-processing').map(entry => entry.input);
       const results = previousTexts.map(entry => {
         return text.includes(entry) ? `Similar content found: "${entry}"` : null;
@@ -204,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await handleImageUpload(file); // OCR
       } else if (file.type === 'text/plain') {
         const textContent = await file.text();
-        await processUserText(textContent); // Text processing
+        await processUserText(textContent);
       }
     } catch (error) {
       console.error('File processing error:', error);
