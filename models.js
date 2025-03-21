@@ -1,4 +1,4 @@
-import * as tf from './main.js'; // Correctly import TensorFlow.js from main.js
+import { tf } from './main.js'; // Correctly import TensorFlow.js from main.js
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
 
