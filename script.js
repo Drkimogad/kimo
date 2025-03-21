@@ -72,6 +72,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // Define startSpeechRecognition
+  async function startSpeechRecognition() {
+    console.log('Starting speech recognition');
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      displayResponse('Speech Recognition API not supported by this browser.', true);
+      return;
+    }
+
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => toggleListeningUI(true);
+    recognition.onend = () => toggleListeningUI(false);
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      displayResponse('Failed to recognize speech.', true);
+    };
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join('');
+      $('user-input').value = transcript;
+    };
+
+    recognition.start();
+  }
+
   // Event Listeners
   $('submit-btn')?.addEventListener('click', async () => {
     const input = $('user-input')?.value.trim();
