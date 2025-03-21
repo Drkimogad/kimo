@@ -1,5 +1,5 @@
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
-import tf from '../main.js';
+import tf from './main.js';
 
 export const text = {
   model: null,
