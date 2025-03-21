@@ -31,13 +31,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function showLoading() {
-    const loader = $('loading-spinner');
-    if (loader) loader.style.display = 'block';
+    const loader = $('loading');
+    if (loader) loader.classList.remove('loading-hidden');
   }
 
   function hideLoading() {
-    const loader = $('loading-spinner');
-    if (loader) loader.style.display = 'none';
+    const loader = $('loading');
+    if (loader) loader.classList.add('loading-hidden');
   }
 
   function updateSessionHistory(type, data) {
@@ -50,6 +50,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const voiceBtn = $('voice-btn');
     if (voiceBtn) voiceBtn.classList.toggle('recording', listening);
     isListening = listening;
+  }
+
+  // ************** DUCKDUCKGO SEARCH **************
+  async function searchDuckDuckGo(query) {
+    try {
+      showLoading();
+      const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
+      const data = await response.json();
+      if (data && data.RelatedTopics) {
+        const results = data.RelatedTopics.map(topic => topic.Text).join('<br>');
+        displayResponse(`DuckDuckGo Search Results:<br>${results}`);
+        updateSessionHistory('search', { query, results });
+      } else {
+        displayResponse('No results found.', true);
+      }
+    } catch (error) {
+      console.error('DuckDuckGo search error:', error);
+      displayResponse('Failed to search online.', true);
+    } finally {
+      hideLoading();
+    }
   }
 
   // ************** IMAGE CLASSIFICATION **************
@@ -139,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('submit-btn')?.addEventListener('click', async () => {
     const input = $('user-input')?.value.trim();
     if (!input) return;
-    await processUserText(input);
+    await searchDuckDuckGo(input);
   });
 
   // ************** SAVE BUTTON FUNCTIONALITY **************
