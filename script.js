@@ -6,10 +6,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   let isListening = false;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
+  // Display processing message on app start
+  displayProcessingMessage();
+
   // Model Initialization
   try {
     await loadModels();
     console.log('All models loaded successfully');
+    hideProcessingMessage(); // Hide processing message
   } catch (error) {
     console.error('Model initialization failed:', error);
     displayResponse('Some features might be unavailable', true);
@@ -26,6 +30,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (clear) responseArea.innerHTML = '';
     responseArea.innerHTML += `<div class="response">${content}</div>`;
     responseArea.scrollTop = responseArea.scrollHeight;
+  }
+
+  function displayProcessingMessage() {
+    const loader = $('loading');
+    if (loader) {
+      loader.classList.remove('loading-hidden');
+      loader.textContent = 'Processing...';
+    }
+  }
+
+  function hideProcessingMessage() {
+    const loader = $('loading');
+    if (loader) loader.classList.add('loading-hidden');
   }
 
   function showLoading() {
@@ -62,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (data && data.RelatedTopics) {
         const results = data.RelatedTopics.map(topic => {
           if (topic.FirstURL) {
-            return `<a href="${topic.FirstURL}" target="_blank">${topic.Text}</a>`;
+            return `<a href="#" data-url="${topic.FirstURL}" class="result-link">${topic.Text}</a>`;
           } else {
             return topic.Text;
           }
@@ -84,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const data = await response.json();
       if (data && data.query && data.query.search) {
         const results = data.query.search.map(result => {
-          return `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(result.title)}" target="_blank">${result.title}</a>: ${result.snippet}`;
+          return `<a href="#" data-url="https://en.wikipedia.org/wiki/${encodeURIComponent(result.title)}" class="result-link">${result.title}</a>: ${result.snippet}`;
         }).join('<br>');
         return results;
       } else {
@@ -103,6 +120,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     displayResponse(`DuckDuckGo Results:<br>${duckDuckGoResults}<br><br>Wikipedia Results:<br>${wikipediaResults}`, true);
     updateSessionHistory('search', { query, duckDuckGoResults, wikipediaResults });
     hideLoading();
+  }
+
+  async function loadContent(url) {
+    try {
+      showLoading();
+      const response = await fetch(url);
+      const data = await response.text();
+      displayResponse(`<div>${data}</div>`, false);
+      hideLoading();
+    } catch (error) {
+      console.error('Failed to load content:', error);
+      displayResponse('Failed to load content.', true);
+    }
   }
 
   // Define startSpeechRecognition
@@ -212,5 +242,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log(`Humanize button clicked with input: ${input}`);
     await processUserText(input);
     await checkPlagiarism(input);
+  });
+
+  // Event delegation for result links
+  $('response-area')?.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('result-link')) {
+      e.preventDefault();
+      const url = e.target.getAttribute('data-url');
+      await loadContent(url);
+    }
+  });
+
+  // Hide photo upload box initially
+  const photoUploadBox = $('photo-upload-box');
+  const clearButton = $('clear-btn');
+  if (photoUploadBox && clearButton) {
+    photoUploadBox.style.display = 'none';
+    clearButton.style.display = 'none';
+  }
+
+  // Show photo upload box when a file is selected
+  $('file-upload')?.addEventListener('change', () => {
+    if (photoUploadBox && clearButton) {
+      photoUploadBox.style.display = 'block';
+      clearButton.style.display = 'block';
+    }
   });
 });
