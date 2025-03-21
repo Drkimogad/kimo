@@ -82,10 +82,10 @@ textarea#user-input {
 
 .response-container {
   flex: 1;
-  border: 1px solid #dee2e6;
   padding: 10px;
   overflow-y: auto; /* Allow scrolling if content is long */
   margin-bottom: 10px;
+  border: none; /* No border for the response box */
 }
 
 .response-actions {
@@ -112,15 +112,7 @@ footer {
   text-align: center;
   border-top: 1px solid #dee2e6;
 }
-```
 
-### Summary
-
-- **Extended Response Area**: Made the response area flexible and responsive, with scrollable content if needed.
-- **Moved Save Button**: Positioned the save button in the bottom right corner of the response area.
-- **Reduced Header Padding**: Adjusted header padding to save space.
-- **Increased Toggle Button Size**: Enlarged the toggle button and updated its label to "Toggle Mode".
-- **Repositioned Buttons**: Arranged buttons according to the specified layout.
-- **Updated Focus Colors and Borders**: Introduced light mustard colors for focus states and button borders.
-
-Please review the changes and test the functionalities. If there are any specific errors or issues, let me know so we can address them!
+.loading-hidden {
+  display: none;
+}
