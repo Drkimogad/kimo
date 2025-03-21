@@ -1,15 +1,15 @@
 /* Root Variables (Colors & Borders) */
 :root {
-  --bg-color: #ffffff;
-  --text-color: #000000;
-  --accent: #FFD700; /* Mustard */
+  --bg-color: #f8f9fa;
+  --text-color: #2c3e50;
+  --accent: #ffdd57; /* Calmer mustard */
   --border: 2px solid #2c3e50;
 }
 
 [data-theme="dark"] {
   --bg-color: #1a1a1a;
   --text-color: #ffffff;
-  --accent: #FFD700;
+  --accent: #ffdd57;
 }
 
 /* General Page Styling */
@@ -155,4 +155,44 @@ button {
 #clear-canvas {
   margin-top: 0.5rem;
   padding: 0.5rem 1rem;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1200px) {
+  main {
+    max-width: 90%;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    max-width: 95%;
+  }
+  
+  header, footer {
+    padding: 0.5rem;
+  }
+  
+  button {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    max-width: 100%;
+  }
+  
+  header, footer {
+    padding: 0.5rem;
+  }
+  
+  button {
+    padding: 0.5rem;
+  }
+  
+  #theme-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
 }
