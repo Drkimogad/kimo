@@ -62,17 +62,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       const data = await response.json();
       if (data && data.RelatedTopics) {
         const results = data.RelatedTopics.map(topic => topic.Text).join('<br>');
-        displayResponse(`DuckDuckGo Search Results:<br>${results}`, true);
-        updateSessionHistory('search', { query, results });
+        return results;
       } else {
-        displayResponse('No results found.', true);
+        return 'No results found on DuckDuckGo.';
       }
     } catch (error) {
       console.error('DuckDuckGo search error:', error);
-      displayResponse('Failed to search online.', true);
-    } finally {
-      hideLoading();
+      return 'Failed to search DuckDuckGo.';
     }
+  }
+
+  async function searchWikipedia(query) {
+    console.log(`Searching Wikipedia for: ${query}`);
+    try {
+      const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
+      const data = await response.json();
+      if (data && data.query && data.query.search) {
+        const results = data.query.search.map(result => result.snippet).join('<br>');
+        return results;
+      } else {
+        return 'No results found on Wikipedia.';
+      }
+    } catch (error) {
+      console.error('Wikipedia search error:', error);
+      return 'Failed to search Wikipedia.';
+    }
+  }
+
+  async function searchAndGenerate(query) {
+    showLoading();
+    const duckDuckGoResults = await searchDuckDuckGo(query);
+    const wikipediaResults = await searchWikipedia(query);
+    displayResponse(`DuckDuckGo Results:<br>${duckDuckGoResults}<br><br>Wikipedia Results:<br>${wikipediaResults}`, true);
+    updateSessionHistory('search', { query, duckDuckGoResults, wikipediaResults });
+    hideLoading();
   }
 
   // Define startSpeechRecognition
@@ -87,6 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const recognition = new SpeechRecognition();
     recognition.interimResults = true;
     recognition.lang = 'en-US';
+    recognition.continuous = true; // Allow for continuous listening
 
     recognition.onstart = () => toggleListeningUI(true);
     recognition.onend = () => toggleListeningUI(false);
@@ -110,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const input = $('user-input')?.value.trim();
     if (!input) return;
     console.log(`Search button clicked with input: ${input}`);
-    await searchDuckDuckGo(input);
+    await searchAndGenerate(input);
   });
 
   // More Event Listeners and Functions...
