@@ -12,157 +12,90 @@
   --accent: #FFD700;
 }
 
-/* General Page Styling */
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
-  background: var(--bg-color);
-  color: var(--text-color);
-  transition: background 0.3s, color 0.3s;
+  background-color: var(--background-color, #fff);
+  color: var(--text-color, #000);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
-/* Header & Footer */
-header, footer {
-  background: var(--accent);
-  padding: 1rem;
+header {
+  background-color: var(--header-background-color, #282c34);
+  padding: 20px;
   text-align: center;
-  border-bottom: var(--border);
+  color: white;
 }
 
-/* Theme Toggle Button */
-#theme-toggle {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: none;
-  border: var(--border);
-  cursor: pointer;
-}
-
-/* Main Content */
 main {
-  padding: 1rem;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-/* Input Fields & Buttons */
-.input-group {
-  margin: 1rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
 
 textarea {
-  width: 100%;
-  padding: 0.5rem;
-  border: var(--border);
-  border-radius: 4px;
-  resize: vertical;
+  width: 80%;
+  height: 100px;
+  margin-bottom: 20px;
+  padding: 10px;
+  font-size: 16px;
 }
 
 .button-group {
   display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 button {
-  background: var(--accent);
-  color: #2c3e50;
-  border: var(--border);
-  padding: 0.5rem 1rem;
+  padding: 10px 20px;
+  font-size: 16px;
   cursor: pointer;
-  border-radius: 4px;
 }
 
-/* Response Area */
+canvas-container {
+  margin: 20px 0;
+}
+
 #response-area {
-  margin-top: 1rem;
-  padding: 1rem;
-  border: var(--border);
-  border-radius: 4px;
-  min-height: 100px;
-}
-
-/* Offline Page Styles */
-.offline-container {
-  display: flex;
-  min-height: 60vh;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.offline-content {
-  max-width: 500px;
-  padding: 2rem;
-}
-
-.offline-icon {
-  font-size: 4rem;
-  margin-bottom: 1.5rem;
-}
-
-.offline-button {
-  background: var(--accent);
-  padding: 1rem 2rem;
-  margin-top: 1.5rem;
-  border-radius: 8px;
-  transition: opacity 0.3s;
-}
-
-.offline-button:hover {
-  opacity: 0.9;
-  cursor: pointer;
-}
-.loading-hidden {
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 1rem 2rem;
-  background: rgba(0,0,0,0.8);
-  color: white;
-  border-radius: 4px;
-}
-
-.response-container {
-  margin-top: 1rem;
-  padding: 1rem;
-  border: 1px solid #ddd;
-  min-height: 100px;
-  max-height: 60vh;
+  width: 80%;
+  max-height: 300px;
   overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.response {
+  margin-bottom: 10px;
+}
+
+.recording {
+  background-color: red;
+  color: white;
+}
+
+#loading {
+  display: none;
 }
 
 .loading-hidden {
   display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  padding: 1rem 2rem;
-  background: rgba(0,0,0,0.8);
-  color: white;
-  border-radius: 4px;
 }
 
-.canvas {
-  display: none; /* Hide processing canvas */
+[data-theme="dark"] {
+  --background-color: #181a1b;
+  --text-color: #e8e6e3;
+  --header-background-color: #1f1f1f;
 }
 
-.canvas-container {
-  margin: 1rem 0;
-  border: 2px solid #ccc;
-  padding: 1rem;
-}
-
-#drawing-canvas {
-  border: 1px solid #888;
-  background: white;
-}
-
-#clear-canvas {
-  margin-top: 0.5rem;
-  padding: 0.5rem 1rem;
+[data-theme="light"] {
+  --background-color: #fff;
+  --text-color: #000;
+  --header-background-color: #282c34;
 }
