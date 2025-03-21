@@ -1,7 +1,6 @@
-// Import external scripts
-import tf from './main.js';
-import loadModels, { recognizeHandwriting } from './models.js';  // Ensure we import recognizeHandwriting
-import { processOCR } from './ocr.js';  // Ensure we import processOCR if it's in ocr.js
+import * as tf from './main.js';
+import { loadModels } from './models.js';  // Import functions from models.js
+import { recognizeHandwriting } from './ocr.js';  // Import recognizeHandwriting from ocr.js
 
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -176,7 +175,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
       const previousTexts = sessionHistory.filter(entry => entry.type === 'text-processing').map(entry => entry.input);
       const results = previousTexts.map(entry => {
-        // Simple plagiarism check by comparing text similarity
         return text.includes(entry) ? `Similar content found: "${entry}"` : null;
       }).filter(result => result !== null);
 
