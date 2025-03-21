@@ -56,6 +56,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       showLoading();
       const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       if (data && data.RelatedTopics) {
         const results = data.RelatedTopics.map(topic => topic.Text).join('<br>');
