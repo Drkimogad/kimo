@@ -1,5 +1,5 @@
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
-import tf from '../main.js';
+import tf from './main.js';
 
 export const image = {
   model: null,
