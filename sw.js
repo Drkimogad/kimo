@@ -1,22 +1,22 @@
 const CACHE_NAME = 'kimo-ai-cache-v3'; // Incremented version
-const OFFLINE_URL = 'https://drkimogad.github.io/kimo/offline.html';
+const OFFLINE_URL = './offline.html';
 const CACHE_ASSETS = [
   // Existing assets
-  'https://drkimogad.github.io/kimo/',
-  'https://drkimogad.github.io/kimo/index.html',
-  'https://drkimogad.github.io/kimo/styles.css',
-  'https://drkimogad.github.io/kimo/script.js',
-  'https://drkimogad.github.io/kimo/models.js',
-  'https://drkimogad.github.io/kimo/ocr.js',
-  'https://drkimogad.github.io/kimo/main.js',
-  'https://drkimogad.github.io/kimo/offline.html',
-  'https://drkimogad.github.io/kimo/icons/icon-512.png', 
-  'https://drkimogad.github.io/kimo/icons/icon-192.png', 
-  'https://drkimogad.github.io/kimo/icons/icon-128.png',
-  'https://drkimogad.github.io/kimo/icons/icon-64.png',
-  'https://drkimogad.github.io/kimo/favicon.ico',
-  'https://drkimogad.github.io/kimo/models/text-model.js',
-  'https://drkimogad.github.io/kimo/models/image-model.js',
+  './',
+  './index.html',
+  './styles.css',
+  './script.js',
+  './models.js',
+  './ocr.js',
+  './main.js',
+  './offline.html',
+  './icons/icon-512.png', 
+  './icons/icon-192.png', 
+  './icons/icon-128.png',
+  './icons/icon-64.png',
+  './favicon.ico',
+  './models/text-model.js',
+  './models/image-model.js',
   
   // New MobileNet model files
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
