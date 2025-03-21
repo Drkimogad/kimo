@@ -1,21 +1,7 @@
-/* Root Variables (Colors & Borders) */
-:root {
-  --bg-color: #ffffff;
-  --text-color: #000000;
-  --accent: #FFD700; /* Mustard */
-  --border: 2px solid #2c3e50;
-}
-
-[data-theme="dark"] {
-  --bg-color: #1a1a1a;
-  --text-color: #ffffff;
-  --accent: #FFD700;
-}
-
 body {
   font-family: Arial, sans-serif;
-  background-color: var(--background-color, #fff);
-  color: var(--text-color, #000);
+  background-color: var(--background-color, #f0f0f0); /* Changed to light grey */
+  color: var(--text-color, #333); /* Changed to dark grey */
   margin: 0;
   padding: 0;
   display: flex;
@@ -24,7 +10,7 @@ body {
 }
 
 header {
-  background-color: var(--header-background-color, #282c34);
+  background-color: var(--header-background-color, #444); /* Changed to charcoal */
   padding: 20px;
   text-align: center;
   color: white;
@@ -44,6 +30,8 @@ textarea {
   margin-bottom: 20px;
   padding: 10px;
   font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .button-group {
@@ -56,6 +44,14 @@ button {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #444; /* Changed to charcoal */
+  color: white;
+}
+
+button:hover {
+  background-color: #555; /* Slightly lighter charcoal */
 }
 
 canvas-container {
@@ -69,10 +65,16 @@ canvas-container {
   border: 1px solid #ccc;
   padding: 10px;
   margin-top: 20px;
+  background-color: white;
+  border-radius: 4px;
 }
 
 .response {
   margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid #eee;
 }
 
 .recording {
@@ -95,7 +97,7 @@ canvas-container {
 }
 
 [data-theme="light"] {
-  --background-color: #fff;
-  --text-color: #000;
-  --header-background-color: #282c34;
+  --background-color: #f0f0f0;
+  --text-color: #333;
+  --header-background-color: #444;
 }
