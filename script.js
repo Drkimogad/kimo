@@ -112,7 +112,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       return 'Failed to search Wikipedia.';
     }
   }
-
+  // proxy side //
+async function loadContent(url) {
+  try {
+    showLoading();
+    const proxyUrl = `http://localhost:3000/proxy?url=${encodeURIComponent(url)}`;
+    const response = await fetch(proxyUrl);
+    const data = await response.text();
+    displayResponse(`<div>${data}</div>`, false);
+    hideLoading();
+  } catch (error) {
+    console.error('Failed to load content:', error);
+    displayResponse('Failed to load content.', true);
+  }
+}
   async function searchAndGenerate(query) {
     showLoading();
     const duckDuckGoResults = await searchDuckDuckGo(query);
