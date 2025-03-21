@@ -1,7 +1,7 @@
 // Import external scripts
 import tf from './main.js';
-import loadModels from './models.js';
-import { recognizeHandwriting } from './ocr.js';
+import loadModels, { recognizeHandwriting } from './models.js';  // Ensure we import recognizeHandwriting
+import { processOCR } from './ocr.js';  // Ensure we import processOCR if it's in ocr.js
 
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ************** DUCKDUCKGO SEARCH **************
   async function searchDuckDuckGo(query) {
+    console.log(`Searching DuckDuckGo for: ${query}`);
     try {
       showLoading();
       const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
@@ -75,6 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ************** IMAGE CLASSIFICATION **************
   async function classifyUploadedImage(file) {
+    console.log(`Classifying uploaded image: ${file.name}`);
     try {
       showLoading();
       const img = await loadImage(file);
@@ -91,6 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ************** TEXT PROCESSING **************
   async function processUserText(text) {
+    console.log(`Processing user text: ${text}`);
     try {
       showLoading();
       const processedText = await processText(text);
@@ -106,10 +109,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ************** OCR HANDLING **************
   async function handleImageUpload(file) {
+    console.log(`Handling image upload for OCR: ${file.name}`);
     try {
       showLoading();
-      const img = await loadImage(file);
-      const recognizedText = await recognizeHandwriting(img);
+      const recognizedText = await recognizeHandwriting(file);  // Ensure we call recognizeHandwriting
       displayResponse(`Recognized Text: ${recognizedText}`, true);
       updateSessionHistory('handwriting', { file: file.name, text: recognizedText });
     } catch (error) {
@@ -121,9 +124,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function handleCanvasOCR(canvas) {
+    console.log('Handling canvas OCR');
     try {
       showLoading();
-      const recognizedText = await recognizeHandwriting(canvas);
+      const recognizedText = await recognizeHandwriting(canvas);  // Ensure we call recognizeHandwriting
       displayResponse(`Canvas OCR: ${recognizedText}`, true);
       updateSessionHistory('drawing', { text: recognizedText });
     } catch (error) {
@@ -136,6 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ************** SPEECH RECOGNITION **************
   async function startSpeechRecognition() {
+    console.log('Starting speech recognition');
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       displayResponse('Speech Recognition API not supported by this browser.', true);
       return;
@@ -165,6 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ************** PLAGIARISM DETECTION **************
   async function checkPlagiarism(text) {
+    console.log(`Checking plagiarism for: ${text}`);
     try {
       showLoading();
       const sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
@@ -192,6 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    console.log(`File uploaded: ${file.name}`);
     try {
       showLoading();
       if (file.type.startsWith('image/')) {
@@ -213,6 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('submit-btn')?.addEventListener('click', async () => {
     const input = $('user-input')?.value.trim();
     if (!input) return;
+    console.log(`Search button clicked with input: ${input}`);
     await searchDuckDuckGo(input);
   });
 
@@ -221,6 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const responseArea = $('response-area');
     if (!responseArea || !responseArea.innerText.trim()) return;
 
+    console.log('Save button clicked');
     const savedData = responseArea.innerText.trim();
     const blob = new Blob([savedData], { type: 'text/plain' });
     const a = document.createElement('a');
@@ -251,6 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('humanize-btn')?.addEventListener('click', async () => {
     const input = $('user-input')?.value.trim();
     if (!input) return;
+    console.log(`Humanize button clicked with input: ${input}`);
     await processUserText(input);
     await checkPlagiarism(input);
   });
