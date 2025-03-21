@@ -6,45 +6,7 @@ let mobilenetModel;
 let useModel;
 let handwritingModelInitialized = false;
 
-export const recognizeHandwriting = (input) => {
-  return new Promise((resolve, reject) => {
-    if (!input) {
-      console.error("No image or canvas provided for handwriting recognition.");
-      reject("No image or canvas provided.");
-      return;
-    }
-
-    let imageData;
-
-    if (input instanceof File) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        imageData = reader.result;
-        processOCR(imageData, resolve, reject);
-      };
-      reader.readAsDataURL(input);
-    } else if (input instanceof HTMLCanvasElement) {
-      imageData = input.toDataURL();
-      processOCR(imageData, resolve, reject);
-    } else {
-      console.error("Unsupported input type for OCR.");
-      reject("Unsupported input type.");
-    }
-  });
-};
-
-function processOCR(imageData, resolve, reject) {
-  Tesseract.recognize(imageData, 'eng', { logger: (m) => console.log(m) })
-    .then(({ data: { text } }) => {
-      console.log("Recognized Text:", text);
-      resolve(text);
-    })
-    .catch(err => {
-      console.error("Error in OCR:", err);
-      reject(err);
-    });
-}
-
+// Load AI models dynamically
 export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'handwriting']) {
   const loadPromises = [];
 
