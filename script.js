@@ -134,6 +134,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // ************** SPEECH RECOGNITION **************
+  async function startSpeechRecognition() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      displayResponse('Speech Recognition API not supported by this browser.', true);
+      return;
+    }
+
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => toggleListeningUI(true);
+    recognition.onend = () => toggleListeningUI(false);
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      displayResponse('Failed to recognize speech.', true);
+    };
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join('');
+      $('user-input').value = transcript;
+    };
+
+    recognition.start();
+  }
+
+  // ************** PLAGIARISM DETECTION **************
+  async function checkPlagiarism(text) {
+    try {
+      showLoading();
+      const sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
+      const previousTexts = sessionHistory.filter(entry => entry.type === 'text-processing').map(entry => entry.input);
+      const results = previousTexts.map(entry => {
+        // Simple plagiarism check by comparing text similarity
+        return text.includes(entry) ? `Similar content found: "${entry}"` : null;
+      }).filter(result => result !== null);
+
+      if (results.length > 0) {
+        displayResponse(`Plagiarism Check Results:<br>${results.join('<br>')}`);
+      } else {
+        displayResponse('No plagiarism detected.', true);
+      }
+    } catch (error) {
+      console.error('Plagiarism detection error:', error);
+      displayResponse('Failed to check for plagiarism.', true);
+    } finally {
+      hideLoading();
+    }
+  }
+
   // ************** FILE UPLOAD HANDLING **************
   $('file-upload')?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
@@ -190,4 +243,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       localStorage.setItem('theme', newTheme);
     });
   }
+
+  // ************** VOICE INPUT BUTTON **************
+  $('voice-btn')?.addEventListener('click', startSpeechRecognition);
+
+  // ************** HUMANIZE BUTTON **************
+  $('humanize-btn')?.addEventListener('click', async () => {
+    const input = $('user-input')?.value.trim();
+    if (!input) return;
+    await processUserText(input);
+    await checkPlagiarism(input);
+  });
 });
