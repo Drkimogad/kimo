@@ -9,7 +9,7 @@ body {
 
 header {
   background-color: #f8f9fa;
-  padding: 10px 20px; /* Reduced padding */
+  padding: 10px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -22,16 +22,16 @@ header h1 {
 }
 
 header button {
-  font-size: 16px; /* Increased size */
+  font-size: 16px;
   padding: 10px 20px;
-  border: 1px solid #f7d794; /* Light mustard border */
+  border: 1px solid #f7d794;
   background-color: #fff;
   cursor: pointer;
 }
 
 header button:hover,
 header button:focus {
-  background-color: #f7d794; /* Light mustard background on hover/focus */
+  background-color: #f7d794;
 }
 
 main {
@@ -56,7 +56,7 @@ textarea#user-input {
 .button-group input[type="file"] {
   flex: 1;
   padding: 10px;
-  border: 1px solid #f7d794; /* Light mustard border */
+  border: 1px solid #f7d794;
   background-color: #fff;
   cursor: pointer;
 }
@@ -65,7 +65,7 @@ textarea#user-input {
 .button-group button:focus,
 .button-group input[type="file"]:hover,
 .button-group input[type="file"]:focus {
-  background-color: #f7d794; /* Light mustard background on hover/focus */
+  background-color: #f7d794;
 }
 
 .canvas-container {
@@ -73,6 +73,10 @@ textarea#user-input {
   flex-direction: column;
   align-items: center;
   margin-bottom: 10px;
+}
+
+.canvas-container.hidden {
+  display: none;
 }
 
 #drawing-canvas {
@@ -83,9 +87,9 @@ textarea#user-input {
 .response-container {
   flex: 1;
   padding: 10px;
-  overflow-y: auto; /* Allow scrolling if content is long */
+  overflow-y: auto;
   margin-bottom: 10px;
-  border: none; /* No border for the response box */
+  border: none;
 }
 
 .response-actions {
@@ -96,23 +100,15 @@ textarea#user-input {
 
 .response-actions button {
   padding: 10px;
-  border: 1px solid #f7d794; /* Light mustard border */
+  border: 1px solid #f7d794;
   background-color: #fff;
   cursor: pointer;
 }
 
 .response-actions button:hover,
 .response-actions button:focus {
-  background-color: #f7d794; /* Light mustard background on hover/focus */
+  background-color: #f7d794;
 }
 
 footer {
-  background-color: #f8f9fa;
-  padding: 10px 20px;
-  text-align: center;
-  border-top: 1px solid #dee2e6;
-}
-
-.loading-hidden {
-  display: none;
-}
+  
