@@ -6,6 +6,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   let isListening = false;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
+  document.addEventListener("DOMContentLoaded", () => {
+  const searchButton = document.getElementById("submit-btn");
+  const responseArea = document.getElementById("response-area");
+
+  // Hide the response area initially
+  responseArea.classList.add("hidden");
+
+  // Attach event listener to the search button
+  searchButton.addEventListener("click", () => {
+    const query = document.getElementById("user-input").value;
+
+    if (query) {
+      performSearch(query);  // Call your search function
+
+      // Show the results after performing the search
+      responseArea.classList.remove("hidden");
+    } else {
+      alert("Please enter a search query!");
+    }
+  });
+});
+
   // Display processing message on app start
   displayProcessingMessage();
 
