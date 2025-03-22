@@ -67,75 +67,126 @@ document.addEventListener('DOMContentLoaded', async () => {
     isListening = listening;
   }
 
-  // DuckDuckGo Search
-  async function searchDuckDuckGo(query) {
-    console.log(`Searching DuckDuckGo for: ${query}`);
+//  Multi-API Search Framework
+// 1. Define API Endpoints and Keys
+const duckDuckGoEndpoint = "https://api.duckduckgo.com/?q={query}&format=json";
+const wikipediaEndpoint = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*";
+const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=YOUR_GOOGLE_API_KEY&cx=YOUR_SEARCH_ENGINE_ID";
+const bingEndpoint = "https://api.bing.microsoft.com/v7.0/search?q={query}";
+const openSourceEndpoint = "https://api.example-opensource.com/search?q={query}"; // Placeholder
+
+// 2. Define API Functions
+async function searchDuckDuckGo(query) {
+    const url = duckDuckGoEndpoint.replace("{query}", encodeURIComponent(query));
     try {
-      const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      if (data && data.RelatedTopics) {
-        const results = data.RelatedTopics.map(topic => {
-          if (topic.FirstURL) {
-            return `<a href="#" data-url="${topic.FirstURL}" class="result-link">${topic.Text}</a>`;
-          } else {
-            return topic.Text;
-          }
-        }).join('<br>');
-        return results;
-      } else {
-        return 'No results found on DuckDuckGo.';
-      }
+        const response = await fetch(url);
+        const data = await response.json();
+        return data.RelatedTopics.map(item => ({ title: item.Text, link: item.FirstURL }));
     } catch (error) {
-      console.error('DuckDuckGo search error:', error);
-      return 'Failed to search DuckDuckGo.';
+        console.error("DuckDuckGo search error:", error);
+        return [];
     }
-  }
+}
 
-  async function searchWikipedia(query) {
-    console.log(`Searching Wikipedia for: ${query}`);
+async function searchWikipedia(query) {
+    const url = wikipediaEndpoint.replace("{query}", encodeURIComponent(query));
     try {
-      const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
-      const data = await response.json();
-      if (data && data.query && data.query.search) {
-        const results = data.query.search.map(result => {
-          return `<a href="#" data-url="https://en.wikipedia.org/wiki/${encodeURIComponent(result.title)}" class="result-link">${result.title}</a>: ${result.snippet}`;
-        }).join('<br>');
-        return results;
-      } else {
-        return 'No results found on Wikipedia.';
-      }
+        const response = await fetch(url);
+        const data = await response.json();
+        return data.query.search.map(item => ({ title: item.title, link: `https://en.wikipedia.org/wiki/${item.title.replace(/ /g, '_')}` }));
     } catch (error) {
-      console.error('Wikipedia search error:', error);
-      return 'Failed to search Wikipedia.';
+        console.error("Wikipedia search error:", error);
+        return [];
     }
-  }
+}
 
-  async function searchAndGenerate(query) {
-    showLoading();
-    const duckDuckGoResults = await searchDuckDuckGo(query);
-    const wikipediaResults = await searchWikipedia(query);
-    displayResponse(`DuckDuckGo Results:<br>${duckDuckGoResults}<br><br>Wikipedia Results:<br>${wikipediaResults}`, true);
-    updateSessionHistory('search', { query, duckDuckGoResults, wikipediaResults });
-    hideLoading();
-  }
-
-  async function loadContent(url) {
+async function searchGoogle(query) {
+    const url = googleEndpoint.replace("{query}", encodeURIComponent(query));
     try {
-      showLoading();
-      const proxyUrl = `https://kimo-peach.vercel.app/api/proxy?url=${encodeURIComponent(url)}`;
-      const response = await fetch(proxyUrl);
-      const data = await response.text();
-      displayResponse(`<div>${data}</div>`, false);
-      hideLoading();
+        const response = await fetch(url);
+        const data = await response.json();
+        return data.items.map(item => ({ title: item.title, link: item.link }));
     } catch (error) {
-      console.error('Failed to load content:', error);
-      displayResponse('Failed to load content.', true);
+        console.error("Google Custom Search error:", error);
+        return [];
     }
-  }
+}
 
+async function searchBing(query) {
+    const url = bingEndpoint.replace("{query}", encodeURIComponent(query));
+    try {
+        const response = await fetch(url, { headers: { "Ocp-Apim-Subscription-Key": "YOUR_BING_API_KEY" } });
+        const data = await response.json();
+        return data.webPages.value.map(item => ({ title: item.name, link: item.url }));
+    } catch (error) {
+        console.error("Bing search error:", error);
+        return [];
+    }
+}
+
+async function searchOpenSource(query) {
+    const url = openSourceEndpoint.replace("{query}", encodeURIComponent(query));
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        return data.results.map(item => ({ title: item.title, link: item.url }));
+    } catch (error) {
+        console.error("Open Source search error:", error);
+        return [];
+    }
+}
+
+// 3. Perform All Searches Simultaneously
+async function performSearch(query) {
+    const [duckDuckGoResults, wikipediaResults, googleResults, bingResults, openSourceResults] = await Promise.all([
+        searchDuckDuckGo(query),
+        searchWikipedia(query),
+        searchGoogle(query),
+        searchBing(query),
+        searchOpenSource(query)
+    ]);
+
+    displayResults({
+        "DuckDuckGo": duckDuckGoResults,
+        "Wikipedia": wikipediaResults,
+        "Google": googleResults,
+        "Bing": bingResults,
+        "Open Source": openSourceResults
+    });
+}
+
+// 4. Display Categorized Results
+function displayResults(categorizedResults) {
+    const resultsArea = document.getElementById("results");
+    resultsArea.innerHTML = ""; // Clear previous results
+
+    Object.keys(categorizedResults).forEach(category => {
+        const section = document.createElement("div");
+        section.className = "result-category";
+
+        const heading = document.createElement("h3");
+        heading.textContent = category;
+        section.appendChild(heading);
+
+        categorizedResults[category].forEach(result => {
+            const link = document.createElement("a");
+            link.href = result.link;
+            link.textContent = result.title;
+            link.target = "_blank"; // Opens in default browser
+            section.appendChild(link);
+        });
+
+        resultsArea.appendChild(section);
+    });
+}
+
+// 5. Handle Search Button Click
+const searchButton = document.getElementById("search-button");
+searchButton.addEventListener("click", () => {
+    const query = document.getElementById("search-input").value;
+    performSearch(query);
+});
+// end of searching api //
   // Define startSpeechRecognition
   async function startSpeechRecognition() {
     console.log('Starting speech recognition');
