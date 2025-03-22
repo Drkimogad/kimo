@@ -1,14 +1,12 @@
-// Node fetch proxy to handle ext URLs
 const express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
 
 app.use(cors());
 
-app.get('/proxy', async (req, res) => {
+app.get('/api/proxy', async (req, res) => {
   const url = req.query.url;
   if (!url) {
     return res.status(400).send('URL is required');
@@ -23,6 +21,4 @@ app.get('/proxy', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Proxy server running at http://localhost:${port}`);
-});
+module.exports = app;
