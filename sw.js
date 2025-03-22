@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v3'; // Incremented version
+const CACHE_NAME = 'kimo-ai-cache-v4'; // Incremented version
 const OFFLINE_URL = './offline.html';
 const CACHE_ASSETS = [
   // Existing assets
@@ -34,46 +34,19 @@ const CACHE_ASSETS = [
 
   // Tesseract.js handwriting library files
   'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/tesseract.min.js',  // Tesseract.js library  
-  'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz' // english language file
+  'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz', // English language file
+
+  // Public proxy-server assets
+  './index.html',
+  './proxy-server.js'
 ];
 
 // ✅ Install Service Worker & Cache Assets
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open('kimo-cache-v1')
+    caches.open(CACHE_NAME)
       .then(cache => {
-        return cache.addAll([
-          '/',
-          '/index.html',
-          './styles.css',
-          './script.js',
-          './models.js',
-          './ocr.js',
-          './main.js',
-          './offline.html',
-          './manifest.json',
-          './icons/icon-512.png', 
-          './icons/icon-192.png', 
-          './icons/icon-128.png',
-          './icons/icon-64.png',
-          './favicon.ico',
-          './models/text-model.js',
-          './models/image-model.js',
-          // New MobileNet model files
-          'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
-          'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard1of5.bin',
-          'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard2of5.bin',
-          'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard3of5.bin',
-          'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard4of5.bin',
-          'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard5of5.bin',
-          // Universal Sentence Encoder files
-          'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/model.json',
-          'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
-          'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
-          // Tesseract.js handwriting library files
-          'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/tesseract.min.js',  // Tesseract.js library  
-          'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz' // english language file
-        ]);
+        return cache.addAll(CACHE_ASSETS);
       })
       .catch(error => {
         console.error('Failed to cache resources:', error);
