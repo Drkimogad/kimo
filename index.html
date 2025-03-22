@@ -8,7 +8,6 @@
   <link rel="manifest" href="https://drkimogad.github.io/kimo/manifest.json">
   <link rel="icon" href="https://drkimogad.github.io/kimo/favicon.ico" type="image/x-icon">    
   <link rel="apple-touch-icon" href="https://drkimogad.github.io/kimo/icons/icon-192.png">
-  <!-- Removed direct TensorFlow.js and model scripts -->
 </head>
 <body data-theme="light">
   <header>
@@ -23,14 +22,39 @@
       <input type="file" id="file-upload" accept="image/*,text/plain">
       <button id="submit-btn">🚀 Generate/Search</button>
     </div>
-    <!-- Add before response-area -->
+
+    <!-- Canvas Section -->
     <div class="canvas-container hidden" id="photo-upload-box">
       <canvas id="drawing-canvas"></canvas>
       <button id="clear-canvas">Clear</button>
     </div>
 
-    <div id="response-area" class="response-container"></div>
+    <!-- Categorized Search Results -->
+    <section id="response-area" class="response-container">
+      <div class="api-results">
+        <h2>DuckDuckGo Results</h2>
+        <ul id="duckduckgo-results"></ul>
+      </div>
+      <div class="api-results">
+        <h2>Wikipedia Results</h2>
+        <ul id="wikipedia-results"></ul>
+      </div>
+      <div class="api-results">
+        <h2>Google Custom Search Results</h2>
+        <ul id="google-results"></ul>
+      </div>
+      <div class="api-results">
+        <h2>Bing Results</h2>
+        <ul id="bing-results"></ul>
+      </div>
+      <div class="api-results">
+        <h2>Open Source API Results</h2>
+        <ul id="open-source-results"></ul>
+      </div>
+    </section>
+
     <div id="loading" class="loading-hidden">Processing...</div>
+
     <div class="response-actions">
       <button id="save-btn">💾 Save</button>
       <button id="humanize-btn">📝 Humanize</button>
@@ -40,14 +64,14 @@
   <footer>
     <p>© 2024 Kimo AI. All rights reserved.</p>
   </footer>
-  
+
   <script src="https://unpkg.com/tesseract.js" defer></script>
   <script type="module" src="ocr.js" defer></script>
   <script type="module" src="main.js" defer></script>
   <script type="module" src="models.js" defer></script>  
   <script type="module" src="script.js" defer></script>
-  
-  <!-- serviceworker -->
+
+  <!-- Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
