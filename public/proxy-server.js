@@ -5,6 +5,15 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Missing URL parameter' });
   }
 
+  // Handle CORS preflight request
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', 'https://drkimogad.github.io');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(200).end();
+    return;
+  }
+
   try {
     const response = await fetch(url);
     const contentType = response.headers.get('content-type');
