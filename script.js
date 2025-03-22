@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   let isListening = false;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
-  document.addEventListener("DOMContentLoaded", () => {
   const searchButton = document.getElementById("submit-btn");
   const responseArea = document.getElementById("response-area");
 
@@ -26,7 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert("Please enter a search query!");
     }
   });
-});
 
   // Display processing message on app start
   displayProcessingMessage();
