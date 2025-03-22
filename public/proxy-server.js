@@ -1,44 +1,23 @@
-const express = require('express');
-const fetch = require('node-fetch');
-const cors = require('cors');
-const path = require('path');
+module.exports = async (req, res) => {
+  const { url } = req.query;
 
-const app = express();
-
-app.use(cors());
-
-// Serve static files from the 'public' directory with caching
-app.use(express.static(path.join(__dirname, 'public'), {
-  setHeaders: (res, path) => {
-    // Cache for 30 days
-    res.setHeader('Cache-Control', 'public, max-age=2592000');
-  }
-}));
-
-// Proxy route with enhanced error handling
-app.get('/api/proxy', async (req, res) => {
-  const url = req.query.url;
   if (!url) {
-    return res.status(400).send('URL is required');
+    return res.status(400).json({ error: 'Missing URL parameter' });
   }
 
   try {
     const response = await fetch(url);
-    
-    // Check if the response is OK (status 200–299)
-    if (!response.ok) {
-      return res.status(response.status).send(`Error fetching the content: ${response.statusText}`);
-    }
+    const contentType = response.headers.get('content-type');
 
-    const data = await response.text();
-    res.send(data);
+    res.setHeader('Access-Control-Allow-Origin', 'https://drkimogad.github.io');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Content-Type', contentType);
+
+    const body = await response.text();
+    res.status(200).send(body);
   } catch (error) {
-    console.error('Error fetching the external URL:', error);
-    res.status(500).send('Internal Server Error: Unable to fetch the content');
+    console.error('Error fetching URL:', error);
+    res.status(500).json({ error: 'Failed to fetch URL' });
   }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Proxy server running on port ${PORT}`);
-});
+};
