@@ -121,6 +121,10 @@ button:hover {
   text-align: center;
 }
 
+.hidden {
+  display: none;
+}
+
 .offline-content {
   max-width: 500px;
   padding: 2rem;
