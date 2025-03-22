@@ -181,11 +181,18 @@ function displayResults(categorizedResults) {
 }
 
 // 5. Handle Search Button Click
-const searchButton = document.getElementById("search-button");
-searchButton.addEventListener("click", () => {
-    const query = document.getElementById("search-input").value;
-    performSearch(query);
+document.addEventListener("DOMContentLoaded", () => {
+  const searchButton = document.getElementById("search-button");
+  if (searchButton) {
+    searchButton.addEventListener("click", () => {
+      const query = document.getElementById("search-input").value;
+      performSearch(query);
+    });
+  } else {
+    console.error("Search button not found in the DOM.");
+  }
 });
+
 // end of searching api //
   // Define startSpeechRecognition
   async function startSpeechRecognition() {
