@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-app.get('/api/proxy', async (req, res) => {
+app.get('https://kimo-peach.vercel.app/api/proxy', async (req, res) => {
   const url = req.query.url;
   if (!url) {
     return res.status(400).send('URL is required');
