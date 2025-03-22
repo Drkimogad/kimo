@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 // Update the proxy URL to use the Vercel URL
-const vercelProxyUrl = 'https://kimo-lf241f7im-drkimogad-s-projects.vercel.app/api/proxy';
+const vercelProxyUrl = 'https://kimo-clm2ld8om-drkimogad-s-projects.vercel.app//api/proxy';
 
 app.get('/api/proxy', async (req, res) => {
   const url = req.query.url;
