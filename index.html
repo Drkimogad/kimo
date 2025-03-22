@@ -8,7 +8,7 @@
   <link rel="manifest" href="https://drkimogad.github.io/kimo/manifest.json">
   <link rel="icon" href="https://drkimogad.github.io/kimo/favicon.ico" type="image/x-icon">    
   <link rel="apple-touch-icon" href="https://drkimogad.github.io/kimo/icons/icon-192.png">
-  <!-- Remove direct TensorFlow.js and model scripts -->
+  <!-- Removed direct TensorFlow.js and model scripts -->
 </head>
 <body data-theme="light">
   <header>
@@ -41,13 +41,11 @@
     <p>© 2024 Kimo AI. All rights reserved.</p>
   </footer>
   
-  <script src="https://unpkg.com/tesseract.js"></script>
-  <script type="module" src="ocr.js"></script>
-  <script type="module" src="main.js"></script>
-  <script type="module" src="models.js"></script>  
-  <script type="module" src="script.js"></script>
-   <script type="module" src="proxy-server.js"></script>
-
+  <script src="https://unpkg.com/tesseract.js" defer></script>
+  <script type="module" src="ocr.js" defer></script>
+  <script type="module" src="main.js" defer></script>
+  <script type="module" src="models.js" defer></script>  
+  <script type="module" src="script.js" defer></script>
   
   <!-- serviceworker -->
   <script>
