@@ -8,6 +8,10 @@
     {
       "src": "public/index.html",
       "use": "@vercel/static"
+    },
+    {
+      "src": "public/proxy-server.js",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -18,6 +22,26 @@
     {
       "src": "/(.*)",
       "dest": "/public/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*).js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
+    },
+    {
+      "source": "/(.*).html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=2592000"
+        }
+      ]
     }
   ]
 }
