@@ -15,7 +15,8 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-app.get('api/proxy', async (req, res) => {
+// Proxy route with enhanced error handling
+app.get('/api/proxy', async (req, res) => {
   const url = req.query.url;
   if (!url) {
     return res.status(400).send('URL is required');
@@ -23,10 +24,17 @@ app.get('api/proxy', async (req, res) => {
 
   try {
     const response = await fetch(url);
+    
+    // Check if the response is OK (status 200–299)
+    if (!response.ok) {
+      return res.status(response.status).send(`Error fetching the content: ${response.statusText}`);
+    }
+
     const data = await response.text();
     res.send(data);
   } catch (error) {
-    res.status(500).send('Error fetching the content');
+    console.error('Error fetching the external URL:', error);
+    res.status(500).send('Internal Server Error: Unable to fetch the content');
   }
 });
 
