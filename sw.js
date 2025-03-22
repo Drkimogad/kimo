@@ -34,11 +34,7 @@ const CACHE_ASSETS = [
 
   // Tesseract.js handwriting library files
   'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/tesseract.min.js',  // Tesseract.js library  
-  'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz', // English language file
-
-  // Public proxy-server assets
-  './index.html',
-  './proxy-server.js'
+  'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz' // English language file
 ];
 
 // ✅ Install Service Worker & Cache Assets
