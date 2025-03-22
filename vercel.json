@@ -8,10 +8,6 @@
     {
       "src": "public/index.html",
       "use": "@vercel/static"
-    },
-    {
-      "src": "public/proxy-server.js",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
