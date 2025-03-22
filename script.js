@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function loadContent(url) {
     try {
       showLoading();
-      const proxyUrl = `http://localhost:3000/proxy?url=${encodeURIComponent(url)}`;
+      const proxyUrl = `https://kimo-clm2ld8om-drkimogad-s-projects.vercel.app?url=${encodeURIComponent(url)}`;
       const response = await fetch(proxyUrl);
       const data = await response.text();
       displayResponse(`<div>${data}</div>`, false);
