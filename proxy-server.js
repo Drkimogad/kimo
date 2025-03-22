@@ -1,13 +1,14 @@
 const express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 
 app.use(cors());
 
-// Update the proxy URL to use the Vercel URL
-const vercelProxyUrl = 'https://kimo-lf241f7im-drkimogad-s-projects.vercel.app/api/proxy';
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/proxy', async (req, res) => {
   const url = req.query.url;
@@ -16,7 +17,7 @@ app.get('/api/proxy', async (req, res) => {
   }
 
   try {
-    const response = await fetch(`${vercelProxyUrl}?url=${encodeURIComponent(url)}`);
+    const response = await fetch(url);
     const data = await response.text();
     res.send(data);
   } catch (error) {
