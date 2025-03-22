@@ -7,8 +7,13 @@ const app = express();
 
 app.use(cors());
 
-// Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files from the 'public' directory with caching
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, path) => {
+    // Cache for 30 days
+    res.setHeader('Cache-Control', 'public, max-age=2592000');
+  }
+}));
 
 app.get('/api/proxy', async (req, res) => {
   const url = req.query.url;
