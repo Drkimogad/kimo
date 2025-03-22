@@ -15,7 +15,8 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const response = await fetch(url);
+    const decodedUrl = decodeURIComponent(url); // Decode special characters
+    const response = await fetch(decodedUrl);
     const contentType = response.headers.get('content-type');
 
     res.setHeader('Access-Control-Allow-Origin', 'https://drkimogad.github.io');
