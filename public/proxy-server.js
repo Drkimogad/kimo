@@ -15,9 +15,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-// Update the proxy URL to use the Vercel URL
-const vercelProxyUrl = 'https://kimo-peach.vercel.app';
-
 app.get('/api/proxy', async (req, res) => {
   const url = req.query.url;
   if (!url) {
@@ -25,7 +22,7 @@ app.get('/api/proxy', async (req, res) => {
   }
 
   try {
-    const response = await fetch(`${vercelProxyUrl}?url=${encodeURIComponent(url)}`);
+    const response = await fetch(url);
     const data = await response.text();
     res.send(data);
   } catch (error) {
