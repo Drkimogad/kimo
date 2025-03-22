@@ -66,124 +66,75 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (voiceBtn) voiceBtn.classList.toggle('recording', listening);
     isListening = listening;
   }
-// online searching function//
-// Combined search logic and UI/UX enhancements
-async function performSearch(query) {
-  const responseArea = document.getElementById('response-area');
-  responseArea.innerHTML = `<p>Searching for: <strong>${query}</strong>...</p>`;
 
-  // Create containers for categorized results
-  responseArea.innerHTML += `
-    <div id="search-results">
-      <h3>DuckDuckGo Results</h3>
-      <ul id="duckduckgo-results" class="results-list"></ul>
-
-      <h3>Wikipedia Results</h3>
-      <ul id="wikipedia-results" class="results-list"></ul>
-
-      <h3>External URL Results (Fetched via Proxy)</h3>
-      <ul id="external-url-results" class="results-list"></ul>
-    </div>
-  `;
-
-  try {
-    // Perform DuckDuckGo Search
-    const duckDuckGoResults = await fetchDuckDuckGoResults(query);
-    displayResults(duckDuckGoResults, 'duckduckgo-results');
-
-    // Perform Wikipedia Search
-    const wikipediaResults = await fetchWikipediaResults(query);
-    displayResults(wikipediaResults, 'wikipedia-results');
-
-    // Proxy search - fetch URLs via your Vercel proxy
-    const externalUrls = ["https://example1.com", "https://example2.com"];
-    for (const url of externalUrls) {
-      const proxyResponse = await fetchExternalUrl(url);
-      displayExternalResult(proxyResponse, 'external-url-results');
+  // DuckDuckGo Search
+  async function searchDuckDuckGo(query) {
+    console.log(`Searching DuckDuckGo for: ${query}`);
+    try {
+      const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data && data.RelatedTopics) {
+        const results = data.RelatedTopics.map(topic => {
+          if (topic.FirstURL) {
+            return `<a href="#" data-url="${topic.FirstURL}" class="result-link">${topic.Text}</a>`;
+          } else {
+            return topic.Text;
+          }
+        }).join('<br>');
+        return results;
+      } else {
+        return 'No results found on DuckDuckGo.';
+      }
+    } catch (error) {
+      console.error('DuckDuckGo search error:', error);
+      return 'Failed to search DuckDuckGo.';
     }
-  } catch (error) {
-    console.error('Error performing search:', error);
-    responseArea.innerHTML += '<p style="color:red;">An error occurred while fetching search results.</p>';
   }
-}
 
-// Fetching DuckDuckGo Results
-async function fetchDuckDuckGoResults(query) {
-  const url = `https://api.duckduckgo.com/?q=${query}&format=json&no_html=1`;
-  const response = await fetch(url);
-  const data = await response.json();
-  return data.RelatedTopics.slice(0, 5).map(item => ({
-    title: item.Text,
-    link: item.FirstURL,
-  }));
-}
+  async function searchWikipedia(query) {
+    console.log(`Searching Wikipedia for: ${query}`);
+    try {
+      const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
+      const data = await response.json();
+      if (data && data.query && data.query.search) {
+        const results = data.query.search.map(result => {
+          return `<a href="#" data-url="https://en.wikipedia.org/wiki/${encodeURIComponent(result.title)}" class="result-link">${result.title}</a>: ${result.snippet}`;
+        }).join('<br>');
+        return results;
+      } else {
+        return 'No results found on Wikipedia.';
+      }
+    } catch (error) {
+      console.error('Wikipedia search error:', error);
+      return 'Failed to search Wikipedia.';
+    }
+  }
 
-// Fetching Wikipedia Results
-async function fetchWikipediaResults(query) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&format=json&origin=*`;
-  const response = await fetch(url);
-  const data = await response.json();
-  return data.query.search.slice(0, 5).map(item => ({
-    title: item.title,
-    link: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
-  }));
-}
+  async function searchAndGenerate(query) {
+    showLoading();
+    const duckDuckGoResults = await searchDuckDuckGo(query);
+    const wikipediaResults = await searchWikipedia(query);
+    displayResponse(`DuckDuckGo Results:<br>${duckDuckGoResults}<br><br>Wikipedia Results:<br>${wikipediaResults}`, true);
+    updateSessionHistory('search', { query, duckDuckGoResults, wikipediaResults });
+    hideLoading();
+  }
 
-// Fetch External URLs via Vercel Proxy
-async function fetchExternalUrl(url) {
-  const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
-  const response = await fetch(proxyUrl);
-  const data = await response.text();
-  return { title: url, content: data }; // Return the raw HTML or relevant text
-}
-
-// Display search results dynamically
-function displayResults(results, containerId) {
-  const container = document.getElementById(containerId);
-  results.forEach(result => {
-    const listItem = document.createElement('li');
-    listItem.innerHTML = `<a href="${result.link}" target="_blank">${result.title}</a>`;
-    container.appendChild(listItem);
-  });
-}
-
-// Display external URL content
-function displayExternalResult(result, containerId) {
-  const container = document.getElementById(containerId);
-  const listItem = document.createElement('li');
-  listItem.innerHTML = `<details><summary>${result.title}</summary><p>${result.content.slice(0, 200)}...</p></details>`;
-  container.appendChild(listItem);
-}
-
-// Basic Styling
-const style = document.createElement('style');
-style.innerHTML = `
-  #search-results {
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #f9f9f9;
+  async function loadContent(url) {
+    try {
+      showLoading();
+      const proxyUrl = `https://kimo-peach.vercel.app/api/proxy?url=${encodeURIComponent(url)}`;
+      const response = await fetch(proxyUrl);
+      const data = await response.text();
+      displayResponse(`<div>${data}</div>`, false);
+      hideLoading();
+    } catch (error) {
+      console.error('Failed to load content:', error);
+      displayResponse('Failed to load content.', true);
+    }
   }
-  .results-list {
-    list-style-type: none;
-    padding: 0;
-  }
-  .results-list li {
-    margin-bottom: 10px;
-  }
-  .results-list a {
-    color: #007bff;
-    text-decoration: none;
-  }
-  .results-list a:hover {
-    text-decoration: underline;
-  }
-  details {
-    cursor: pointer;
-  }
-`;
-document.head.appendChild(style);
 
   // Define startSpeechRecognition
   async function startSpeechRecognition() {
