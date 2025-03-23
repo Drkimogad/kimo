@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 const API_ENDPOINTS = {
   duckDuckGo: "https://api.duckduckgo.com/?q={query}&format=json",
   wikipedia: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*",
-  google: "https://www.googleapis.com/customsearch/v1?q={query}&key=GOOGLE_API_KEY&cx=SEARCH_ENGINE_ID",
+  google: "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=https://cse.google.com/cse?cx=56296f4e79fe04f61",
   braveSearch: "https://api.search.brave.com/res/v1/web/search?q={query}"
 };
 
