@@ -2,75 +2,97 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=0.9">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kimo AI</title>
-  <link rel="stylesheet" href="https://drkimogad.github.io/kimo/styles.css">
-  <link rel="manifest" href="https://drkimogad.github.io/kimo/manifest.json">
-  <link rel="icon" href="https://drkimogad.github.io/kimo/favicon.ico" type="image/x-icon">    
-  <link rel="apple-touch-icon" href="https://drkimogad.github.io/kimo/icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">    
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="theme-color" content="#ffffff">
 </head>
 <body data-theme="light">
-  <h1 class="kimo-title">Kimo AI</h1>
-  <button id="theme-toggle">🌗 Toggle Mode</button>
+  <header class="app-header">
+    <h1 class="kimo-title">Kimo AI</h1>
+    <button id="theme-toggle" aria-label="Toggle theme">🌗</button>
+  </header>
 
-  <main>
+  <main class="main-content">
     <!-- Response Area -->
     <section id="response-area" class="response-container">
-      <!-- Welcome message will be shown via CSS when empty -->
-      <div class="api-results">
-        <ul id="duckduckgo-results"></ul>
+      <div class="welcome-message">
+        <p>Welcome to Kimo AI 🚀<br>Your AI-powered search companion!</p>
       </div>
-      <div class="api-results">
-        <ul id="wikipedia-results"></ul>
+      
+      <div class="results-grid">
+        <div class="api-results">
+          <h3>Web Results</h3>
+          <ul id="duckduckgo-results"></ul>
+        </div>
+        <div class="api-results">
+          <h3>Wikipedia</h3>
+          <ul id="wikipedia-results"></ul>
+        </div>
+        <div class="api-results">
+          <h3>Google</h3>
+          <ul id="google-results"></ul>
+        </div>
       </div>
-      <div class="api-results">
-        <ul id="google-results"></ul>
-      </div>
+
       <div class="response-actions">
-        <button id="clear-btn">🗑️ Clear</button>
-        <button id="humanize-btn">📝 Humanize</button>
-        <button id="save-btn">💾 Save</button>
+        <button id="clear-btn" class="icon-button" aria-label="Clear results">🗑️ Clear</button>
+        <button id="humanize-btn" class="icon-button" aria-label="Humanize output">📝 Simplify</button>
+        <button id="save-btn" class="icon-button" aria-label="Save session">💾 Save</button>
       </div>
     </section>
 
     <!-- Search Controls -->
     <div class="search-container">
-      <textarea id="user-input" placeholder="Type your query, upload a file, or speak..."></textarea>
-      <div class="action-row">
-        <button id="voice-btn">🎤 Voice</button>
-        <input type="file" id="file-upload" accept="image/*,text/plain">
-        <button id="submit-btn">🚀 Search</button>
+      <div class="input-group">
+        <textarea 
+          id="user-input" 
+          placeholder="Type your query, upload a file, or speak..."
+          aria-label="Search input"
+        ></textarea>
+        <div class="button-group">
+          <button id="voice-btn" class="icon-button" aria-label="Voice input">🎤</button>
+          <label for="file-upload" class="icon-button upload-label" aria-label="File upload">
+            📁
+            <input 
+              type="file" 
+              id="file-upload" 
+              accept="image/*,text/plain"
+              aria-hidden="true"
+            >
+          </label>
+          <button id="submit-btn" class="primary-button">🚀 Search</button>
+        </div>
       </div>
     </div>
 
-    <!-- Canvas Section -->
-    <div class="canvas-container hidden" id="photo-upload-box">
-      <canvas id="drawing-canvas"></canvas>
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading-hidden" aria-live="polite">
+      <div class="spinner"></div>
+      <span class="loading-text">Searching...</span>
     </div>
-
-    <div id="loading" class="loading-hidden">Processing...</div>
   </main>
 
-  <footer>
+  <footer class="app-footer">
     <p>© 2024 Kimo AI. All rights reserved.</p>
   </footer>
 
-  <script src="https://unpkg.com/tesseract.js" defer></script>
-  <script type="module" src="ocr.js" defer></script>
-  <script type="module" src="main.js" defer></script>
-  <script type="module" src="models.js" defer></script>  
-  <script type="module" src="script.js" defer></script>
-
-  <!-- Service Worker Registration -->
+  <!-- Scripts -->
+  <script type="module" src="updated.js"></script>
+  
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then((registration) => {
-            console.log('Service Worker registered:', registration);
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('SW registered:', registration);
           })
-          .catch((error) => {
-            console.error('Service Worker registration failed:', error);
+          .catch(error => {
+            console.log('SW registration failed:', error);
           });
       });
     }
