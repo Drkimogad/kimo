@@ -49,7 +49,7 @@ function toggleListeningUI(listening) {
   isListening = listening;
 }
 
-// Wait for DOM to load
+// Unified DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', async () => {
   let isListening = false;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
@@ -61,51 +61,66 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     await loadModels();
     console.log('All models loaded successfully');
-    hideProcessingMessage(); // Hide processing message
+    hideProcessingMessage();
   } catch (error) {
     console.error('Model initialization failed:', error);
     displayResponse('Some features might be unavailable', true);
   }
 
-  // Hide the response area initially
-  const responseArea = document.getElementById("response-area");
-  if (responseArea) {
-    responseArea.classList.add("hidden");
-  }
+  // Element references
+  const responseArea = $('response-area');
+  const searchButton = $('submit-btn');
+  const userInput = $('user-input');
 
-  // Attach event listener to the search button
-  const searchButton = document.getElementById("search-button");
-  if (searchButton) {
-    searchButton.addEventListener("click", () => {
-      const query = document.getElementById("user-input").value;
-
+  // Search functionality
+  if (searchButton && userInput) {
+    searchButton.addEventListener('click', async () => {
+      const query = userInput.value.trim();
+      console.log(`Search button clicked with input: ${query}`);
+      
       if (query) {
-        performSearch(query);  // Call your search function
-
-        // Show the results after performing the search
-        responseArea.classList.remove("hidden");
+        showLoading();
+        try {
+          await performSearch(query);
+          responseArea?.classList.remove('hidden');
+        } catch (error) {
+          console.error('Search failed:', error);
+          displayResponse('Search failed. Please try again.', true);
+        } finally {
+          hideLoading();
+        }
       } else {
-        alert("Please enter a search query!");
+        alert('Please enter a search query!');
       }
     });
-  } else {
-    console.error("Search button not found in the DOM.");
+  }
+
+  // Initialize theme
+  const themeToggle = $('theme-toggle');
+  if (themeToggle) {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.body.dataset.theme = currentTheme;
   }
 });
 
-// 1. Define API Endpoints and Keys
-const duckDuckGoEndpoint = "https://api.duckduckgo.com/?q={query}&format=json";
-const wikipediaEndpoint = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*";
-const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=YOUR_GOOGLE_API_KEY&cx=YOUR_SEARCH_ENGINE_ID";
-const openSourceEndpoint = "https://api.example-opensource.com/search?q={query}"; // Placeholder
+// API Configuration
+const API_ENDPOINTS = {
+  duckDuckGo: "https://api.duckduckgo.com/?q={query}&format=json",
+  wikipedia: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*",
+  google: "https://www.googleapis.com/customsearch/v1?q={query}&key=YOUR_GOOGLE_API_KEY&cx=YOUR_SEARCH_ENGINE_ID",
+  openSource: "https://api.example-opensource.com/search?q={query}"
+};
 
-// 2. Define API Functions
+// Search Functions
 async function searchDuckDuckGo(query) {
-  const url = duckDuckGoEndpoint.replace("{query}", encodeURIComponent(query));
+  const url = API_ENDPOINTS.duckDuckGo.replace("{query}", encodeURIComponent(query));
   try {
     const response = await fetch(url);
     const data = await response.json();
-    return data.RelatedTopics.map(item => ({ title: item.Text, link: item.FirstURL }));
+    return data.RelatedTopics?.map(item => ({ 
+      title: item.Text, 
+      link: item.FirstURL 
+    })) || [];
   } catch (error) {
     console.error("DuckDuckGo search error:", error);
     return [];
@@ -113,11 +128,14 @@ async function searchDuckDuckGo(query) {
 }
 
 async function searchWikipedia(query) {
-  const url = wikipediaEndpoint.replace("{query}", encodeURIComponent(query));
+  const url = API_ENDPOINTS.wikipedia.replace("{query}", encodeURIComponent(query));
   try {
     const response = await fetch(url);
     const data = await response.json();
-    return data.query.search.map(item => ({ title: item.title, link: `https://en.wikipedia.org/wiki/${item.title.replace(/ /g, '_')}` }));
+    return data.query?.search?.map(item => ({
+      title: item.title,
+      link: `https://en.wikipedia.org/wiki/${item.title.replace(/ /g, '_')}`
+    })) || [];
   } catch (error) {
     console.error("Wikipedia search error:", error);
     return [];
@@ -125,11 +143,14 @@ async function searchWikipedia(query) {
 }
 
 async function searchGoogle(query) {
-  const url = googleEndpoint.replace("{query}", encodeURIComponent(query));
+  const url = API_ENDPOINTS.google.replace("{query}", encodeURIComponent(query));
   try {
     const response = await fetch(url);
     const data = await response.json();
-    return data.items.map(item => ({ title: item.title, link: item.link }));
+    return data.items?.map(item => ({
+      title: item.title,
+      link: item.link
+    })) || [];
   } catch (error) {
     console.error("Google Custom Search error:", error);
     return [];
@@ -137,18 +158,21 @@ async function searchGoogle(query) {
 }
 
 async function searchOpenSource(query) {
-  const url = openSourceEndpoint.replace("{query}", encodeURIComponent(query));
+  const url = API_ENDPOINTS.openSource.replace("{query}", encodeURIComponent(query));
   try {
     const response = await fetch(url);
     const data = await response.json();
-    return data.results.map(item => ({ title: item.title, link: item.url }));
+    return data.results?.map(item => ({
+      title: item.title,
+      link: item.url
+    })) || [];
   } catch (error) {
     console.error("Open Source search error:", error);
     return [];
   }
 }
 
-// 3. Perform All Searches Simultaneously
+// Unified Search Execution
 async function performSearch(query) {
   const [duckDuckGoResults, wikipediaResults, googleResults, openSourceResults] = await Promise.all([
     searchDuckDuckGo(query),
@@ -165,49 +189,33 @@ async function performSearch(query) {
   });
 }
 
-// 4. Display Categorized Results
+// Results Display
 function displayResults(categorizedResults) {
-  const resultsArea = document.getElementById("results");
-  if (!resultsArea) {
-    console.error("Results area not found in the DOM.");
-    return;
-  }
-  resultsArea.innerHTML = ""; // Clear previous results
+  const resultsContainers = {
+    "DuckDuckGo": $('duckduckgo-results'),
+    "Wikipedia": $('wikipedia-results'),
+    "Google": $('google-results'),
+    "Open Source": $('open-source-results')
+  };
 
-  Object.keys(categorizedResults).forEach(category => {
-    const section = document.createElement("div");
-    section.className = "result-category";
+  Object.entries(categorizedResults).forEach(([category, results]) => {
+    const container = resultsContainers[category];
+    if (!container) return;
 
-    const heading = document.createElement("h3");
-    heading.textContent = category;
-    section.appendChild(heading);
-
-    categorizedResults[category].forEach(result => {
-      const link = document.createElement("a");
+    container.innerHTML = '';
+    results.forEach(result => {
+      const li = document.createElement('li');
+      const link = document.createElement('a');
       link.href = result.link;
       link.textContent = result.title;
-      link.target = "_blank"; // Opens in default browser
-      section.appendChild(link);
+      link.target = '_blank';
+      li.appendChild(link);
+      container.appendChild(li);
     });
-
-    resultsArea.appendChild(section);
   });
 }
 
-// 5. Handle Search Button Click
-document.addEventListener("DOMContentLoaded", () => {
-  const searchButton = document.getElementById("search-button");
-  if (searchButton) {
-    searchButton.addEventListener("click", () => {
-      const query = document.getElementById("search-input").value;
-      performSearch(query);
-    });
-  } else {
-    console.error("Search button not found in the DOM.");
-  }
-});
-
-// Define startSpeechRecognition
+// Speech Recognition
 async function startSpeechRecognition() {
   console.log('Starting speech recognition');
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -219,7 +227,7 @@ async function startSpeechRecognition() {
   const recognition = new SpeechRecognition();
   recognition.interimResults = true;
   recognition.lang = 'en-US';
-  recognition.continuous = true; // Allow for continuous listening
+  recognition.continuous = true;
 
   recognition.onstart = () => toggleListeningUI(true);
   recognition.onend = () => toggleListeningUI(false);
@@ -239,20 +247,13 @@ async function startSpeechRecognition() {
 }
 
 // Event Listeners
-$('submit-btn')?.addEventListener('click', async () => {
-  const input = $('user-input')?.value.trim();
-  if (!input) return;
-  console.log(`Search button clicked with input: ${input}`);
-  await searchAndGenerate(input);
-});
+$('voice-btn')?.addEventListener('click', startSpeechRecognition);
 
-// Clear Button
 $('clear-btn')?.addEventListener('click', () => {
   $('user-input').value = '';
   displayResponse('', true);
 });
 
-// File Upload Handling
 $('file-upload')?.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -275,12 +276,10 @@ $('file-upload')?.addEventListener('change', async (e) => {
   }
 });
 
-// Save Button Functionality
 $('save-btn')?.addEventListener('click', () => {
   const responseArea = $('response-area');
   if (!responseArea || !responseArea.innerText.trim()) return;
 
-  console.log('Save button clicked');
   const savedData = responseArea.innerText.trim();
   const blob = new Blob([savedData], { type: 'text/plain' });
   const a = document.createElement('a');
@@ -291,23 +290,12 @@ $('save-btn')?.addEventListener('click', () => {
   displayResponse('Saved successfully.');
 });
 
-// Theme Toggle
-const themeToggle = $('theme-toggle');
-if (themeToggle) {
-  const currentTheme = localStorage.getItem('theme') || 'light';
-  document.body.dataset.theme = currentTheme;
+$('theme-toggle')?.addEventListener('click', () => {
+  const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.body.dataset.theme = newTheme;
+  localStorage.setItem('theme', newTheme);
+});
 
-  themeToggle.addEventListener('click', () => {
-    const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-    document.body.dataset.theme = newTheme;
-    localStorage.setItem('theme', newTheme);
-  });
-}
-
-// Voice Input Button
-$('voice-btn')?.addEventListener('click', startSpeechRecognition);
-
-// Humanize Button
 $('humanize-btn')?.addEventListener('click', async () => {
   const input = $('user-input')?.value.trim();
   if (!input) return;
@@ -316,7 +304,6 @@ $('humanize-btn')?.addEventListener('click', async () => {
   await checkPlagiarism(input);
 });
 
-// Event delegation for result links
 $('response-area')?.addEventListener('click', async (e) => {
   if (e.target.classList.contains('result-link')) {
     e.preventDefault();
@@ -325,7 +312,7 @@ $('response-area')?.addEventListener('click', async (e) => {
   }
 });
 
-// Hide photo upload box initially
+// UI Initialization
 const photoUploadBox = $('photo-upload-box');
 const clearButton = $('clear-btn');
 if (photoUploadBox && clearButton) {
@@ -333,7 +320,6 @@ if (photoUploadBox && clearButton) {
   clearButton.style.display = 'none';
 }
 
-// Show photo upload box when a file is selected
 $('file-upload')?.addEventListener('change', () => {
   if (photoUploadBox && clearButton) {
     photoUploadBox.style.display = 'block';
