@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     displayResponse('Some features might be unavailable', true);
   }
 
-  // Hide the response area initially // added last!
+  // Hide the response area initially
   const responseArea = document.getElementById("response-area");
   if (responseArea) {
     responseArea.classList.add("hidden");
@@ -96,8 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 1. Define API Endpoints and Keys
 const duckDuckGoEndpoint = "https://api.duckduckgo.com/?q={query}&format=json";
 const wikipediaEndpoint = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*";
-const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=56296f4e79fe04f61";
-const bingEndpoint = "https://api.bing.microsoft.com/v7.0/search?q={query}";
+const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=YOUR_GOOGLE_API_KEY&cx=YOUR_SEARCH_ENGINE_ID";
 const openSourceEndpoint = "https://api.example-opensource.com/search?q={query}"; // Placeholder
 
 // 2. Define API Functions
@@ -137,18 +136,6 @@ async function searchGoogle(query) {
   }
 }
 
-async function searchBing(query) {
-  const url = bingEndpoint.replace("{query}", encodeURIComponent(query));
-  try {
-    const response = await fetch(url, { headers: { "Ocp-Apim-Subscription-Key": "YOUR_BING_API_KEY" } });
-    const data = await response.json();
-    return data.webPages.value.map(item => ({ title: item.name, link: item.url }));
-  } catch (error) {
-    console.error("Bing search error:", error);
-    return [];
-  }
-}
-
 async function searchOpenSource(query) {
   const url = openSourceEndpoint.replace("{query}", encodeURIComponent(query));
   try {
@@ -163,11 +150,10 @@ async function searchOpenSource(query) {
 
 // 3. Perform All Searches Simultaneously
 async function performSearch(query) {
-  const [duckDuckGoResults, wikipediaResults, googleResults, bingResults, openSourceResults] = await Promise.all([
+  const [duckDuckGoResults, wikipediaResults, googleResults, openSourceResults] = await Promise.all([
     searchDuckDuckGo(query),
     searchWikipedia(query),
     searchGoogle(query),
-    searchBing(query),
     searchOpenSource(query)
   ]);
 
@@ -175,7 +161,6 @@ async function performSearch(query) {
     "DuckDuckGo": duckDuckGoResults,
     "Wikipedia": wikipediaResults,
     "Google": googleResults,
-    "Bing": bingResults,
     "Open Source": openSourceResults
   });
 }
