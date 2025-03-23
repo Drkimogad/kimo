@@ -72,25 +72,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   const searchButton = $('submit-btn');
   const userInput = $('user-input');
 
+  // Keyboard Shortcut (Ctrl/Cmd + Enter)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      searchButton?.click();
+    }
+  });
+
   // Search functionality
   if (searchButton && userInput) {
     searchButton.addEventListener('click', async () => {
       const query = userInput.value.trim();
       console.log(`Search button clicked with input: ${query}`);
       
-      if (query) {
-        showLoading();
-        try {
-          await performSearch(query);
-          responseArea?.classList.remove('hidden');
-        } catch (error) {
-          console.error('Search failed:', error);
-          displayResponse('Search failed. Please try again.', true);
-        } finally {
-          hideLoading();
-        }
-      } else {
-        alert('Please enter a search query!');
+      if (query.length < 2) {
+        displayResponse('Query must be at least 2 characters', true);
+        return;
+      }
+
+      showLoading();
+      try {
+        await performSearch(query);
+        responseArea?.classList.remove('hidden');
+      } catch (error) {
+        console.error('Search failed:', error);
+        displayResponse('Search failed. Please try again.', true);
+      } finally {
+        hideLoading();
       }
     });
   }
@@ -108,7 +117,7 @@ const API_ENDPOINTS = {
   duckDuckGo: "https://api.duckduckgo.com/?q={query}&format=json",
   wikipedia: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*",
   google: "https://www.googleapis.com/customsearch/v1?q={query}&key=YOUR_GOOGLE_API_KEY&cx=YOUR_SEARCH_ENGINE_ID",
-  openSource: "https://api.example-opensource.com/search?q={query}"
+  openSource: "https://searxng.me/search?q={query}&format=json" // Requires CORS proxy in production
 };
 
 // Search Functions
@@ -116,6 +125,7 @@ async function searchDuckDuckGo(query) {
   const url = API_ENDPOINTS.duckDuckGo.replace("{query}", encodeURIComponent(query));
   try {
     const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     return data.RelatedTopics?.map(item => ({ 
       title: item.Text, 
@@ -131,6 +141,7 @@ async function searchWikipedia(query) {
   const url = API_ENDPOINTS.wikipedia.replace("{query}", encodeURIComponent(query));
   try {
     const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     return data.query?.search?.map(item => ({
       title: item.title,
@@ -146,6 +157,7 @@ async function searchGoogle(query) {
   const url = API_ENDPOINTS.google.replace("{query}", encodeURIComponent(query));
   try {
     const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     return data.items?.map(item => ({
       title: item.title,
@@ -161,6 +173,7 @@ async function searchOpenSource(query) {
   const url = API_ENDPOINTS.openSource.replace("{query}", encodeURIComponent(query));
   try {
     const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     return data.results?.map(item => ({
       title: item.title,
@@ -189,7 +202,7 @@ async function performSearch(query) {
   });
 }
 
-// Results Display
+// Enhanced Results Display
 function displayResults(categorizedResults) {
   const resultsContainers = {
     "DuckDuckGo": $('duckduckgo-results'),
@@ -203,38 +216,61 @@ function displayResults(categorizedResults) {
     if (!container) return;
 
     container.innerHTML = '';
+    
+    if (results.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = `No results found via ${category} API`;
+      li.className = 'no-results';
+      container.appendChild(li);
+      return;
+    }
+
     results.forEach(result => {
       const li = document.createElement('li');
       const link = document.createElement('a');
       link.href = result.link;
       link.textContent = result.title;
       link.target = '_blank';
+      link.rel = 'noopener noreferrer';
       li.appendChild(link);
       container.appendChild(li);
     });
   });
 }
 
-// Speech Recognition
+// Voice Input with 8-second Timeout
 async function startSpeechRecognition() {
   console.log('Starting speech recognition');
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+  if (!('webkitSpeechRecognition' in window) {
     displayResponse('Speech Recognition API not supported by this browser.', true);
     return;
   }
 
-  const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-  const recognition = new SpeechRecognition();
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   recognition.interimResults = true;
   recognition.lang = 'en-US';
-  recognition.continuous = true;
+  recognition.continuous = false;
 
-  recognition.onstart = () => toggleListeningUI(true);
-  recognition.onend = () => toggleListeningUI(false);
+  let timeoutId;
+  
+  recognition.onstart = () => {
+    toggleListeningUI(true);
+    timeoutId = setTimeout(() => {
+      recognition.stop();
+    }, 8000);
+  };
+
+  recognition.onend = () => {
+    toggleListeningUI(false);
+    clearTimeout(timeoutId);
+  };
+
   recognition.onerror = (event) => {
     console.error('Speech recognition error:', event.error);
     displayResponse('Failed to recognize speech.', true);
+    clearTimeout(timeoutId);
   };
+
   recognition.onresult = (event) => {
     const transcript = Array.from(event.results)
       .map(result => result[0])
