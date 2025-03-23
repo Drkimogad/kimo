@@ -220,6 +220,35 @@ body {
   margin-top: auto;
 }
 
+
+/* Add this to your existing CSS */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.response-container {
+  order: 1; /* Forces response area to top */
+}
+
+.search-container {
+  order: 2; /* Keeps search box at bottom */
+  position: sticky;
+  bottom: 20px;
+  background: var(--bg-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+/* Remove previous margin on .search-container */
+.search-container {
+  margin: 0 auto; /* Replace previous margin declaration */
+}
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
