@@ -1,6 +1,9 @@
 import { loadModels } from './models.js';
 import { recognizeHandwriting } from './ocr.js';
 
+// Global state declaration
+let isListening = false; // Fixes ReferenceError
+
 // Helper Functions
 function $(id) {
   return document.getElementById(id);
@@ -51,7 +54,6 @@ function toggleListeningUI(listening) {
 
 // Unified DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', async () => {
-  let isListening = false;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
   // Display processing message on app start
@@ -84,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (searchButton && userInput) {
     searchButton.addEventListener('click', async () => {
       const query = userInput.value.trim();
-      console.log(`Search button clicked with input: ${query}`);
+      console.log(`Search initiated: ${query}`);
       
       if (query.length < 2) {
         displayResponse('Query must be at least 2 characters', true);
@@ -112,12 +114,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// API Configuration
+// API Configuration (UPDATE THESE VALUES)
 const API_ENDPOINTS = {
   duckDuckGo: "https://api.duckduckgo.com/?q={query}&format=json",
   wikipedia: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*",
-  google: "https://www.googleapis.com/customsearch/v1?q={query}&key=YOUR_GOOGLE_API_KEY&cx=YOUR_SEARCH_ENGINE_ID",
-  openSource: "https://searxng.me/search?q={query}&format=json" // Requires CORS proxy in production
+  google: "https://www.googleapis.com/customsearch/v1?q={query}&key=GOOGLE_API_KEY&cx=SEARCH_ENGINE_ID",
+  braveSearch: "https://api.search.brave.com/res/v1/web/search?q={query}"
+};
+
+// Brave Search API Headers (ADD YOUR API KEY)
+const BRAVE_API_HEADERS = {
+  'X-Subscription-Token': 'BRAVE_API_KEY',
+  'Accept': 'application/json'
 };
 
 // Search Functions
@@ -169,46 +177,46 @@ async function searchGoogle(query) {
   }
 }
 
-async function searchOpenSource(query) {
-  const url = API_ENDPOINTS.openSource.replace("{query}", encodeURIComponent(query));
+async function searchBrave(query) {
+  const url = API_ENDPOINTS.braveSearch.replace("{query}", encodeURIComponent(query));
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { headers: BRAVE_API_HEADERS });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
-    return data.results?.map(item => ({
+    return data.web?.results?.map(item => ({
       title: item.title,
       link: item.url
     })) || [];
   } catch (error) {
-    console.error("Open Source search error:", error);
+    console.error("Brave search error:", error);
     return [];
   }
 }
 
 // Unified Search Execution
 async function performSearch(query) {
-  const [duckDuckGoResults, wikipediaResults, googleResults, openSourceResults] = await Promise.all([
+  const [ddgResults, wikiResults, googleResults, braveResults] = await Promise.all([
     searchDuckDuckGo(query),
     searchWikipedia(query),
     searchGoogle(query),
-    searchOpenSource(query)
+    searchBrave(query)
   ]);
 
   displayResults({
-    "DuckDuckGo": duckDuckGoResults,
-    "Wikipedia": wikipediaResults,
+    "DuckDuckGo": ddgResults,
+    "Wikipedia": wikiResults,
     "Google": googleResults,
-    "Open Source": openSourceResults
+    "Brave Search": braveResults
   });
 }
 
-// Enhanced Results Display
+// Results Display
 function displayResults(categorizedResults) {
   const resultsContainers = {
     "DuckDuckGo": $('duckduckgo-results'),
     "Wikipedia": $('wikipedia-results'),
     "Google": $('google-results'),
-    "Open Source": $('open-source-results')
+    "Brave Search": $('open-source-results') // Reusing existing HTML element
   };
 
   Object.entries(categorizedResults).forEach(([category, results]) => {
@@ -219,7 +227,7 @@ function displayResults(categorizedResults) {
     
     if (results.length === 0) {
       const li = document.createElement('li');
-      li.textContent = `No results found via ${category} API`;
+      li.textContent = `No results found via ${category}`;
       li.className = 'no-results';
       container.appendChild(li);
       return;
@@ -238,10 +246,10 @@ function displayResults(categorizedResults) {
   });
 }
 
-// Voice Input with 8-second Timeout
+// Voice Input with Timeout
 async function startSpeechRecognition() {
   console.log('Starting speech recognition');
-  if (!('webkitSpeechRecognition' in window) {
+  if (!('webkitSpeechRecognition' in window)) {
     displayResponse('Speech Recognition API not supported by this browser.', true);
     return;
   }
@@ -255,9 +263,7 @@ async function startSpeechRecognition() {
   
   recognition.onstart = () => {
     toggleListeningUI(true);
-    timeoutId = setTimeout(() => {
-      recognition.stop();
-    }, 8000);
+    timeoutId = setTimeout(() => recognition.stop(), 8000);
   };
 
   recognition.onend = () => {
@@ -273,14 +279,20 @@ async function startSpeechRecognition() {
 
   recognition.onresult = (event) => {
     const transcript = Array.from(event.results)
-      .map(result => result[0])
-      .map(result => result.transcript)
+      .map(result => result[0].transcript)
       .join('');
     $('user-input').value = transcript;
   };
 
   recognition.start();
 }
+
+// Event Listeners (Updated to use performSearch)
+$('submit-btn')?.addEventListener('click', async () => {
+  const input = $('user-input')?.value.trim();
+  if (!input) return;
+  await performSearch(input); // Fixed reference
+});
 
 // Event Listeners
 $('voice-btn')?.addEventListener('click', startSpeechRecognition);
