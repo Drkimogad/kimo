@@ -56,14 +56,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     await loadModels();
     console.log('All models loaded');
+    
     // Show the welcome message initially
     $('response-area').innerHTML = `
       <div class="welcome-message">
         Welcome to Kimo AI 🚀<br>
         Your AI-powered search companion and more!
-      </div>
-    `;
-    document.querySelector('.response-actions').style.display = 'none';
+      </div>`;
+    
+    const responseActions = document.querySelector('.response-actions');
+    if (responseActions) {
+      responseActions.style.display = 'none';
+    }
   } catch (error) {
     console.error('Initialization failed:', error);
   }
