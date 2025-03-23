@@ -90,13 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 const API_ENDPOINTS = {
   duckDuckGo: "https://api.duckduckgo.com/?q={query}&format=json",
   wikipedia: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*",
-  google: "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=56296f4e79fe04f61", // Fixed cx value
-  braveSearch: "https://api.search.brave.com/res/v1/web/search?q={query}"
-};
-
-const BRAVE_API_HEADERS = {
-  'X-Subscription-Token': 'BRAVE_API_KEY',
-  'Accept': 'application/json'
+  google: `https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=56296f4e79fe04f61` // Fixed cx value
 };
 
 // Search Functions
@@ -148,41 +142,20 @@ async function searchGoogle(query) {
   }
 }
 
-async function searchBrave(query) {
-  const url = API_ENDPOINTS.braveSearch.replace("{query}", encodeURIComponent(query));
-  try {
-    const response = await fetch(url, { 
-      headers: BRAVE_API_HEADERS,
-      mode: 'cors'
-    });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    return data.web?.results?.map(item => ({
-      title: item.title,
-      link: item.url
-    })) || [];
-  } catch (error) {
-    console.error("Brave search error:", error);
-    return [];
-  }
-}
-
 // Search Execution
 async function performSearch(query) {
   showLoading();
   try {
-    const [ddgResults, wikiResults, googleResults, braveResults] = await Promise.all([
+    const [ddgResults, wikiResults, googleResults] = await Promise.all([
       searchDuckDuckGo(query),
       searchWikipedia(query),
-      searchGoogle(query),
-      searchBrave(query)
+      searchGoogle(query)
     ]);
 
     displayResults({
       "DuckDuckGo": ddgResults,
       "Wikipedia": wikiResults,
-      "Google": googleResults,
-      "Brave Search": braveResults
+      "Google": googleResults
     });
 
     // Show the response area and buttons now that we have results
@@ -201,8 +174,7 @@ function displayResults(categorizedResults) {
   const resultsContainers = {
     "DuckDuckGo": $('duckduckgo-results'),
     "Wikipedia": $('wikipedia-results'),
-    "Google": $('google-results'),
-    "Brave Search": $('open-source-results')
+    "Google": $('google-results')
   };
 
   Object.entries(categorizedResults).forEach(([category, results]) => {
