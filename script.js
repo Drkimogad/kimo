@@ -6,10 +6,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   let isListening = false;
   let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
 
-  const searchButton = document.getElementById("submit-btn");
-  const responseArea = document.getElementById("response-area");
+  // Display processing message on app start
+  displayProcessingMessage();
 
-  // Hide the response area initially
+  // Model Initialization
+  try {
+    await loadModels();
+    console.log('All models loaded successfully');
+    hideProcessingMessage(); // Hide processing message
+  } catch (error) {
+    console.error('Model initialization failed:', error);
+    displayResponse('Some features might be unavailable', true);
+  }
+
+    // Hide the response area initially // added last!
   responseArea.classList.add("hidden");
 
   // Attach event listener to the search button
@@ -25,20 +35,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert("Please enter a search query!");
     }
   });
+});
 
   // Display processing message on app start
   displayProcessingMessage();
-
-  // Model Initialization
-  try {
-    await loadModels();
-    console.log('All models loaded successfully');
-    hideProcessingMessage(); // Hide processing message
-  } catch (error) {
-    console.error('Model initialization failed:', error);
-    displayResponse('Some features might be unavailable', true);
-  }
-
   // Helper Functions
   function $(id) {
     return document.getElementById(id);
@@ -92,8 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 const duckDuckGoEndpoint = "https://api.duckduckgo.com/?q={query}&format=json";
 const wikipediaEndpoint = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*";
 const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=<script async src="https://cse.google.com/cse.js?cx=56296f4e79fe04f61">
-</script>
-<div class="gcse-search"></div>";
+</script>";
 const bingEndpoint = "https://api.bing.microsoft.com/v7.0/search?q={query}";
 const openSourceEndpoint = "https://api.example-opensource.com/search?q={query}"; // Placeholder
 
