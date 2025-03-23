@@ -55,15 +55,21 @@ function toggleListeningUI(listening) {
 
 // Unified DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', async () => {
-  // Model Initialization
+  // Remove displayProcessingMessage() call
   try {
     await loadModels();
-    console.log('All models loaded successfully');
-    hideProcessingMessage();
+    console.log('All models loaded');
+    // Keep welcome message visible
+    $('response-area').innerHTML = `
+      <div class="welcome-message">
+        Welcome to Kimo AI 🚀<br>
+        Your AI-powered search companion and more!
+      </div>
+    `;
   } catch (error) {
-    console.error('Model initialization failed:', error);
-    displayResponse('Some features might be unavailable', true);
+    console.error('Initialization failed:', error);
   }
+});
 
   // Theme initialization
   const themeToggle = $('theme-toggle');
