@@ -11,12 +11,12 @@
   --footer-bg: #2d2d2d;
 }
 
-/* Scale all content to 90% */
+/* Adjust scaling to fit properly */
 body {
-  transform: scale(0.9);
+  transform: scale(1);
   transform-origin: top center;
-  width: 111.11%; /* Counteract scaling */
-  min-height: 111.11vh;
+  width: 100%;
+  min-height: 100vh;
 }
 
 /* Fix positioning */
@@ -38,6 +38,10 @@ body {
   text-align: center;
   padding: 1rem;
   position: relative;
+}
+
+.header-container h1 {
+  text-align: center;
 }
 
 #theme-toggle {
@@ -64,6 +68,11 @@ main {
   flex: 1;
   text-align: center;
   padding: 2rem 0;
+  display: none; /* Hide initially */
+}
+
+#response-area.has-results {
+  display: block; /* Show when it has results */
 }
 
 .welcome-message {
@@ -104,6 +113,7 @@ footer {
   padding: 0.8rem;
   text-align: center;
 }
+
 #loading {
   display: none !important; /* Force hide by default */
 }
@@ -116,6 +126,17 @@ footer {
   transform: translate(-50%, -50%);
 }
 
+.response-actions {
+  display: none; /* Hide buttons initially */
+}
+
+/* Media queries for responsive design */
+@media (max-width: 1200px) {
+  main {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .search-controls {
     flex-direction: column;
@@ -123,5 +144,17 @@ footer {
   
   button {
     width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .header-container {
+    text-align: center;
+  }
+
+  #theme-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+    font-size: 1rem;
   }
 }
