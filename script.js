@@ -210,14 +210,22 @@ async function performSearch(query) {
   });
 }
 
+// Clear Button Functionality
+$('clear-btn').addEventListener('click', () => {
+  $('user-input').value = '';
+  $('response-area').innerHTML = '';
+  $('response-area').classList.remove('has-results');
+});
+
 // Results Display
-function displayResults(categorizedResults) {
+function displayResults() {
   const resultsContainers = {
     "DuckDuckGo": $('duckduckgo-results'),
     "Wikipedia": $('wikipedia-results'),
     "Google": $('google-results'),
-    "Brave Search": $('open-source-results') // Reusing existing HTML element
-  };
+    "Brave Search": $('open-source-results'), // Reusing existing HTML element
+      $('response-area').classList.add('has-results');
+}
 
   Object.entries(categorizedResults).forEach(([category, results]) => {
     const container = resultsContainers[category];
