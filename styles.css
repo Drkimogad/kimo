@@ -11,6 +11,19 @@
   --footer-bg: #2d2d2d;
 }
 
+/* Scale all content to 90% */
+body {
+  transform: scale(0.9);
+  transform-origin: top center;
+  width: 111.11%; /* Counteract scaling */
+  min-height: 111.11vh;
+}
+
+/* Fix positioning */
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
