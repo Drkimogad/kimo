@@ -31,13 +31,11 @@ function hideProcessingMessage() {
 }
 
 function showLoading() {
-  const loader = $('loading');
-  if (loader) loader.classList.remove('loading-hidden');
+  document.getElementById('loading').classList.add('loading-visible');
 }
 
 function hideLoading() {
-  const loader = $('loading');
-  if (loader) loader.classList.add('loading-hidden');
+  document.getElementById('loading').classList.remove('loading-visible');
 }
 
 function updateSessionHistory(type, data) {
