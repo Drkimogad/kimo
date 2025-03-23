@@ -2,7 +2,7 @@ import { loadModels } from './models.js';
 import { recognizeHandwriting } from './ocr.js';
 
 // Global state declaration
-let isListening = false; // Fixes ReferenceError
+let isListening = false;
 
 // Helper Functions
 function $(id) {
@@ -42,6 +42,7 @@ function hideLoading() {
 
 function updateSessionHistory(type, data) {
   const entry = { type, ...data, timestamp: new Date().toISOString() };
+  const sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
   sessionHistory.push(entry);
   localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
 }
@@ -54,11 +55,6 @@ function toggleListeningUI(listening) {
 
 // Unified DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', async () => {
-  let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory')) || [];
-
-  // Display processing message on app start
-  displayProcessingMessage();
-
   // Model Initialization
   try {
     await loadModels();
@@ -69,44 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     displayResponse('Some features might be unavailable', true);
   }
 
-  // Element references
-  const responseArea = $('response-area');
-  const searchButton = $('submit-btn');
-  const userInput = $('user-input');
-
-  // Keyboard Shortcut (Ctrl/Cmd + Enter)
-  document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-      e.preventDefault();
-      searchButton?.click();
-    }
-  });
-
-  // Search functionality
-  if (searchButton && userInput) {
-    searchButton.addEventListener('click', async () => {
-      const query = userInput.value.trim();
-      console.log(`Search initiated: ${query}`);
-      
-      if (query.length < 2) {
-        displayResponse('Query must be at least 2 characters', true);
-        return;
-      }
-
-      showLoading();
-      try {
-        await performSearch(query);
-        responseArea?.classList.remove('hidden');
-      } catch (error) {
-        console.error('Search failed:', error);
-        displayResponse('Search failed. Please try again.', true);
-      } finally {
-        hideLoading();
-      }
-    });
-  }
-
-  // Initialize theme
+  // Theme initialization
   const themeToggle = $('theme-toggle');
   if (themeToggle) {
     const currentTheme = localStorage.getItem('theme') || 'light';
@@ -114,15 +73,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// API Configuration (UPDATE THESE VALUES)
+// API Configuration
 const API_ENDPOINTS = {
   duckDuckGo: "https://api.duckduckgo.com/?q={query}&format=json",
   wikipedia: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*",
-  google: "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=https://cse.google.com/cse?cx=56296f4e79fe04f61",
+  google: "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=56296f4e79fe04f61", // Fixed cx value
   braveSearch: "https://api.search.brave.com/res/v1/web/search?q={query}"
 };
 
-// Brave Search API Headers (ADD YOUR API KEY)
 const BRAVE_API_HEADERS = {
   'X-Subscription-Token': 'BRAVE_API_KEY',
   'Accept': 'application/json'
@@ -180,7 +138,10 @@ async function searchGoogle(query) {
 async function searchBrave(query) {
   const url = API_ENDPOINTS.braveSearch.replace("{query}", encodeURIComponent(query));
   try {
-    const response = await fetch(url, { headers: BRAVE_API_HEADERS });
+    const response = await fetch(url, { 
+      headers: BRAVE_API_HEADERS,
+      mode: 'cors'
+    });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     return data.web?.results?.map(item => ({
@@ -193,45 +154,54 @@ async function searchBrave(query) {
   }
 }
 
-// Unified Search Execution
+// Search Execution
 async function performSearch(query) {
-  const [ddgResults, wikiResults, googleResults, braveResults] = await Promise.all([
-    searchDuckDuckGo(query),
-    searchWikipedia(query),
-    searchGoogle(query),
-    searchBrave(query)
-  ]);
+  showLoading();
+  try {
+    const [ddgResults, wikiResults, googleResults, braveResults] = await Promise.all([
+      searchDuckDuckGo(query),
+      searchWikipedia(query),
+      searchGoogle(query),
+      searchBrave(query)
+    ]);
 
-  displayResults({
-    "DuckDuckGo": ddgResults,
-    "Wikipedia": wikiResults,
-    "Google": googleResults,
-    "Brave Search": braveResults
-  });
+    displayResults({
+      "DuckDuckGo": ddgResults,
+      "Wikipedia": wikiResults,
+      "Google": googleResults,
+      "Brave Search": braveResults
+    });
+    
+  } catch (error) {
+    console.error('Search failed:', error);
+    displayResponse('Search failed. Please try again.', true);
+  } finally {
+    hideLoading();
+  }
 }
 
-// Clear Button Functionality
-$('clear-btn').addEventListener('click', () => {
-  $('user-input').value = '';
-  $('response-area').innerHTML = '';
-  $('response-area').classList.remove('has-results');
-});
-
 // Results Display
-function displayResults() {
+function displayResults(categorizedResults) {
   const resultsContainers = {
     "DuckDuckGo": $('duckduckgo-results'),
     "Wikipedia": $('wikipedia-results'),
     "Google": $('google-results'),
-    "Brave Search": $('open-source-results') // Reusing existing HTML element
-}; // Added missing semicolon and closing brace
+    "Brave Search": $('open-source-results')
+  };
 
   Object.entries(categorizedResults).forEach(([category, results]) => {
     const container = resultsContainers[category];
     if (!container) return;
+
+    container.innerHTML = '';
     
-    container.innerHTML = results.length > 0 ? '' : '<li>No results found</li>';
-    
+    if (results.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = `No results found via ${category}`;
+      container.appendChild(li);
+      return;
+    }
+
     results.forEach(result => {
       const li = document.createElement('li');
       const link = document.createElement('a');
@@ -243,21 +213,62 @@ function displayResults() {
       container.appendChild(li);
     });
   });
-    $('response-area').classList.add('has-results');
+
+  $('response-area').classList.add('has-results');
 }
 
-// Voice Input with Timeout
-async function startSpeechRecognition() {
-  console.log('Starting speech recognition');
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+  // Search functionality
+  $('submit-btn')?.addEventListener('click', async () => {
+    const query = $('user-input').value.trim();
+    if (query.length >= 2) {
+      await performSearch(query);
+    }
+  });
+
+  // Clear functionality
+  $('clear-btn')?.addEventListener('click', () => {
+    $('user-input').value = '';
+    $('response-area').innerHTML = '';
+    $('response-area').classList.remove('has-results');
+  });
+
+  // Voice input
+  $('voice-btn')?.addEventListener('click', startSpeechRecognition);
+
+  // File upload
+  $('file-upload')?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      showLoading();
+      try {
+        if (file.type.startsWith('image/')) {
+          await recognizeHandwriting(file);
+        } else if (file.type === 'text/plain') {
+          const text = await file.text();
+          await processUserText(text);
+        }
+      } catch (error) {
+        console.error('File processing error:', error);
+        displayResponse('Error processing file.', true);
+      } finally {
+        hideLoading();
+      }
+    }
+  });
+});
+
+// Voice Recognition
+function startSpeechRecognition() {
   if (!('webkitSpeechRecognition' in window)) {
-    displayResponse('Speech Recognition API not supported by this browser.', true);
+    displayResponse('Speech Recognition not supported', true);
     return;
   }
 
   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  recognition.interimResults = true;
   recognition.lang = 'en-US';
-  recognition.continuous = false;
+  recognition.interimResults = true;
 
   let timeoutId;
   
@@ -271,12 +282,6 @@ async function startSpeechRecognition() {
     clearTimeout(timeoutId);
   };
 
-  recognition.onerror = (event) => {
-    console.error('Speech recognition error:', event.error);
-    displayResponse('Failed to recognize speech.', true);
-    clearTimeout(timeoutId);
-  };
-
   recognition.onresult = (event) => {
     const transcript = Array.from(event.results)
       .map(result => result[0].transcript)
@@ -287,90 +292,8 @@ async function startSpeechRecognition() {
   recognition.start();
 }
 
-// Event Listeners (Updated to use performSearch)
-$('submit-btn')?.addEventListener('click', async () => {
-  const input = $('user-input')?.value.trim();
-  if (!input) return;
-  await performSearch(input); // Fixed reference
-});
-
-// Event Listeners
-$('voice-btn')?.addEventListener('click', startSpeechRecognition);
-
-$('clear-btn')?.addEventListener('click', () => {
-  $('user-input').value = '';
-  displayResponse('', true);
-});
-
-$('file-upload')?.addEventListener('change', async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  console.log(`File uploaded: ${file.name}`);
-  try {
-    showLoading();
-    if (file.type.startsWith('image/')) {
-      await classifyUploadedImage(file);
-      await handleImageUpload(file);
-    } else if (file.type === 'text/plain') {
-      const textContent = await file.text();
-      await processUserText(textContent);
-    }
-  } catch (error) {
-    console.error('File processing error:', error);
-    displayResponse('Error processing file.', true);
-  } finally {
-    hideLoading();
-  }
-});
-
-$('save-btn')?.addEventListener('click', () => {
-  const responseArea = $('response-area');
-  if (!responseArea || !responseArea.innerText.trim()) return;
-
-  const savedData = responseArea.innerText.trim();
-  const blob = new Blob([savedData], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'saved_output.txt';
-  a.click();
-  URL.revokeObjectURL(a.href);
-  displayResponse('Saved successfully.');
-});
-
-$('theme-toggle')?.addEventListener('click', () => {
-  const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.body.dataset.theme = newTheme;
-  localStorage.setItem('theme', newTheme);
-});
-
-$('humanize-btn')?.addEventListener('click', async () => {
-  const input = $('user-input')?.value.trim();
-  if (!input) return;
-  console.log(`Humanize button clicked with input: ${input}`);
-  await processUserText(input);
-  await checkPlagiarism(input);
-});
-
-$('response-area')?.addEventListener('click', async (e) => {
-  if (e.target.classList.contains('result-link')) {
-    e.preventDefault();
-    const url = e.target.getAttribute('data-url');
-    await loadContent(url);
-  }
-});
-
-// UI Initialization
+// Initialize UI elements
 const photoUploadBox = $('photo-upload-box');
-const clearButton = $('clear-btn');
-if (photoUploadBox && clearButton) {
+if (photoUploadBox) {
   photoUploadBox.style.display = 'none';
-  clearButton.style.display = 'none';
 }
-
-$('file-upload')?.addEventListener('change', () => {
-  if (photoUploadBox && clearButton) {
-    photoUploadBox.style.display = 'block';
-    clearButton.style.display = 'block';
-  }
-});
