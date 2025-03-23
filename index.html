@@ -10,17 +10,40 @@
   <link rel="apple-touch-icon" href="https://drkimogad.github.io/kimo/icons/icon-192.png">
 </head>
 <body data-theme="light">
-  <header>
-    <h1>Kimo AI</h1>
-    <button id="theme-toggle">🌗 Toggle Mode</button>
-  </header>
+  <h1 class="kimo-title">Kimo AI</h1>
+  <button id="theme-toggle">🌗 Toggle Mode</button>
 
   <main>
-    <textarea id="user-input" placeholder="Type your query, upload a file, or speak..."></textarea>
-    <div class="button-group">
-      <button id="voice-btn">🎤 Voice Input</button>
-      <input type="file" id="file-upload" accept="image/*,text/plain">
-      <button id="submit-btn">🚀 Generate/Search</button>
+    <!-- Response Area -->
+    <section id="response-area" class="response-container">
+      <!-- Welcome message will be shown via CSS when empty -->
+      <div class="api-results">
+        <ul id="duckduckgo-results"></ul>
+      </div>
+      <div class="api-results">
+        <ul id="wikipedia-results"></ul>
+      </div>
+      <div class="api-results">
+        <ul id="google-results"></ul>
+      </div>
+      <div class="api-results">
+        <ul id="open-source-results"></ul>
+      </div>
+      <div class="response-actions">
+        <button id="clear-btn">🗑️ Clear</button>
+        <button id="humanize-btn">📝 Humanize</button>
+        <button id="save-btn">💾 Save</button>
+      </div>
+    </section>
+
+    <!-- Search Controls -->
+    <div class="search-container">
+      <textarea id="user-input" placeholder="Type your query, upload a file, or speak..."></textarea>
+      <div class="action-row">
+        <button id="voice-btn">🎤 Voice</button>
+        <input type="file" id="file-upload" accept="image/*,text/plain">
+        <button id="submit-btn">🚀 Search</button>
+      </div>
     </div>
 
     <!-- Canvas Section -->
@@ -29,32 +52,7 @@
       <button id="clear-canvas">Clear</button>
     </div>
 
-    <!-- Categorized Search Results -->
-    <section id="response-area" class="response-container">
-      <div class="api-results">
-        <h2>DuckDuckGo Results</h2>
-        <ul id="duckduckgo-results"></ul>
-      </div>
-      <div class="api-results">
-        <h2>Wikipedia Results</h2>
-        <ul id="wikipedia-results"></ul>
-      </div>
-      <div class="api-results">
-        <h2>Google Custom Search Results</h2>
-        <ul id="google-results"></ul>
-      </div>
-      <div class="api-results">
-        <h2>Open Source API Results</h2>
-        <ul id="open-source-results"></ul>
-      </div>
-    </section>
-
     <div id="loading" class="loading-hidden">Processing...</div>
-
-    <div class="response-actions">
-      <button id="save-btn">💾 Save</button>
-      <button id="humanize-btn">📝 Humanize</button>
-    </div>
   </main>
 
   <footer>
