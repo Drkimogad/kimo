@@ -45,167 +45,120 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-  // Display processing message on app start
-  displayProcessingMessage();
-  // Helper Functions
-  function $(id) {
-    return document.getElementById(id);
-  }
-
-  function displayResponse(content, clear = false) {
-    const responseArea = $('response-area');
-    if (!responseArea) return;
-    if (clear) responseArea.innerHTML = '';
-    responseArea.innerHTML += `<div class="response">${content}</div>`;
-    responseArea.scrollTop = responseArea.scrollHeight;
-  }
-
-  function displayProcessingMessage() {
-    const loader = $('loading');
-    if (loader) {
-      loader.classList.remove('loading-hidden');
-      loader.textContent = 'Processing...';
-    }
-  }
-
-  function hideProcessingMessage() {
-    const loader = $('loading');
-    if (loader) loader.classList.add('loading-hidden');
-  }
-
-  function showLoading() {
-    const loader = $('loading');
-    if (loader) loader.classList.remove('loading-hidden');
-  }
-
-  function hideLoading() {
-    const loader = $('loading');
-    if (loader) loader.classList.add('loading-hidden');
-  }
-
-  function updateSessionHistory(type, data) {
-    const entry = { type, ...data, timestamp: new Date().toISOString() };
-    sessionHistory.push(entry);
-    localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
-  }
-
-  function toggleListeningUI(listening) {
-    const voiceBtn = $('voice-btn');
-    if (voiceBtn) voiceBtn.classList.toggle('recording', listening);
-    isListening = listening;
-  }
-
-//  Multi-API Search Framework
 // 1. Define API Endpoints and Keys
 const duckDuckGoEndpoint = "https://api.duckduckgo.com/?q={query}&format=json";
 const wikipediaEndpoint = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*";
-const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=YOUR_CX";
+const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=YOUR_GOOGLE_API_KEY&cx=YOUR_SEARCH_ENGINE_ID";
 const bingEndpoint = "https://api.bing.microsoft.com/v7.0/search?q={query}";
 const openSourceEndpoint = "https://api.example-opensource.com/search?q={query}"; // Placeholder
 
 // 2. Define API Functions
 async function searchDuckDuckGo(query) {
-    const url = duckDuckGoEndpoint.replace("{query}", encodeURIComponent(query));
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        return data.RelatedTopics.map(item => ({ title: item.Text, link: item.FirstURL }));
-    } catch (error) {
-        console.error("DuckDuckGo search error:", error);
-        return [];
-    }
+  const url = duckDuckGoEndpoint.replace("{query}", encodeURIComponent(query));
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.RelatedTopics.map(item => ({ title: item.Text, link: item.FirstURL }));
+  } catch (error) {
+    console.error("DuckDuckGo search error:", error);
+    return [];
+  }
 }
 
 async function searchWikipedia(query) {
-    const url = wikipediaEndpoint.replace("{query}", encodeURIComponent(query));
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        return data.query.search.map(item => ({ title: item.title, link: `https://en.wikipedia.org/wiki/${item.title.replace(/ /g, '_')}` }));
-    } catch (error) {
-        console.error("Wikipedia search error:", error);
-        return [];
-    }
+  const url = wikipediaEndpoint.replace("{query}", encodeURIComponent(query));
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.query.search.map(item => ({ title: item.title, link: `https://en.wikipedia.org/wiki/${item.title.replace(/ /g, '_')}` }));
+  } catch (error) {
+    console.error("Wikipedia search error:", error);
+    return [];
+  }
 }
 
 async function searchGoogle(query) {
-    const url = googleEndpoint.replace("{query}", encodeURIComponent(query));
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        return data.items.map(item => ({ title: item.title, link: item.link }));
-    } catch (error) {
-        console.error("Google Custom Search error:", error);
-        return [];
-    }
+  const url = googleEndpoint.replace("{query}", encodeURIComponent(query));
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.items.map(item => ({ title: item.title, link: item.link }));
+  } catch (error) {
+    console.error("Google Custom Search error:", error);
+    return [];
+  }
 }
 
 async function searchBing(query) {
-    const url = bingEndpoint.replace("{query}", encodeURIComponent(query));
-    try {
-        const response = await fetch(url, { headers: { "Ocp-Apim-Subscription-Key": "YOUR_BING_API_KEY" } });
-        const data = await response.json();
-        return data.webPages.value.map(item => ({ title: item.name, link: item.url }));
-    } catch (error) {
-        console.error("Bing search error:", error);
-        return [];
-    }
+  const url = bingEndpoint.replace("{query}", encodeURIComponent(query));
+  try {
+    const response = await fetch(url, { headers: { "Ocp-Apim-Subscription-Key": "YOUR_BING_API_KEY" } });
+    const data = await response.json();
+    return data.webPages.value.map(item => ({ title: item.name, link: item.url }));
+  } catch (error) {
+    console.error("Bing search error:", error);
+    return [];
+  }
 }
 
 async function searchOpenSource(query) {
-    const url = openSourceEndpoint.replace("{query}", encodeURIComponent(query));
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        return data.results.map(item => ({ title: item.title, link: item.url }));
-    } catch (error) {
-        console.error("Open Source search error:", error);
-        return [];
-    }
+  const url = openSourceEndpoint.replace("{query}", encodeURIComponent(query));
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.results.map(item => ({ title: item.title, link: item.url }));
+  } catch (error) {
+    console.error("Open Source search error:", error);
+    return [];
+  }
 }
 
 // 3. Perform All Searches Simultaneously
 async function performSearch(query) {
-    const [duckDuckGoResults, wikipediaResults, googleResults, bingResults, openSourceResults] = await Promise.all([
-        searchDuckDuckGo(query),
-        searchWikipedia(query),
-        searchGoogle(query),
-        searchBing(query),
-        searchOpenSource(query)
-    ]);
+  const [duckDuckGoResults, wikipediaResults, googleResults, bingResults, openSourceResults] = await Promise.all([
+    searchDuckDuckGo(query),
+    searchWikipedia(query),
+    searchGoogle(query),
+    searchBing(query),
+    searchOpenSource(query)
+  ]);
 
-    displayResults({
-        "DuckDuckGo": duckDuckGoResults,
-        "Wikipedia": wikipediaResults,
-        "Google": googleResults,
-        "Bing": bingResults,
-        "Open Source": openSourceResults
-    });
+  displayResults({
+    "DuckDuckGo": duckDuckGoResults,
+    "Wikipedia": wikipediaResults,
+    "Google": googleResults,
+    "Bing": bingResults,
+    "Open Source": openSourceResults
+  });
 }
 
 // 4. Display Categorized Results
 function displayResults(categorizedResults) {
-    const resultsArea = document.getElementById("results");
-    resultsArea.innerHTML = ""; // Clear previous results
+  const resultsArea = document.getElementById("results");
+  if (!resultsArea) {
+    console.error("Results area not found in the DOM.");
+    return;
+  }
+  resultsArea.innerHTML = ""; // Clear previous results
 
-    Object.keys(categorizedResults).forEach(category => {
-        const section = document.createElement("div");
-        section.className = "result-category";
+  Object.keys(categorizedResults).forEach(category => {
+    const section = document.createElement("div");
+    section.className = "result-category";
 
-        const heading = document.createElement("h3");
-        heading.textContent = category;
-        section.appendChild(heading);
+    const heading = document.createElement("h3");
+    heading.textContent = category;
+    section.appendChild(heading);
 
-        categorizedResults[category].forEach(result => {
-            const link = document.createElement("a");
-            link.href = result.link;
-            link.textContent = result.title;
-            link.target = "_blank"; // Opens in default browser
-            section.appendChild(link);
-        });
-
-        resultsArea.appendChild(section);
+    categorizedResults[category].forEach(result => {
+      const link = document.createElement("a");
+      link.href = result.link;
+      link.textContent = result.title;
+      link.target = "_blank"; // Opens in default browser
+      section.appendChild(link);
     });
+
+    resultsArea.appendChild(section);
+  });
 }
 
 // 5. Handle Search Button Click
@@ -221,138 +174,136 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// end of searching api //
-  // Define startSpeechRecognition
-  async function startSpeechRecognition() {
-    console.log('Starting speech recognition');
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      displayResponse('Speech Recognition API not supported by this browser.', true);
-      return;
-    }
-
-    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-    const recognition = new SpeechRecognition();
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    recognition.continuous = true; // Allow for continuous listening
-
-    recognition.onstart = () => toggleListeningUI(true);
-    recognition.onend = () => toggleListeningUI(false);
-    recognition.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      displayResponse('Failed to recognize speech.', true);
-    };
-    recognition.onresult = (event) => {
-      const transcript = Array.from(event.results)
-        .map(result => result[0])
-        .map(result => result.transcript)
-        .join('');
-      $('user-input').value = transcript;
-    };
-
-    recognition.start();
+// Define startSpeechRecognition
+async function startSpeechRecognition() {
+  console.log('Starting speech recognition');
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    displayResponse('Speech Recognition API not supported by this browser.', true);
+    return;
   }
 
-  // Event Listeners
-  $('submit-btn')?.addEventListener('click', async () => {
-    const input = $('user-input')?.value.trim();
-    if (!input) return;
-    console.log(`Search button clicked with input: ${input}`);
-    await searchAndGenerate(input);
-  });
+  const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  recognition.continuous = true; // Allow for continuous listening
 
-  // Clear Button
-  $('clear-btn')?.addEventListener('click', () => {
-    $('user-input').value = '';
-    displayResponse('', true);
-  });
+  recognition.onstart = () => toggleListeningUI(true);
+  recognition.onend = () => toggleListeningUI(false);
+  recognition.onerror = (event) => {
+    console.error('Speech recognition error:', event.error);
+    displayResponse('Failed to recognize speech.', true);
+  };
+  recognition.onresult = (event) => {
+    const transcript = Array.from(event.results)
+      .map(result => result[0])
+      .map(result => result.transcript)
+      .join('');
+    $('user-input').value = transcript;
+  };
 
-  // File Upload Handling
-  $('file-upload')?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  recognition.start();
+}
 
-    console.log(`File uploaded: ${file.name}`);
-    try {
-      showLoading();
-      if (file.type.startsWith('image/')) {
-        await classifyUploadedImage(file);
-        await handleImageUpload(file);
-      } else if (file.type === 'text/plain') {
-        const textContent = await file.text();
-        await processUserText(textContent);
-      }
-    } catch (error) {
-      console.error('File processing error:', error);
-      displayResponse('Error processing file.', true);
-    } finally {
-      hideLoading();
+// Event Listeners
+$('submit-btn')?.addEventListener('click', async () => {
+  const input = $('user-input')?.value.trim();
+  if (!input) return;
+  console.log(`Search button clicked with input: ${input}`);
+  await searchAndGenerate(input);
+});
+
+// Clear Button
+$('clear-btn')?.addEventListener('click', () => {
+  $('user-input').value = '';
+  displayResponse('', true);
+});
+
+// File Upload Handling
+$('file-upload')?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  console.log(`File uploaded: ${file.name}`);
+  try {
+    showLoading();
+    if (file.type.startsWith('image/')) {
+      await classifyUploadedImage(file);
+      await handleImageUpload(file);
+    } else if (file.type === 'text/plain') {
+      const textContent = await file.text();
+      await processUserText(textContent);
     }
-  });
-
-  // Save Button Functionality
-  $('save-btn')?.addEventListener('click', () => {
-    const responseArea = $('response-area');
-    if (!responseArea || !responseArea.innerText.trim()) return;
-
-    console.log('Save button clicked');
-    const savedData = responseArea.innerText.trim();
-    const blob = new Blob([savedData], { type: 'text/plain' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'saved_output.txt';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    displayResponse('Saved successfully.');
-  });
-
-  // Theme Toggle
-  const themeToggle = $('theme-toggle');
-  if (themeToggle) {
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    document.body.dataset.theme = currentTheme;
-
-    themeToggle.addEventListener('click', () => {
-      const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-      document.body.dataset.theme = newTheme;
-      localStorage.setItem('theme', newTheme);
-    });
+  } catch (error) {
+    console.error('File processing error:', error);
+    displayResponse('Error processing file.', true);
+  } finally {
+    hideLoading();
   }
+});
 
-  // Voice Input Button
-  $('voice-btn')?.addEventListener('click', startSpeechRecognition);
+// Save Button Functionality
+$('save-btn')?.addEventListener('click', () => {
+  const responseArea = $('response-area');
+  if (!responseArea || !responseArea.innerText.trim()) return;
 
-  // Humanize Button
-  $('humanize-btn')?.addEventListener('click', async () => {
-    const input = $('user-input')?.value.trim();
-    if (!input) return;
-    console.log(`Humanize button clicked with input: ${input}`);
-    await processUserText(input);
-    await checkPlagiarism(input);
+  console.log('Save button clicked');
+  const savedData = responseArea.innerText.trim();
+  const blob = new Blob([savedData], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'saved_output.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  displayResponse('Saved successfully.');
+});
+
+// Theme Toggle
+const themeToggle = $('theme-toggle');
+if (themeToggle) {
+  const currentTheme = localStorage.getItem('theme') || 'light';
+  document.body.dataset.theme = currentTheme;
+
+  themeToggle.addEventListener('click', () => {
+    const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.body.dataset.theme = newTheme;
+    localStorage.setItem('theme', newTheme);
   });
+}
 
-  // Event delegation for result links
-  $('response-area')?.addEventListener('click', async (e) => {
-    if (e.target.classList.contains('result-link')) {
-      e.preventDefault();
-      const url = e.target.getAttribute('data-url');
-      await loadContent(url);
-    }
-  });
+// Voice Input Button
+$('voice-btn')?.addEventListener('click', startSpeechRecognition);
 
-  // Hide photo upload box initially
-  const photoUploadBox = $('photo-upload-box');
-  const clearButton = $('clear-btn');
+// Humanize Button
+$('humanize-btn')?.addEventListener('click', async () => {
+  const input = $('user-input')?.value.trim();
+  if (!input) return;
+  console.log(`Humanize button clicked with input: ${input}`);
+  await processUserText(input);
+  await checkPlagiarism(input);
+});
+
+// Event delegation for result links
+$('response-area')?.addEventListener('click', async (e) => {
+  if (e.target.classList.contains('result-link')) {
+    e.preventDefault();
+    const url = e.target.getAttribute('data-url');
+    await loadContent(url);
+  }
+});
+
+// Hide photo upload box initially
+const photoUploadBox = $('photo-upload-box');
+const clearButton = $('clear-btn');
+if (photoUploadBox && clearButton) {
+  photoUploadBox.style.display = 'none';
+  clearButton.style.display = 'none';
+}
+
+// Show photo upload box when a file is selected
+$('file-upload')?.addEventListener('change', () => {
   if (photoUploadBox && clearButton) {
-    photoUploadBox.style.display = 'none';
-    clearButton.style.display = 'none';
+    photoUploadBox.style.display = 'block';
+    clearButton.style.display = 'block';
   }
-
-  // Show photo upload box when a file is selected
-  $('file-upload')?.addEventListener('change', () => {
-    if (photoUploadBox && clearButton) {
-      photoUploadBox.style.display = 'block';
-      clearButton.style.display = 'block';
-    }
-  });
 });
