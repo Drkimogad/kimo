@@ -67,13 +67,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (error) {
     console.error('Initialization failed:', error);
   }
-});
 
   // Theme initialization
   const themeToggle = $('theme-toggle');
   if (themeToggle) {
     const currentTheme = localStorage.getItem('theme') || 'light';
     document.body.dataset.theme = currentTheme;
+    themeToggle.addEventListener('click', () => {
+      const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.body.dataset.theme = newTheme;
+      localStorage.setItem('theme', newTheme);
+      
+      // Force redraw for theme transition
+      document.body.style.display = 'none';
+      document.body.offsetHeight; // Trigger reflow
+      document.body.style.display = 'block';
+    });
   }
 });
 
