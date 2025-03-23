@@ -21,7 +21,7 @@ function displayProcessingMessage() {
   const loader = $('loading');
   if (loader) {
     loader.classList.remove('loading-hidden');
-    loader.textContent = 'Processing...';
+    loader.innerHTML = '<div class="spinner"></div> Searching...';
   }
 }
 
@@ -31,11 +31,14 @@ function hideProcessingMessage() {
 }
 
 function showLoading() {
-  document.getElementById('loading').classList.add('loading-visible');
+  const loader = document.getElementById('loading');
+  loader.classList.add('loading-visible');
+  loader.innerHTML = '<div class="spinner"></div> Searching...';
 }
 
 function hideLoading() {
-  document.getElementById('loading').classList.remove('loading-visible');
+  const loader = document.getElementById('loading');
+  loader.classList.remove('loading-visible');
 }
 
 function updateSessionHistory(type, data) {
@@ -163,7 +166,10 @@ async function performSearch(query) {
 
     // Show the response area and buttons now that we have results
     $('response-area').classList.add('has-results');
-    document.querySelector('.response-actions').style.display = 'flex';
+    const responseActions = document.querySelector('.response-actions');
+    if (responseActions) {
+      responseActions.style.display = 'flex';
+    }
   } catch (error) {
     console.error('Search failed:', error);
     displayResponse('Search failed. Please try again.', true);
@@ -223,7 +229,10 @@ document.addEventListener('DOMContentLoaded', () => {
     $('user-input').value = '';
     $('response-area').innerHTML = '';
     $('response-area').classList.remove('has-results');
-    document.querySelector('.response-actions').style.display = 'none';
+    const responseActions = document.querySelector('.response-actions');
+    if (responseActions) {
+      responseActions.style.display = 'none';
+    }
   });
 
   // Voice input
