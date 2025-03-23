@@ -19,22 +19,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     displayResponse('Some features might be unavailable', true);
   }
 
-    // Hide the response area initially // added last!
-  responseArea.classList.add("hidden");
+  // Hide the response area initially // added last!
+  const responseArea = document.getElementById("response-area");
+  if (responseArea) {
+    responseArea.classList.add("hidden");
+  }
 
   // Attach event listener to the search button
-  searchButton.addEventListener("click", () => {
-    const query = document.getElementById("user-input").value;
+  const searchButton = document.getElementById("search-button");
+  if (searchButton) {
+    searchButton.addEventListener("click", () => {
+      const query = document.getElementById("user-input").value;
 
-    if (query) {
-      performSearch(query);  // Call your search function
+      if (query) {
+        performSearch(query);  // Call your search function
 
-      // Show the results after performing the search
-      responseArea.classList.remove("hidden");
-    } else {
-      alert("Please enter a search query!");
-    }
-  });
+        // Show the results after performing the search
+        responseArea.classList.remove("hidden");
+      } else {
+        alert("Please enter a search query!");
+      }
+    });
+  } else {
+    console.error("Search button not found in the DOM.");
+  }
 });
 
   // Display processing message on app start
@@ -91,8 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 1. Define API Endpoints and Keys
 const duckDuckGoEndpoint = "https://api.duckduckgo.com/?q={query}&format=json";
 const wikipediaEndpoint = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*";
-const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=<script async src="https://cse.google.com/cse.js?cx=56296f4e79fe04f61">
-</script>";
+const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=YOUR_CX";
 const bingEndpoint = "https://api.bing.microsoft.com/v7.0/search?q={query}";
 const openSourceEndpoint = "https://api.example-opensource.com/search?q={query}"; // Placeholder
 
