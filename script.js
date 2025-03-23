@@ -297,3 +297,15 @@ const photoUploadBox = $('photo-upload-box');
 if (photoUploadBox) {
   photoUploadBox.style.display = 'none';
 }
+// Theme toggle
+// Add to DOMContentLoaded event
+$('theme-toggle').addEventListener('click', () => {
+  const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.body.dataset.theme = newTheme;
+  localStorage.setItem('theme', newTheme);
+  
+  // Force redraw for theme transition
+  document.body.style.display = 'none';
+  document.body.offsetHeight; // Trigger reflow
+  document.body.style.display = 'block';
+});
