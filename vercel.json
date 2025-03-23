@@ -1,0 +1,18 @@
+{
+  "builds": [
+    {
+      "src": "proxy-server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/search/(.*)",
+      "dest": "proxy-server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "public/$1"
+    }
+  ]
+}
