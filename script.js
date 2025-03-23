@@ -223,13 +223,14 @@ function displayResults() {
     "DuckDuckGo": $('duckduckgo-results'),
     "Wikipedia": $('wikipedia-results'),
     "Google": $('google-results'),
-    "Brave Search": $('open-source-results'), // Reusing existing HTML element
-      $('response-area').classList.add('has-results');
-}
+    "Brave Search": $('open-source-results') // Reusing existing HTML element
+}; // Added missing semicolon and closing brace
 
   Object.entries(categorizedResults).forEach(([category, results]) => {
     const container = resultsContainers[category];
     if (!container) return;
+    $('response-area').classList.add('has-results');
+    }
 
     container.innerHTML = '';
     
