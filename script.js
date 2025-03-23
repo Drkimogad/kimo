@@ -229,19 +229,9 @@ function displayResults() {
   Object.entries(categorizedResults).forEach(([category, results]) => {
     const container = resultsContainers[category];
     if (!container) return;
-    $('response-area').classList.add('has-results');
-    }
-
-    container.innerHTML = '';
     
-    if (results.length === 0) {
-      const li = document.createElement('li');
-      li.textContent = `No results found via ${category}`;
-      li.className = 'no-results';
-      container.appendChild(li);
-      return;
-    }
-
+    container.innerHTML = results.length > 0 ? '' : '<li>No results found</li>';
+    
     results.forEach(result => {
       const li = document.createElement('li');
       const link = document.createElement('a');
@@ -253,6 +243,7 @@ function displayResults() {
       container.appendChild(li);
     });
   });
+    $('response-area').classList.add('has-results');
 }
 
 // Voice Input with Timeout
