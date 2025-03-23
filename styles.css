@@ -64,32 +64,9 @@ main {
   width: 100%;
 }
 
-#response-area {
-  flex: 1;
-  text-align: center;
-  padding: 2rem 0;
-  display: none; /* Hide initially */
-}
-
-#response-area.has-results {
-  display: block; /* Show when it has results */
-}
-
-.welcome-message {
-  font-size: 1.5rem;
-  opacity: 0.6;
-  margin: auto;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  padding: 1rem 0;
-}
-
 .search-container {
-  margin: 1rem 0;
+  width: 70%;
+  margin: 0 auto;
 }
 
 textarea {
@@ -106,6 +83,25 @@ textarea {
   gap: 1rem;
   justify-content: center;
   margin-top: 1rem;
+}
+
+#response-area {
+  flex: 1;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.welcome-message {
+  font-size: 1.5rem;
+  opacity: 0.6;
+  margin: auto;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  padding: 1rem 0;
 }
 
 footer {
