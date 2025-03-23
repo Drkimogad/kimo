@@ -2,229 +2,143 @@
 :root {
   --bg-color: #f8f9fa;
   --text-color: #2c3e50;
-  --accent: #ffdd57; /* Mustard accent */
-  --footer-bg: rgba(255, 221, 87, 0.15); /* Subtle mustard */
+  --accent: #ffdd57;
+  --footer-bg: #f5f5f5; /* Very light grey */
 }
 
 [data-theme="dark"] {
   --bg-color: #1a1a1a;
   --text-color: #ffffff;
   --accent: #ffdd57;
-  --footer-bg: rgba(255, 221, 87, 0.08);
-}
-
-/* ===== BASE STYLES ===== */
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg-color);
-  color: var(--text-color);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  --footer-bg: #2a2a2a;
 }
 
 /* ===== HEADER ===== */
 header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: var(--accent);
+  position: relative;
+  text-align: center;
+  padding: 1rem 0;
 }
 
 .kimo-title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 1.8rem;
   margin: 0;
   color: var(--text-color);
 }
 
 #theme-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
   padding: 0.5rem;
   border-radius: 8px;
-  transition: background 0.2s;
-}
-
-#theme-toggle:hover {
-  background: rgba(0, 0, 0, 0.1);
 }
 
 /* ===== MAIN CONTENT ===== */
 main {
-  flex: 1;
-  padding: 2rem;
-  max-width: 1200px;
+  padding: 1.5rem;
+  max-width: 900px; /* Reduced by 25% */
   margin: 0 auto;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-/* ===== RESPONSE AREA ===== */
-#response-area {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 1rem 0;
-  overflow-y: auto;
-  position: relative;
-}
-
-#response-area:empty::before {
-  content: "Welcome to Kimo AI 🚀\AYour AI-powered search companion \A and more!";
-  white-space: pre-wrap;
-  text-align: center;
-  color: var(--text-color);
-  opacity: 0.4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-size: 1.4rem;
-  line-height: 2;
-}
-
-.api-results {
-  margin-bottom: 2rem;
-}
-
-.api-results h2 {
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-  color: var(--accent);
 }
 
 /* ===== SEARCH CONTAINER ===== */
 .search-container {
-  width: 75%;
+  width: 70%; /* Reduced from 75% */
   margin: 0 auto;
-  position: relative;
 }
 
 textarea#user-input {
-  width: 100%;
-  padding: 1rem;
-  border: 2px solid var(--accent);
-  border-radius: 12px;
-  background: var(--bg-color);
-  color: var(--text-color);
-  font-size: 1.1rem;
-  min-height: 120px;
-  resize: vertical;
-}
-
-.action-row {
-  width: 75%;
-  margin: 1rem auto 0;
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.action-row button,
-.action-row input[type="file"] {
-  flex: 1;
-  max-width: 200px;
-  padding: 0.8rem;
-  font-size: 1rem;
-  border: 2px solid var(--accent);
-}
-
-/* ===== FOOTER ===== */
-footer {
-  background: var(--footer-bg);
-  padding: 1.5rem;
-  text-align: center;
-  margin-top: auto;
-  border-top: 1px solid rgba(255, 221, 87, 0.2);
+  min-height: 100px; /* Reduced height */
+  padding: 0.8rem; /* Reduced padding */
+  border-radius: 10px; /* Slightly rounded */
 }
 
 /* ===== BUTTONS ===== */
 button {
-  background: var(--accent);
-  color: var(--text-color);
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
+  padding: 0.6rem 1.2rem; /* Reduced padding */
+  font-size: 0.9rem;
 }
 
-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.action-row {
+  gap: 0.8rem; /* Reduced gap */
+  margin-top: 0.8rem;
 }
 
-.response-actions {
-  position: sticky;
-  bottom: 20px;
-  display: none;
-  gap: 1rem;
-  justify-content: flex-end;
-  padding: 1rem;
-  background: var(--bg-color);
-  border-top: 1px solid rgba(255, 221, 87, 0.1);
-}
-
-.has-results .response-actions {
-  display: flex;
-}
-
-/* ===== LOADING ===== */
+/* ===== PROCESSING LOADER ===== */
 #loading {
+  display: none; /* Hidden by default */
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   background: var(--accent);
   color: var(--text-color);
-  padding: 1rem 2rem;
+  padding: 0.8rem 1.5rem;
   border-radius: 8px;
-  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#loading.loading-hidden {
+  display: none;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--footer-bg);
+  padding: 1rem; /* Reduced padding */
+  text-align: center;
+  margin-top: auto;
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 768px) {
-  .search-container,
-  .action-row {
-    width: 90%;
+@media (max-width: 992px) { /* Tablet */
+  main {
+    max-width: 90%;
+    padding: 1rem;
   }
 
-  header {
-    padding: 1rem;
+  .search-container {
+    width: 85%;
   }
 
   .kimo-title {
     font-size: 1.5rem;
   }
+}
 
-  .action-row {
-    flex-direction: column;
+@media (max-width: 768px) { /* Large Phone */
+  main {
+    max-width: 95%;
   }
 
-  .action-row button,
-  .action-row input[type="file"] {
-    max-width: 100%;
+  .search-container {
+    width: 90%;
+  }
+
+  textarea#user-input {
+    min-height: 80px;
+    padding: 0.6rem;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
   }
 }
 
-@media (max-width: 480px) {
-  main {
-    padding: 1rem;
-  }
-
+@media (max-width: 480px) { /* Small Phone */
   .search-container {
     width: 100%;
   }
 
-  textarea#user-input {
-    min-height: 100px;
+  .kimo-title {
+    font-size: 1.3rem;
+  }
+
+  #theme-toggle {
+    right: 0.5rem;
   }
 }
