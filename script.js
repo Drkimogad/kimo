@@ -53,17 +53,17 @@ function toggleListeningUI(listening) {
 
 // Unified DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', async () => {
-  // Remove displayProcessingMessage() call
   try {
     await loadModels();
     console.log('All models loaded');
-    // Keep welcome message visible
+    // Show the welcome message initially
     $('response-area').innerHTML = `
       <div class="welcome-message">
         Welcome to Kimo AI 🚀<br>
         Your AI-powered search companion and more!
       </div>
     `;
+    document.querySelector('.response-actions').style.display = 'none';
   } catch (error) {
     console.error('Initialization failed:', error);
   }
@@ -184,7 +184,10 @@ async function performSearch(query) {
       "Google": googleResults,
       "Brave Search": braveResults
     });
-    
+
+    // Show the response area and buttons now that we have results
+    $('response-area').classList.add('has-results');
+    document.querySelector('.response-actions').style.display = 'flex';
   } catch (error) {
     console.error('Search failed:', error);
     displayResponse('Search failed. Please try again.', true);
@@ -245,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('user-input').value = '';
     $('response-area').innerHTML = '';
     $('response-area').classList.remove('has-results');
+    document.querySelector('.response-actions').style.display = 'none';
   });
 
   // Voice input
@@ -310,15 +314,3 @@ const photoUploadBox = $('photo-upload-box');
 if (photoUploadBox) {
   photoUploadBox.style.display = 'none';
 }
-// Theme toggle
-// Add to DOMContentLoaded event
-$('theme-toggle').addEventListener('click', () => {
-  const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.body.dataset.theme = newTheme;
-  localStorage.setItem('theme', newTheme);
-  
-  // Force redraw for theme transition
-  document.body.style.display = 'none';
-  document.body.offsetHeight; // Trigger reflow
-  document.body.style.display = 'block';
-});
