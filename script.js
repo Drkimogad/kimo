@@ -1,6 +1,54 @@
 import { loadModels } from './models.js';
 import { recognizeHandwriting } from './ocr.js';
 
+// Helper Functions
+function $(id) {
+  return document.getElementById(id);
+}
+
+function displayResponse(content, clear = false) {
+  const responseArea = $('response-area');
+  if (!responseArea) return;
+  if (clear) responseArea.innerHTML = '';
+  responseArea.innerHTML += `<div class="response">${content}</div>`;
+  responseArea.scrollTop = responseArea.scrollHeight;
+}
+
+function displayProcessingMessage() {
+  const loader = $('loading');
+  if (loader) {
+    loader.classList.remove('loading-hidden');
+    loader.textContent = 'Processing...';
+  }
+}
+
+function hideProcessingMessage() {
+  const loader = $('loading');
+  if (loader) loader.classList.add('loading-hidden');
+}
+
+function showLoading() {
+  const loader = $('loading');
+  if (loader) loader.classList.remove('loading-hidden');
+}
+
+function hideLoading() {
+  const loader = $('loading');
+  if (loader) loader.classList.add('loading-hidden');
+}
+
+function updateSessionHistory(type, data) {
+  const entry = { type, ...data, timestamp: new Date().toISOString() };
+  sessionHistory.push(entry);
+  localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
+}
+
+function toggleListeningUI(listening) {
+  const voiceBtn = $('voice-btn');
+  if (voiceBtn) voiceBtn.classList.toggle('recording', listening);
+  isListening = listening;
+}
+
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', async () => {
   let isListening = false;
@@ -48,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 1. Define API Endpoints and Keys
 const duckDuckGoEndpoint = "https://api.duckduckgo.com/?q={query}&format=json";
 const wikipediaEndpoint = "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*";
-const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=YOUR_GOOGLE_API_KEY&cx=YOUR_SEARCH_ENGINE_ID";
+const googleEndpoint = "https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=YOUR_SEARCH_ENGINE_ID";
 const bingEndpoint = "https://api.bing.microsoft.com/v7.0/search?q={query}";
 const openSourceEndpoint = "https://api.example-opensource.com/search?q={query}"; // Placeholder
 
