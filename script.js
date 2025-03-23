@@ -56,14 +56,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     await loadModels();
     console.log('All models loaded');
-    
     // Show the welcome message initially
     $('response-area').innerHTML = `
       <div class="welcome-message">
         Welcome to Kimo AI 🚀<br>
         Your AI-powered search companion and more!
       </div>`;
-    
+      
     const responseActions = document.querySelector('.response-actions');
     if (responseActions) {
       responseActions.style.display = 'none';
@@ -94,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 const API_ENDPOINTS = {
   duckDuckGo: "https://api.duckduckgo.com/?q={query}&format=json",
   wikipedia: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*",
-  google: `https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyCP_lCg66Fd6cNdNWLO8Se12YOp8m11aAA&cx=56296f4e79fe04f61` // Fixed cx value
+  google: `https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyD2wX0SBJBZ47yIJhKTq46lyMJtyX7Zdnc&cx=56296f4e79fe04f61`
 };
 
 // Search Functions
