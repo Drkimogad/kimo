@@ -1,3 +1,10 @@
+// Unregister previous service workers
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    registrations.forEach(registration => registration.unregister());
+  });
+}
+
 import { loadModels } from './models.js';
 import { recognizeHandwriting } from './ocr.js';
 import { Summarizer } from './models/summarizer.js';
