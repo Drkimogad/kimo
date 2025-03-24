@@ -32,7 +32,7 @@ const CACHE_ASSETS = [
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
 
   // Tesseract.js library and language file
-  'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/tesseract.min.js',
+  'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js',
   'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz',
 
   // Local model files
