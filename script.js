@@ -3,6 +3,7 @@ import { recognizeHandwriting } from './ocr.js';
 
 // Global state declaration
 let isListening = false;
+const API_BASE = import.meta.env.VITE_API_BASE || 'https://your-proxy-service.com';
 
 // Helper Functions
 function $(id) {
@@ -12,33 +13,21 @@ function $(id) {
 function displayResponse(content, clear = false) {
   const responseArea = $('response-area');
   if (!responseArea) return;
+  
+  const div = document.createElement('div');
+  div.className = 'response';
+  div.textContent = content; // Safe textContent instead of innerHTML
+  
   if (clear) responseArea.innerHTML = '';
-  responseArea.innerHTML += `<div class="response">${content}</div>`;
+  responseArea.appendChild(div);
   responseArea.scrollTop = responseArea.scrollHeight;
 }
 
-function displayProcessingMessage() {
+function toggleLoading(show) {
   const loader = $('loading');
-  if (loader) {
-    loader.classList.remove('loading-hidden');
-    loader.innerHTML = '<div class="spinner"></div> Searching...';
-  }
-}
-
-function hideProcessingMessage() {
-  const loader = $('loading');
-  if (loader) loader.classList.add('loading-hidden');
-}
-
-function showLoading() {
-  const loader = document.getElementById('loading');
-  loader.classList.add('loading-visible');
-  loader.innerHTML = '<div class="spinner"></div> Searching...';
-}
-
-function hideLoading() {
-  const loader = document.getElementById('loading');
-  loader.classList.remove('loading-visible');
+  if (!loader) return;
+  loader.classList.toggle('loading-visible', show);
+  loader.innerHTML = show ? '<div class="spinner"></div> Searching...' : '';
 }
 
 function updateSessionHistory(type, data) {
@@ -54,103 +43,69 @@ function toggleListeningUI(listening) {
   isListening = listening;
 }
 
-// Unified DOM Content Loaded Handler
+// Consolidated DOM Content Loaded Handler
 document.addEventListener('DOMContentLoaded', async () => {
   try {
+    // Initialize theme
+    const themeToggle = $('theme-toggle');
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.body.dataset.theme = currentTheme;
+    
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.body.dataset.theme = newTheme;
+        localStorage.setItem('theme', newTheme);
+      });
+    }
+
+    // Load models and initialize UI
     await loadModels();
-    console.log('All models loaded');
-    // Show the welcome message initially
     $('response-area').innerHTML = `
       <div class="welcome-message">
         Welcome to Kimo AI 🚀<br>
         Your AI-powered search companion and more!
       </div>`;
-      
-    const responseActions = document.querySelector('.response-actions');
-    if (responseActions) {
-      responseActions.style.display = 'none';
-    }
+    
+    document.querySelector('.response-actions')?.style?.setProperty('display', 'none');
   } catch (error) {
     console.error('Initialization failed:', error);
-  }
-
-  // Theme initialization
-  const themeToggle = $('theme-toggle');
-  if (themeToggle) {
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    document.body.dataset.theme = currentTheme;
-    themeToggle.addEventListener('click', () => {
-      const newTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
-      document.body.dataset.theme = newTheme;
-      localStorage.setItem('theme', newTheme);
-      
-      // Force redraw for theme transition
-      document.body.style.display = 'none';
-      document.body.offsetHeight; // Trigger reflow
-      document.body.style.display = 'block';
-    });
+    displayResponse('Initialization failed. Please refresh the page.', true);
   }
 });
 
 // API Configuration
 const API_ENDPOINTS = {
-  duckDuckGo: "https://api.duckduckgo.com/?q={query}&format=json",
-  wikipedia: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={query}&format=json&origin=*",
-  google: `https://www.googleapis.com/customsearch/v1?q={query}&key=AIzaSyD2wX0SBJBZ47yIJhKTq46lyMJtyX7Zdnc&cx=56296f4e79fe04f61`
+  duckDuckGo: `${API_BASE}/search/ddg?q=`,
+  wikipedia: `${API_BASE}/search/wiki?q=`,
+  google: `${API_BASE}/search/google?q=`
 };
 
 // Search Functions
-async function searchDuckDuckGo(query) {
-  const url = API_ENDPOINTS.duckDuckGo.replace("{query}", encodeURIComponent(query));
+async function searchAPI(endpoint, query) {
   try {
-    const response = await fetch(url);
+    const response = await fetch(`${endpoint}${encodeURIComponent(query)}`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    return data.RelatedTopics?.map(item => ({ 
-      title: item.Text, 
-      link: item.FirstURL 
-    })) || [];
+    return await response.json();
   } catch (error) {
-    console.error("DuckDuckGo search error:", error);
+    console.error("Search error:", error);
     return [];
   }
 }
 
-async function searchWikipedia(query) {
-  const url = API_ENDPOINTS.wikipedia.replace("{query}", encodeURIComponent(query));
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    return data.query?.search?.map(item => ({
-      title: item.title,
-      link: `https://en.wikipedia.org/wiki/${item.title.replace(/ /g, '_')}`
-    })) || [];
-  } catch (error) {
-    console.error("Wikipedia search error:", error);
-    return [];
-  }
-}
-
-async function searchGoogle(query) {
-  const url = API_ENDPOINTS.google.replace("{query}", encodeURIComponent(query));
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    const data = await response.json();
-    return data.items?.map(item => ({
-      title: item.title,
-      link: item.link
-    })) || [];
-  } catch (error) {
-    console.error("Google Custom Search error:", error);
-    return [];
-  }
-}
+const searchDuckDuckGo = (query) => searchAPI(API_ENDPOINTS.duckDuckGo, query);
+const searchWikipedia = (query) => searchAPI(API_ENDPOINTS.wikipedia, query);
+const searchGoogle = (query) => searchAPI(API_ENDPOINTS.google, query);
 
 // Search Execution
 async function performSearch(query) {
-  showLoading();
+  // Validate input
+  if (!query || query.length < 2 || /[<>]/.test(query)) {
+    displayResponse('Please enter a valid search query (2+ characters, no special symbols)');
+    return;
+  }
+
+  toggleLoading(true);
   try {
     const [ddgResults, wikiResults, googleResults] = await Promise.all([
       searchDuckDuckGo(query),
@@ -164,22 +119,20 @@ async function performSearch(query) {
       "Google": googleResults
     });
 
-    // Show the response area and buttons now that we have results
     $('response-area').classList.add('has-results');
-    const responseActions = document.querySelector('.response-actions');
-    if (responseActions) {
-      responseActions.style.display = 'flex';
-    }
+    document.querySelector('.response-actions')?.style?.setProperty('display', 'flex');
   } catch (error) {
     console.error('Search failed:', error);
     displayResponse('Search failed. Please try again.', true);
   } finally {
-    hideLoading();
+    toggleLoading(false);
   }
 }
 
 // Results Display
 function displayResults(categorizedResults) {
+  const sanitizeHTML = (str) => str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  
   const resultsContainers = {
     "DuckDuckGo": $('duckduckgo-results'),
     "Wikipedia": $('wikipedia-results'),
@@ -192,7 +145,7 @@ function displayResults(categorizedResults) {
 
     container.innerHTML = '';
     
-    if (results.length === 0) {
+    if (!results?.length) {
       const li = document.createElement('li');
       li.textContent = `No results found via ${category}`;
       container.appendChild(li);
@@ -202,26 +155,34 @@ function displayResults(categorizedResults) {
     results.forEach(result => {
       const li = document.createElement('li');
       const link = document.createElement('a');
-      link.href = result.link;
-      link.textContent = result.title;
+      link.href = sanitizeHTML(result.link);
+      link.textContent = sanitizeHTML(result.title);
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       li.appendChild(link);
       container.appendChild(li);
     });
   });
+}
 
-  $('response-area').classList.add('has-results');
+// File Processing
+async function processUserText(text) {
+  try {
+    // Basic sanitization before processing
+    const cleanText = text.replace(/[<>]/g, '');
+    await performSearch(cleanText);
+  } catch (error) {
+    console.error('Text processing error:', error);
+    displayResponse('Error processing text file.', true);
+  }
 }
 
 // Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
+function setupEventListeners() {
   // Search functionality
   $('submit-btn')?.addEventListener('click', async () => {
     const query = $('user-input').value.trim();
-    if (query.length >= 2) {
-      await performSearch(query);
-    }
+    if (query) await performSearch(query);
   });
 
   // Clear functionality
@@ -229,10 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $('user-input').value = '';
     $('response-area').innerHTML = '';
     $('response-area').classList.remove('has-results');
-    const responseActions = document.querySelector('.response-actions');
-    if (responseActions) {
-      responseActions.style.display = 'none';
-    }
+    document.querySelector('.response-actions')?.style?.setProperty('display', 'none');
   });
 
   // Voice input
@@ -241,24 +199,32 @@ document.addEventListener('DOMContentLoaded', () => {
   // File upload
   $('file-upload')?.addEventListener('change', async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      showLoading();
-      try {
-        if (file.type.startsWith('image/')) {
-          await recognizeHandwriting(file);
-        } else if (file.type === 'text/plain') {
-          const text = await file.text();
-          await processUserText(text);
-        }
-      } catch (error) {
-        console.error('File processing error:', error);
-        displayResponse('Error processing file.', true);
-      } finally {
-        hideLoading();
+    if (!file) return;
+
+    // Validate file
+    if (file.size > 5 * 1024 * 1024) {
+      displayResponse('File too large (max 5MB)');
+      return;
+    }
+
+    toggleLoading(true);
+    try {
+      if (file.type.startsWith('image/')) {
+        await recognizeHandwriting(file);
+      } else if (file.type === 'text/plain') {
+        const text = await file.text();
+        await processUserText(text);
+      } else {
+        displayResponse('Unsupported file type');
       }
+    } catch (error) {
+      console.error('File processing error:', error);
+      displayResponse('Error processing file.', true);
+    } finally {
+      toggleLoading(false);
     }
   });
-});
+}
 
 // Voice Recognition
 function startSpeechRecognition() {
@@ -283,18 +249,21 @@ function startSpeechRecognition() {
     clearTimeout(timeoutId);
   };
 
-  recognition.onresult = (event) => {
+  recognition.onresult = async (event) => {
     const transcript = Array.from(event.results)
       .map(result => result[0].transcript)
-      .join('');
+      .join('')
+      .replace(/[<>]/g, ''); // Basic sanitization
+
     $('user-input').value = transcript;
+    if (transcript.length >= 2) await performSearch(transcript);
   };
 
   recognition.start();
 }
 
 // Initialize UI elements
-const photoUploadBox = $('photo-upload-box');
-if (photoUploadBox) {
-  photoUploadBox.style.display = 'none';
-}
+document.addEventListener('DOMContentLoaded', () => {
+  setupEventListeners();
+  $('photo-upload-box').style.display = 'none';
+});
