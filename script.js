@@ -267,3 +267,125 @@ document.addEventListener('DOMContentLoaded', () => {
   setupEventListeners();
   $('photo-upload-box').style.display = 'none';
 });
+
+// new AI enhancements 
+// ==================== AI ENHANCEMENTS ==================== //
+// Import AI modules at top (add after existing imports)
+import { Summarizer } from './ai/summarizer.js';
+import { Personalizer } from './ai/personalizer.js';
+import { OfflineStorage } from './utils/offlineStorage.js';
+
+// Add AI state management
+let aiConfig = {
+  personalization: true,
+  summarization: true,
+  modelStatus: 'loading'
+};
+
+// Add after DOMContentLoaded handler
+async function initializeAISystems() {
+  try {
+    await OfflineStorage.init();
+    await Summarizer.warmup();
+    aiConfig.modelStatus = 'ready';
+    console.log('AI systems initialized');
+  } catch (error) {
+    console.error('AI initialization failed:', error);
+    aiConfig.modelStatus = 'error';
+  }
+}
+
+// Add to existing DOMContentLoaded handler
+document.addEventListener('DOMContentLoaded', async () => {
+  // Add to existing try block
+  try {
+    // Add after loadModels()
+    await initializeAISystems();
+    
+    // Update welcome message
+    const welcomeMessage = aiConfig.modelStatus === 'ready' 
+      ? 'AI-powered search companion! 🧠'
+      : 'Basic search companion';
+    
+    $('response-area').innerHTML = `
+      <div class="welcome-message">
+        Welcome to Kimo AI 🚀<br>
+        ${welcomeMessage}
+      </div>`;
+      
+  } catch (error) {
+    // Existing error handling
+  }
+});
+
+// Enhanced performSearch with AI features
+async function performSearch(query) {
+  // Add to validation
+  if (aiConfig.modelStatus === 'error') {
+    displayResponse('AI features temporarily unavailable');
+  }
+
+  // Add personalization tracking
+  if (aiConfig.personalization) {
+    await Personalizer.trackSearch(query);
+  }
+
+  // Modify results processing
+  const [ddgResults, wikiResults, googleResults] = await Promise.all([
+    searchDuckDuckGo(query),
+    searchWikipedia(query),
+    searchGoogle(query)
+  ]);
+
+  // Personalize results
+  let processedResults = {
+    "DuckDuckGo": aiConfig.personalization 
+      ? await Personalizer.rankResults(ddgResults) 
+      : ddgResults,
+    "Wikipedia": aiConfig.personalization
+      ? await Personalizer.rankResults(wikiResults)
+      : wikiResults,
+    "Google": aiConfig.personalization
+      ? await Personalizer.rankResults(googleResults)
+      : googleResults
+  };
+
+  displayResults(processedResults);
+
+  // Add AI summary
+  if (aiConfig.summarization) {
+    const summary = await Summarizer.generate(
+      [...ddgResults, ...wikiResults, ...googleResults]
+        .map(r => r.title)
+        .join('. ')
+    );
+    displayResponse(`AI Summary: ${summary}`);
+  }
+}
+
+// Add new event listeners at bottom
+document.addEventListener('DOMContentLoaded', () => {
+  // Privacy toggle
+  $('#privacy-toggle').addEventListener('click', () => {
+    aiConfig.personalization = !aiConfig.personalization;
+    localStorage.setItem('aiPrivacy', aiConfig.personalization);
+    displayResponse(`Personalization ${aiConfig.personalization ? 'enabled' : 'disabled'}`);
+  });
+
+  // Summary toggle
+  $('#summary-toggle').addEventListener('click', () => {
+    aiConfig.summarization = !aiConfig.summarization;
+    localStorage.setItem('aiSummary', aiConfig.summarization);
+    displayResponse(`Summarization ${aiConfig.summarization ? 'enabled' : 'disabled'}`);
+  });
+
+  // Humanize button
+  $('#humanize-btn').addEventListener('click', async () => {
+    const results = Array.from(document.querySelectorAll('.response'))
+      .map(el => el.textContent)
+      .join('\n');
+    
+    const simplified = await Summarizer.simplify(results);
+    displayResponse(simplified, true);
+  });
+});
