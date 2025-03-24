@@ -9,39 +9,48 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon">    
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="theme-color" content="#ffffff">
+  
+  <!-- Preload AI models -->
+  <link rel="preload" href="/models/t5-small/onnx/model.onnx" as="fetch">
+  <link rel="preload" href="/models/t5-small/tokenizer.json" as="fetch">
 </head>
 <body data-theme="light">
+  <!-- Header remains unchanged -->
   <header class="app-header">
     <h1 class="kimo-title">Kimo AI</h1>
     <button id="theme-toggle" aria-label="Toggle theme">🌗</button>
   </header>
 
   <main class="main-content">
-    <!-- Response Area -->
+    <!-- Updated Response Area with Summary Support -->
     <section id="response-area" class="response-container">
       <div class="welcome-message">
         <p>Welcome to Kimo AI 🚀<br>Your AI-powered search companion!</p>
       </div>
       
       <div class="results-grid">
+        <!-- Added summary containers -->
+        <div class="summary-container" id="ai-summary"></div>
         <div class="api-results">
-          <h3>Web Results</h3>
+          <h3>Web Results <span class="personalized-badge">Personalized</span></h3>
           <ul id="duckduckgo-results"></ul>
         </div>
         <div class="api-results">
-          <h3>Wikipedia</h3>
+          <h3>Wikipedia <span class="personalized-badge">Personalized</span></h3>
           <ul id="wikipedia-results"></ul>
         </div>
         <div class="api-results">
-          <h3>Google</h3>
+          <h3>Google <span class="personalized-badge">Personalized</span></h3>
           <ul id="google-results"></ul>
         </div>
       </div>
 
+      <!-- Updated Action Buttons -->
       <div class="response-actions">
         <button id="clear-btn" class="icon-button" aria-label="Clear results">🗑️ Clear</button>
-        <button id="humanize-btn" class="icon-button" aria-label="Humanize output">📝 Simplify</button>
+        <button id="humanize-btn" class="icon-button" aria-label="Simplify output">📝 Simplify</button>
         <button id="save-btn" class="icon-button" aria-label="Save session">💾 Save</button>
+        <button id="summary-toggle" class="icon-button" aria-label="Toggle summary">🧠 Summary</button>
       </div>
     </section>
 
@@ -69,35 +78,42 @@
       </div>
     </div>
 
-    <!-- Loading Indicator -->
+    <!-- Enhanced Loading Indicator -->
     <div id="loading" class="loading-hidden" aria-live="polite">
       <div class="spinner"></div>
-      <span class="loading-text">Searching...</span>
+      <span class="loading-text">Analyzing with AI...</span>
+      <progress class="model-load-progress" value="0" max="100"></progress>
     </div>
   </main>
 
   <footer class="app-footer">
     <p>© 2024 Kimo AI. All rights reserved.</p>
+    <div class="privacy-controls">
+      <button id="privacy-toggle" aria-label="Privacy settings">🔒 AI Personalization</button>
+    </div>
   </footer>
 
-  <!-- Scripts -->
-   <script src="https://unpkg.com/tesseract.js" defer></script>
+  <!-- Updated Scripts Section -->
+  <script src="https://unpkg.com/tesseract.js" defer></script>
+  <script type="module" src="utils/offlineStorage.js" defer></script>
+  <script type="module" src="ai/summarizer.js" defer></script>
+  <script type="module" src="ai/personalizer.js" defer></script>
   <script type="module" src="ocr.js" defer></script>
   <script type="module" src="main.js" defer></script>
   <script type="module" src="models.js" defer></script>  
   <script type="module" src="script.js" defer></script>
-  
-  <!-- Service Worker -->
+
+  <!-- Updated Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            console.log('SW registered:', registration);
-          })
-          .catch(error => {
-            console.log('SW registration failed:', error);
-          });
+        // Register main service worker
+        navigator.serviceWorker.register('/sw.js');
+        
+        // Register AI model cache worker
+        navigator.serviceWorker.register('/models/t5-small/service-worker-cache.js', {
+          scope: '/models/'
+        });
       });
     }
   </script>
