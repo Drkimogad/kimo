@@ -1,4 +1,4 @@
-import { OfflineStorage } from '/models/offlineStorage.js';
+import { OfflineStorage } from 'https://drkimogad.github.io/kimo/models/offlineStorage.js';
 
 const PERSONALIZATION_WEIGHTS = {
   click: 2.0,
