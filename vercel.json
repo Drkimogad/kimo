@@ -7,7 +7,11 @@
   ],
   "routes": [
     {
-      "src": "/search/(.*)",
+      "src": "/api/(.*)",
+      "dest": "proxy-server.js"
+    },
+    {
+      "src": "/models/(.*)",
       "dest": "proxy-server.js"
     },
     {
