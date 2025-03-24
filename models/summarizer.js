@@ -1,4 +1,4 @@
-import { pipeline } from '../t5-small/pipelines.js';
+import { pipeline } from '@huggingface/transformers';
 const SUMMARY_CACHE = new Map();
 const CLOUD_SUMMARY_URL = import.meta.env.VITE_SUMMARY_API || '/api/summarize';
 
