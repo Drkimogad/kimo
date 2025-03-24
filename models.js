@@ -1,4 +1,4 @@
-import { tf } from './main.js'; // Correctly import TensorFlow.js from main.js
+import * as tf from 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest';
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
 const Tesseract = window.Tesseract; // import function
