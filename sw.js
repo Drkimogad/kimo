@@ -48,11 +48,21 @@ const CACHE_ASSETS = [
 // ✅ Install Service Worker & Cache Assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(CACHE_ASSETS);
+    caches.open('my-cache').then((cache) => {
+      return Promise.all(
+        urlsToCache.map((url) => {
+          return fetch(url)
+            .then((response) => {
+              if (!response.ok) throw new Error(`HTTP error: ${url}`);
+              return cache.put(url, response);
+            })
+            .catch((error) => {
+              console.error('Failed to cache:', url, error);
+            });
+        })
+      );
     })
   );
-  self.skipWaiting();  // Activate SW immediately after installation
 });
 
 // ✅ Activate and Remove Old Caches
