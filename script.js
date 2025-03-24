@@ -322,3 +322,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     displayResponse('Initialization failed. Please refresh the page.', true);
   }
 });
+
+// ONNX Runtime Model
+async function run() {
+  try {
+    // 1. Use a simple base64-encoded model (y = 2x)
+    const modelBase64 = 
+      "o4IAAAKAAQADAAIAAAAAAAAAggABAP////8CAAAAAQAAAAYAAABsaW5lYXIAAAAAAgAAABEAAAAHAAAAeAAAAAAAAAAA" +
+      "AAAAAAEAAAAFAAAAeAAAAAEAAAACAAAAAQAAAAUAAAB5AAAAAQAAAAIAAAAFAAAAbW9kZWwAAAAABQAAAGxpbmVh" +
+      "cgAAAAADAAAAAQAAABQAAAAQAAAAAgAAAAAAAABAAAAAQAAAAAEAAAA=";
+
+    // 2. Convert to Uint8Array
+    const modelBytes = Uint8Array.from(atob(modelBase64), c => c.charCodeAt(0));
+    
+    // 3. Load model
+    const session = await ort.InferenceSession.create(modelBytes);
+    
+    // 4. Test with input x=3
+    const input = new ort.Tensor('float32', new Float32Array([3]), [1]);
+    const output = await session.run({ x: input });
+    
+    console.log("Result:", output.y.data); // Should output [6]
+    
+  } catch (error) {
+    console.error('ONNX Error:', error);
+  }
+}
