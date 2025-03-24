@@ -4,7 +4,7 @@ const cors = require('cors');
 const app = express();
 
 // Configure environment variables
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5173;
 const {
   GOOGLE_API_KEY,
   GOOGLE_CX,
