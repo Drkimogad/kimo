@@ -16,12 +16,7 @@ const CACHE_ASSETS = [
   './icons/icon-128.png',
   './icons/icon-64.png',
   './favicon.ico',
-  './models/text-model.js',
-  './models/image-model.js',
-  './utils/offlineStorage.js',
-  './models/image-model.js',
 
-  
   // New MobileNet model files
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard1of5.bin',
@@ -145,11 +140,11 @@ const CACHE_NAME = 'app-cache-v1';
 const MODELS_CACHE = [
   './models/text-model.js',
   './models/image-model.js',
-  '/models/t5-small/onnx/model.onnx',
-  '/models/t5-small/tokenizer.json',
-  '/models/t5-small/config.json',
-  '/models/summarizer.js',    // Correct path for summarizer.js
-  '/models/personalizer.js',  // Correct path for personalizer.js
+  './models/t5-small/onnx/model.onnx',
+  './models/t5-small/tokenizer.json',
+  './models/t5-small/config.json',
+  './models/summarizer.js',    // Correct path for summarizer.js
+  './models/personalizer.js',  // Correct path for personalizer.js
   './models/offlineStorage.js'
 ];
 
