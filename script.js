@@ -4,6 +4,26 @@ import { Summarizer } from './models/summarizer.js';
 import { Personalizer } from './models/personalizer.js';
 import { OfflineStorage } from './models/offlineStorage.js';
 
+import { pipeline } from '@xenova/transformers';
+import { env } from '@xenova/transformers';
+
+// Set the model path to the folder where your small essential files are stored
+env.localModelPath = './models/';
+
+// Function to load the model dynamically
+async function loadModel() {
+    const generator = await pipeline('text-generation', 'Xenova/t5-small', {
+        cache: true, // Enable caching after the first download
+        progress_callback: (progress) => console.log(`Downloading: ${Math.round(progress * 100)}%`),
+    });
+
+    const result = await generator('Translate this text to French: Hello, how are you?');
+    console.log(result); // Example output from the text generation model
+}
+
+loadModel(); // Call the function to load the model when the app runs
+
+
 // Global state declaration
 let isListening = false;
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://your-proxy-service.com';
