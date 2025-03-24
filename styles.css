@@ -1,0 +1,284 @@
+:root {
+  --bg-color: #f8f9fa;
+  --text-color: #2c3e50;
+  --accent: #ffdd57;
+  --footer-bg: #f5f5f5;
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --footer-bg: #2d2d2d;
+}
+
+/* Base Styles */
+html {
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* Header Styles */
+.app-header {
+  padding: 1rem;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--footer-bg);
+}
+
+.kimo-title {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+#theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  transition: opacity var(--transition-speed);
+}
+
+#theme-toggle:hover {
+  opacity: 0.8;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Search Container */
+.search-container {
+  margin: 2rem auto;
+  width: 100%;
+  max-width: 800px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#user-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border: 2px solid var(--accent);
+  border-radius: var(--border-radius);
+  resize: vertical;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* Buttons */
+.icon-button, .primary-button {
+  padding: 0.8rem 1.2rem;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: 
+    background-color var(--transition-speed),
+    transform var(--transition-speed);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.primary-button {
+  background-color: var(--accent);
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.icon-button {
+  background: transparent;
+  color: var(--text-color);
+}
+
+.upload-label {
+  position: relative;
+  overflow: hidden;
+}
+
+#file-upload {
+  position: absolute;
+  left: -9999px;
+}
+
+/* Results Section */
+.response-container {
+  margin-top: 2rem;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.api-results {
+  background: var(--footer-bg);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+}
+
+.api-results h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.2rem;
+}
+
+.api-results ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.api-results li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.api-results a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.api-results a:hover {
+  text-decoration: underline;
+}
+
+/* Loading Indicator */
+#loading {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+  align-items: center;
+  gap: 1rem;
+  background: var(--footer-bg);
+  padding: 1rem 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+#loading.loading-visible {
+  display: flex;
+}
+
+.spinner {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-left-color: var(--text-color);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Footer */
+.app-footer {
+  background: var(--footer-bg);
+  padding: 1rem;
+  text-align: center;
+  margin-top: auto;
+}
+
+
+/* Add this to your existing CSS */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.response-container {
+  order: 1; /* Forces response area to top */
+}
+
+.search-container {
+  order: 2; /* Keeps search box at bottom */
+  position: sticky;
+  bottom: 20px;
+  background: var(--bg-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+/* Remove previous margin on .search-container */
+.search-container {
+  margin: 0 auto; /* Replace previous margin declaration */
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-wrap: wrap;
+  }
+
+  .icon-button, .primary-button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  #user-input {
+    min-height: 100px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  #theme-toggle {
+    position: static;
+  }
+}
