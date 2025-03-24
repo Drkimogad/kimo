@@ -1,6 +1,7 @@
 import { tf } from './main.js'; // Correctly import TensorFlow.js from main.js
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
+const Tesseract = window.Tesseract; // import function
 
 let mobilenetModel;
 let useModel;
@@ -25,9 +26,6 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use']) {
   await Promise.all(loadPromises);
   console.log('All specified models loaded successfully');
 }
-
-// ocr,js
-const Tesseract = window.Tesseract; // import function
 
 export const recognizeHandwriting = (imageSource) => {
   // Check if the image source is a canvas or an image URL
@@ -57,4 +55,3 @@ window.addEventListener('load', () => {
     console.log("Window loaded. Checking Tesseract...");
     console.log(window.Tesseract);  // Should print an object if loaded correctly
 });
-
