@@ -1,4 +1,4 @@
-import Tesseract from 'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js';
+const Tesseract = window.Tesseract; // import function
 
 export const recognizeHandwriting = (imageSource) => {
   // Check if the image source is a canvas or an image URL
