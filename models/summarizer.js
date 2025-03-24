@@ -1,5 +1,9 @@
 import { pipeline } from 'https://esm.sh/@xenova/transformers';
-import { env } from 'https://esm.sh/@xenova/transformers';
+import { env, apis } from '../env.js';
+import * as ONNX_NODE from 'onnxruntime-node';
+import * as ONNX_WEB from 'onnxruntime-web';
+
+export { Tensor } from 'onnxruntime-common';
 
 const SUMMARY_CACHE = new Map();
 const CLOUD_SUMMARY_URL = import.meta.env.VITE_SUMMARY_API || '/api/summarize';
