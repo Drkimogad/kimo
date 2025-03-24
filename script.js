@@ -4,12 +4,6 @@ import { Summarizer } from './models/summarizer.js';
 import { Personalizer } from './models/personalizer.js';
 import { OfflineStorage } from './models/offlineStorage.js';
 
-import { pipeline } from '@xenova/transformers';
-import { env } from '@xenova/transformers';
-
-// Set the model path to the folder where your small essential files are stored
-env.localModelPath = './models/';
-
 // Function to load the model dynamically
 async function loadModel() {
     const generator = await pipeline('text-generation', 'Xenova/t5-small', {
