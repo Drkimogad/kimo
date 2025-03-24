@@ -1,4 +1,4 @@
-import { pipeline } from 'https://esm.sh@xenova/transformers';
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformer';
 
 const SUMMARY_CACHE = new Map();
 const CLOUD_SUMMARY_URL = import.meta.env.VITE_SUMMARY_API || '/api/summarize';
