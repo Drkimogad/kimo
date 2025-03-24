@@ -5,6 +5,7 @@ const Tesseract = window.Tesseract; // import function
 
 let mobilenetModel;
 let useModel;
+let activeModel;
 
 export async function loadModels(modelsToLoad = ['mobilenet', 'use']) {
   const loadPromises = [];
@@ -25,6 +26,18 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use']) {
 
   await Promise.all(loadPromises);
   console.log('All specified models loaded successfully');
+}
+
+export function setActiveModel(modelName) {
+  if (modelName === 'mobilenet' && mobilenetModel) {
+    activeModel = mobilenetModel;
+    console.log('MobileNet model is now active');
+  } else if (modelName === 'use' && useModel) {
+    activeModel = useModel;
+    console.log('Universal Sentence Encoder model is now active');
+  } else {
+    console.error('Invalid model name or model not loaded');
+  }
 }
 
 export const recognizeHandwriting = (imageSource) => {
