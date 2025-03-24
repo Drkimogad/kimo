@@ -38,7 +38,6 @@ const CACHE_ASSETS = [
   // Local model files
   './models/text-model.js',
   './models/image-model.js',
-  './models/t5-small/onnx/model.onnx',
   './models/t5-small/tokenizer.json',
   './models/t5-small/config.json',
   './models/summarizer.js',
