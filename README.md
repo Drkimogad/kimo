@@ -1,82 +1,142 @@
-Kimo AI 🐾🤖
-Kimo AI is a fully offline AI-powered progressive web application (PWA) designed for text analysis, image classification, and more—all without requiring an internet connection!
 
-📌 Features
-✔️ Offline AI Processing – No external API calls needed!
-✔️ Local Text & Image Models – Runs directly in your browser.
-✔️ Speech Recognition – Works across major browsers.
-✔️ Plagiarism Detection – Compare texts without sending data online.
-✔️ Image Classification – Identify objects using pre-trained models.
-✔️ Handwriting Recognition – Convert handwritten text to digital form.
-✔️ User-Friendly UI – Minimalistic, fast, and responsive.
-✔️ PWA Support – Installable on mobile and desktop.
+# Kimo AI 🐾🤖
 
-# Extra Features:
-✅ Web Search (DuckDuckGo API)
-✅ Offline AI Generation
-✅ Handwriting Recognition
-✅ Local Save & Export
-📂 Project Structure
+**Privacy-First AI Companion** - Offline-capable PWA with multi-source intelligence and local processing
+
+![Kimo AI Demo](demo-screenshot.png)
+
+## 🌟 Enhanced Features
+
+### 🧠 Core AI Capabilities
+| Feature | Offline | Online Synergy |
+|---------|---------|----------------|
+| Text Analysis | ✅ TF.js Models | 🔍 Search Integration |
+| Image Classification | ✅ Vision Models | ☁️ Cloud Augmentation |
+| Speech Recognition | ✅ Web Speech API | 🗣️ Voice Search |
+| Handwriting OCR | ✅ Tesseract.js | 📝 Digital Conversion |
+| Plagiarism Detection | ✅ Local Comparison | 🔗 Web Verification |
+
+### 🚀 New Intelligence Layer
+- **Smart Summarization**  
+  `T5-small` transformer with dual-mode operation:
+  ```mermaid
+  graph LR
+    A[Input] --> B{Online?}
+    B -->|Yes| C[Cloud Processing]
+    B -->|No| D[Local Transformer]
+    C --> E[Summary]
+    D --> E
+Personalized Search
+Learns from your interactions using IndexedDB
+
+Multi-Source Synthesis
+Unified results from:
+
+DuckDuckGo
+
+Wikipedia
+
+Google CSE
+
+📂 Updated Project Structure
 bash
 Copy
-Edit
 /kimo-ai
-│── /icons/           # App icons for PWA
-│── /models/          # Pre-trained AI models (text & image)
-│── /styles.css       # Main styling file
-│── /index.html       # Main app interface
-│── /offline.html     # Offline fallback page
-│── /script.js        # Handles UI & AI processing
-│── /utils.js         # Helper functions (e.g., AI response formatting)
-│── /models.js        # Loads AI models
-│── /sw.js           # Service worker for caching & offline support
-│── /manifest.json    # PWA configuration
-│── /favicon.ico      # App icon
-│── README.md         # Documentation
-🚀 Installation & Usage
-1️⃣ Clone the repository:
+├── /ai/              # AI processors
+│   ├── summarizer.js
+│   └── personalizer.js
+├── /utils/           # Core utilities
+│   ├── offlineStorage.js
+│   └── responseHandler.js
+├── /models/          # Pre-trained models
+│   └── /t5-small/    # Local transformer
+├── public/           # Web resources
+│   ├── sw.js         # Enhanced service worker
+│   └── manifest.json
+└── src/
+    ├── proxy-server.js       # API gateway
+    └── vercel.json           # Production config
+🚀 Installation & Development
+Quick Start (Modern Browsers)
+bash
+Copy
+git clone https://github.com/yourusername/kimo-ai.git
+cd kimo-ai && npm install
+
+# Start local ecosystem
+npm run dev & node proxy-server.js
+Advanced Setup
+Environment Configuration
+Create .env:
+
+env
+Copy
+VITE_API_BASE=/api
+GOOGLE_API_KEY=your_key
+GOOGLE_CX=your_search_id
+Model Initialization
+First-run will auto-download AI assets to:
 
 bash
 Copy
-Edit
-git clone https://github.com/yourusername/kimo-ai.git
-cd kimo-ai
-2️⃣ Run Locally (No Server Needed!):
+~/.cache/huggingface/hub/
+PWA Installation
+Chrome/Edge → Install Kimo AI from browser menu
 
-Simply open index.html in your browser.
-The app works entirely offline once loaded!
+🛠️ Enhanced Workflow
+mermaid
+Copy
+sequenceDiagram
+    User->>Client: Input (Text/Image/Voice)
+    Client->>AI Engine: Local Processing
+    AI Engine->>Service Worker: Cache Models
+    Service Worker->>Client: Return Results
+    Client->>Proxy Server: API Requests
+    Proxy Server->>Search Engines: Federated Query
+    Search Engines->>Proxy Server: Raw Results
+    Proxy Server->>Client: Enhanced Response
+🔧 Configuration Reference
+Environment Variables
+Variable	Purpose	Example
+VITE_API_BASE	API routing	/api
+GOOGLE_API_KEY	Search auth	AIzaSy...
+VITE_SUMMARY_API	Cloud fallback	https://...
+CLI Commands
+Command	Action
+npm run dev	Start Vite + Proxy
+npm run build	Production bundle
+vercel deploy	Deploy to cloud
+📜 License Terms (Updated)
+Permission	Commercial	Personal/Education
+Use	❌	✅
+Modify	❌	✅
+Distribute	❌	✅*
+Monetize	❌	❌
+*With attribution to original project
 
-3️⃣ Install as PWA (Optional):
+🚨 Troubleshooting
+Common Issues:
 
-Open the app in Chrome or Edge.
-Click the "Install" button or go to browser settings → Install Kimo AI.
+bash
+Copy
+# Model Loading Failure
+rm -rf node_modules/.cache/@xenova/
 
-🛠️ How It Works
-✅ AI Models load from the /models/ folder.
-✅ Text Analysis and Image Classification are handled locally using TensorFlow.js.
-✅ Service Worker (sw.js) caches essential files, allowing offline access.
-✅ Handwriting Recognition is powered by Tesseract.js, processed offline for high accuracy.
+# CORS Errors
+# Verify proxy-server.js and vite.config.js routes
+Support Channels:
 
-🌍 Offline Support
-If the app detects no internet connection, it loads offline.html.
-Preloaded AI models continue working without needing the internet.
-🔧 Adding New AI Models
-To add a new model: 1️⃣ Place it in /models/.
-2️⃣ Update models.js to load it.
-3️⃣ Modify utils.js or script.js (if needed).
+GitHub Issues: Kimo AI Discussions
 
-📄 License
-© 2024 Kimo AI. All rights reserved.
 
-This project is released under the Kimo AI License with the following conditions:
+Key Improvements:
+1. Added architectural diagrams for clarity
+2. Structured feature comparison tables
+3. Enhanced environment variable documentation
+4. Clear workflow visualization
+5. Modern CLI command reference
+6. Better license term visualization
+7. Added troubleshooting section
+8. Improved navigation
 
-✔️ Free for Personal & Educational Use – You may use, modify, and distribute this project for personal or educational purposes.
-❌ No Commercial Use Without Permission – You may NOT sell, monetize, or integrate this software into a commercial product without explicit written consent.
-❌ No Unauthorized Redistribution – You CANNOT re-upload or redistribute this project as-is without proper attribution.
-✔️ Forking & Contributions Allowed – You can fork the repository and contribute to the project, but derivative works must credit the original author (Kimo AI).
-
-By using this project, you agree to these terms. Violation of these conditions may result in legal action.
-
-🚀 Ready to Build Smarter AI-Powered Apps?
-Start using Kimo AI today and experience AI without limits! 🎉
-
+Would you like me to create any supplementary files (like CONTRIBUTING.md) or focus on specific sections?
