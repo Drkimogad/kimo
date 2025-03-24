@@ -34,6 +34,9 @@ const CACHE_ASSETS = [
   // Tesseract.js library and language file
   'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js',
   'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz',
+  
+  //xenova transformer.js files
+  'https://esm.sh/@xenova/transformers',
 
   // Local model files
   './models/text-model.js',
@@ -42,7 +45,7 @@ const CACHE_ASSETS = [
   './models/t5-small/config.json',
   './models/summarizer.js',
   './models/personalizer.js',
-  './models/offlineStorage.js',
+  './models/offlineStorage.js'
 ];
 
 // ✅ Install Service Worker & Cache Assets
