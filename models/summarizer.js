@@ -1,4 +1,6 @@
-import { pipeline } from '@huggingface/transformers';
+import { pipeline } from '@xenova/transformers';
+import { env } from '@xenova/transformers';
+
 const SUMMARY_CACHE = new Map();
 const CLOUD_SUMMARY_URL = import.meta.env.VITE_SUMMARY_API || '/api/summarize';
 
