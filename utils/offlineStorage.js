@@ -1,4 +1,4 @@
-const DB_NAME = 'kimoAI';
+const DB_NAME = 'kimo-ai';
 const DB_VERSION = 2;
 
 export class OfflineStorage {
@@ -15,8 +15,12 @@ export class OfflineStorage {
 
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
-        if (!db.objectStoreNames.contains('searchHistory')) {
-          db.createObjectStore('searchHistory', { keyPath: 'id', autoIncrement: true });
+        if (!db.objectStoreNames.contains('history')) {
+          const store = db.createObjectStore('history', {
+            keyPath: 'id',
+            autoIncrement: true
+          });
+          store.createIndex('timestamp', 'timestamp', { unique: false });
         }
       };
 
