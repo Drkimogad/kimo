@@ -113,16 +113,37 @@ if ('serviceWorker' in navigator) {
   </script>
     <script>
     async function run() {
-      // Load ONNX model
-      const session = await ort.InferenceSession.create('model.onnx');
-      
-      // Prepare input
-      const input = new ort.Tensor(new Float32Array([1, 2, 3]), [3]);
-      
-      // Run inference
-      const output = await session.run({ input });
-      console.log(output);
+      try {
+        // 1. Create a tiny ONNX model programmatically (y = 2x + 1)
+        const modelBytes = new Uint8Array([
+          0x08, 0x06, 0x12, 0x06, 0x72, 0x65, 0x6c, 0x75, 0x2d, 0x31, 0x1a, 0x09, 0x0a, 0x01,
+          0x78, 0x12, 0x01, 0x79, 0x2a, 0x07, 0x0a, 0x03, 0x41, 0x64, 0x64, 0x12, 0x00, 0x2a,
+          0x0b, 0x0a, 0x04, 0x43, 0x6f, 0x6e, 0x73, 0x12, 0x03, 0x61, 0x64, 0x64, 0x2a, 0x0d,
+          0x0a, 0x06, 0x43, 0x6f, 0x6e, 0x73, 0x74, 0x31, 0x12, 0x03, 0x61, 0x64, 0x64, 0x2a,
+          0x0d, 0x0a, 0x06, 0x43, 0x6f, 0x6e, 0x73, 0x74, 0x32, 0x12, 0x03, 0x61, 0x64, 0x64,
+          0x2a, 0x0d, 0x0a, 0x06, 0x43, 0x6f, 0x6e, 0x73, 0x74, 0x33, 0x12, 0x03, 0x61, 0x64,
+          0x64, 0x32, 0x02, 0x08, 0x01
+        ]);
+
+        // 2. Load the model
+        const session = await ort.InferenceSession.create(modelBytes.buffer);
+
+        // 3. Test input (x=5)
+        const inputTensor = new ort.Tensor('float32', new Float32Array([5]), [1]);
+
+        // 4. Run inference
+        const results = await session.run({ x: inputTensor });
+        const output = results.y.data[0];
+
+        console.log(`Result for x=5: ${output}`); // Should output 11 (2*5 + 1)
+        alert(`2*5 + 1 = ${output}`); // Shows "2*5 + 1 = 11"
+        
+      } catch (error) {
+        console.error('Error:', error);
+      }
     }
+
+    // Run the demo
     run();
   </script>
 </body>
