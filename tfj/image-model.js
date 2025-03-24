@@ -1,5 +1,5 @@
+import * as tf from 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest';
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
-import tf from './main.js';
 
 export const image = {
   model: null,
@@ -14,7 +14,7 @@ export const image = {
       throw new Error('Image classification unavailable');
     }
   },
-
+  
   async classify(imgElement) {
     if (!this.model) await this.init();
     return this.model.classify(imgElement);
