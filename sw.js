@@ -39,13 +39,13 @@ const CACHE_ASSETS = [
   'https://esm.sh/@xenova/transformers',
 
   // Local model files
-  './models/text-model.js',
-  './models/image-model.js',
+  './tfj/text-model.js',
+  './tfj/image-model.js',
   './models/t5-small/tokenizer.json',
   './models/t5-small/config.json',
   './models/summarizer.js',
   './models/personalizer.js',
-  './models/offlineStorage.js'
+  './utils/offlineStorage.js'
 ];
 
 // ✅ Install Service Worker & Cache Assets
