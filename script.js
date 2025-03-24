@@ -1,8 +1,8 @@
 import { loadModels } from './models.js';
 import { recognizeHandwriting } from './ocr.js';
-import { Summarizer } from './ai/summarizer.js';
-import { Personalizer } from './ai/personalizer.js';
-import { OfflineStorage } from './utils/offlineStorage.js';
+import { Summarizer } from './models/summarizer.js';
+import { Personalizer } from './models/personalizer.js';
+import { OfflineStorage } from './models/offlineStorage.js';
 
 // Global state declaration
 let isListening = false;
