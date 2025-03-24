@@ -111,6 +111,8 @@ const CACHE_NAME = 'app-cache-v1';
 const MODELS_CACHE = [
   '/models/t5-small/onnx/model.onnx',
   '/models/t5-small/tokenizer.json',
+  '/models/t5-small/config.json'
+
 ];
 
 self.addEventListener('install', (event) => {
