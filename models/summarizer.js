@@ -1,4 +1,4 @@
-import { pipeline } from '/xenova-transformers/pipeline.js';
+import { pipeline } from 'https://drkimogad.github.io/kimo/models/t5-small/pipelines.js';
 const SUMMARY_CACHE = new Map();
 const CLOUD_SUMMARY_URL = import.meta.env.VITE_SUMMARY_API || '/api/summarize';
 
