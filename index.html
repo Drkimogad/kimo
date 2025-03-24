@@ -9,6 +9,17 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon">    
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="theme-color" content="#ffffff">
+  <script type="importmap">
+  {
+    "imports": {
+      "@tensorflow/tfjs": "https://esm.sh/@tensorflow/tfjs@4.22.0",
+      "@tensorflow-models/universal-sentence-encoder": 
+        "https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.3",
+      "@tensorflow-models/mobilenet": 
+        "https://esm.sh/@tensorflow-models/mobilenet@2.1.0"
+    }
+  }
+  </script>
 </head>
 <body data-theme="light">
   <!-- Header remains unchanged -->
@@ -101,6 +112,19 @@
   
   <script src="/env.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.15.0/dist/ort.min.js"></script>
+
+  <script type="module">
+    import { analyzeContent } from './script.js';
+
+    // Example manual trigger
+    document.getElementById('analyze-button').addEventListener('click', async () => {
+      const results = await analyzeContent({
+        text: document.getElementById('text-input').value,
+        image: document.getElementById('preview-image')
+      });
+      displayResults(results);
+    });
+  </script>
   
   <!-- Updated Service Worker Registration -->
   <script>
