@@ -98,6 +98,8 @@
   <script type="module" src="main.js" defer></script>
   <script type="module" src="models.js" defer></script>  
   <script type="module" src="script.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.15.0/dist/ort.min.js"></script>
+
 
   <!-- Updated Service Worker Registration -->
   <script>
@@ -108,6 +110,20 @@ if ('serviceWorker' in navigator) {
     console.error('Service worker registration failed:', err);
   });
 }
+  </script>
+    <script>
+    async function run() {
+      // Load ONNX model
+      const session = await ort.InferenceSession.create('model.onnx');
+      
+      // Prepare input
+      const input = new ort.Tensor(new Float32Array([1, 2, 3]), [3]);
+      
+      // Run inference
+      const output = await session.run({ input });
+      console.log(output);
+    }
+    run();
   </script>
 </body>
 </html>
