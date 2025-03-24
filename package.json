@@ -1,0 +1,16 @@
+{
+  "name": "kimo-ai",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node proxy-server.js"  // or similar command
+  },
+  "dependencies": {
+    "@xenova/transformers": "^2.17.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "vite": "^6.2.3"
+  }
+}
