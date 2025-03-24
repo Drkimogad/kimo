@@ -21,3 +21,8 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+
+// Check browser's IndexedDB for cached models
+import { env } from '@xenova/transformers';
+
+console.log('Model cache directory:', env.cacheDir);
