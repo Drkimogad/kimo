@@ -43,8 +43,8 @@ const CACHE_ASSETS = [
   './tfj/image-model.js',
   './models/t5-small/tokenizer.json',
   './models/t5-small/config.json',
-  './models/summarizer.js',
-  './models/personalizer.js',
+  './ai/summarizer.js',
+  './ai/personalizer.js',
   './utils/offlineStorage.js'
 ];
 
