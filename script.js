@@ -24,6 +24,44 @@ async function loadModel() {
 
 loadModel(); // Call the function to load the model when the app runs
 
+// script.js - Your main application logic
+export async function analyzeContent(content) {
+  try {
+    // Lazy-load models only when needed
+    const { checkPlagiarism } = await import('./text-model.js');
+    const { classifyImage } = await import('./image-model.js');
+
+    // Text analysis
+    const textResult = await checkPlagiarism(content.text);
+    
+    // Image analysis
+    const imageResult = await classifyImage(content.image);
+
+    return {
+      text: textResult,
+      image: imageResult
+    };
+
+  } catch (error) {
+    console.error("Analysis failed:", error);
+    throw new Error("Content analysis unavailable");
+  }
+}
+
+// Initialize when DOM loads
+window.addEventListener('DOMContentLoaded', () => {
+  // Example usage
+  const sampleContent = {
+    text: "Artificial intelligence is transforming the world",
+    image: document.getElementById('preview-image')
+  };
+
+  analyzeContent(sampleContent)
+    .then(results => console.log("Analysis results:", results))
+    .catch(console.error);
+});
+
+
 
 // Global state declaration
 let isListening = false;
