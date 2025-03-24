@@ -9,17 +9,10 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon">    
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="theme-color" content="#ffffff">
-  <script type="importmap">
-  {
-    "imports": {
-      "@tensorflow/tfjs": "https://esm.sh/@tensorflow/tfjs@4.22.0",
-      "@tensorflow-models/universal-sentence-encoder": 
-        "https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.3",
-      "@tensorflow-models/mobilenet": 
-        "https://esm.sh/@tensorflow-models/mobilenet@2.1.0"
-    }
-  }
-  </script>
+  
+  <!-- Preload AI models -->
+  <link rel="preload" href="/models/t5-small/onnx/model.onnx" as="fetch">
+  <link rel="preload" href="/models/t5-small/tokenizer.json" as="fetch">
 </head>
 <body data-theme="light">
   <!-- Header remains unchanged -->
@@ -102,39 +95,27 @@
 
   <!-- Updated Scripts Section -->
   <script src="https://unpkg.com/tesseract.js" defer></script>
-  <script type="module" src="./models/offlineStorage.js" defer></script>
-  <script type="module" src="./models/summarizer.js" defer></script>
-  <script type="module" src="./models/personalizer.js" defer></script>
+  <script type="module" src="utils/offlineStorage.js" defer></script>
+  <script type="module" src="ai/summarizer.js" defer></script>
+  <script type="module" src="ai/personalizer.js" defer></script>
   <script type="module" src="ocr.js" defer></script>
   <script type="module" src="main.js" defer></script>
   <script type="module" src="models.js" defer></script>  
   <script type="module" src="script.js" defer></script>
-  
-  <script src="/env.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.15.0/dist/ort.min.js"></script>
 
-  <script type="module">
-    import { analyzeContent } from './script.js';
-
-    // Example manual trigger
-    document.getElementById('analyze-button').addEventListener('click', async () => {
-      const results = await analyzeContent({
-        text: document.getElementById('text-input').value,
-        image: document.getElementById('preview-image')
-      });
-      displayResults(results);
-    });
-  </script>
-  
   <!-- Updated Service Worker Registration -->
   <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').then(() => {
-    console.log('Main service worker registered successfully!');
-  }).catch((err) => {
-    console.error('Service worker registration failed:', err);
-  });
-}
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // Register main service worker
+        navigator.serviceWorker.register('/sw.js');
+        
+        // Register AI model cache worker
+        navigator.serviceWorker.register('/models/t5-small/service-worker-cache.js', {
+          scope: '/models/'
+        });
+      });
+    }
   </script>
 </body>
 </html>
