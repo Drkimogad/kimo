@@ -1,7 +1,8 @@
-const CACHE_NAME = 'kimo-ai-cache-v4'; // Incremented version
-const OFFLINE_URL = './offline.html';
+const CACHE_NAME = 'kimo-ai-cache-v5'; // Increment cache version
+const OFFLINE_URL = './offline.html';  // Fallback offline page
+
+// Files to cache (merged list, no duplication)
 const CACHE_ASSETS = [
-  // Existing assets
   './',
   './index.html',
   './styles.css',
@@ -17,7 +18,7 @@ const CACHE_ASSETS = [
   './icons/icon-64.png',
   './favicon.ico',
 
-  // New MobileNet model files
+  // MobileNet model files
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard1of5.bin',
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard2of5.bin',
@@ -30,137 +31,69 @@ const CACHE_ASSETS = [
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
 
-  // Tesseract.js handwriting library files
-  'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/tesseract.min.js',  // Tesseract.js library  
-  'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz' // English language file
+  // Tesseract.js library and language file
+  'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/tesseract.min.js',
+  'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz',
+
+  // Local model files
+  './models/text-model.js',
+  './models/image-model.js',
+  './models/t5-small/onnx/model.onnx',
+  './models/t5-small/tokenizer.json',
+  './models/t5-small/config.json',
+  './models/summarizer.js',
+  './models/personalizer.js',
+  './models/offlineStorage.js',
 ];
 
 // ✅ Install Service Worker & Cache Assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Cache main app files + models
-      return cache.addAll([
-
-  './',
-  './index.html',
-  './styles.css',
-  './script.js',
-  './models.js',
-  './ocr.js',
-  './main.js',
-  './offline.html',
-  './manifest.json',
-  './icons/icon-512.png', 
-  './icons/icon-192.png', 
-  './icons/icon-128.png',
-  './icons/icon-64.png',
-  './favicon.ico',
-  
-  // New MobileNet model files
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard1of5.bin',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard2of5.bin',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard3of5.bin',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard4of5.bin',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard5of5.bin',
-
-  // Universal Sentence Encoder files
-  'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/model.json',
-  'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
-  'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
-
-  // Tesseract.js handwriting library files
-  'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/tesseract.min.js',  // Tesseract.js library  
-  'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz' // English language file
-        ...MODELS_CACHE_FILES, // Merge model files into caching
-      ]);
+      return cache.addAll(CACHE_ASSETS);
     })
   );
+  self.skipWaiting();  // Activate SW immediately after installation
 });
 
-// ✅ Fetch resources from cache or network
-self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        // If the request is in the cache, return it
-        if (response) {
-          return response;
-        }
-
-        // If the resource is not in the cache, fetch it from the network
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(
-          function(networkResponse) {
-            // Check if we received a valid response
-            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              return networkResponse;
-            }
-
-            // Clone the response to cache it
-            const responseToCache = networkResponse.clone();
-
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                cache.put(event.request, responseToCache);  // Cache it for future use
-              });
-
-            return networkResponse;
-          }
-        );
-      }).catch(function() {
-        // Fallback to offline.html if network fetch fails
-        // This fallback only happens when there's no cached version and the network fetch fails
-        return caches.match(OFFLINE_URL);  // Serve offline page if network fails
-      })
-  );
-});
-
-// ✅ Activate service worker and remove old caches
-self.addEventListener('activate', function(event) {
-  const cacheWhitelist = [CACHE_NAME];
-
+// ✅ Activate and Remove Old Caches
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(function(cacheNames) {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);  // Delete old caches that aren't in the whitelist
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);  // Delete old caches
           }
         })
       );
     })
   );
+  self.clients.claim();  // Take control of all pages
 });
 
-// sw caching js part //
-const CACHE_NAME = 'app-cache-v1';
-const MODELS_CACHE = [
-  './models/text-model.js',
-  './models/image-model.js',
-  './models/t5-small/onnx/model.onnx',
-  './models/t5-small/tokenizer.json',
-  './models/t5-small/config.json',
-  './models/summarizer.js',    // Correct path for summarizer.js
-  './models/personalizer.js',  // Correct path for personalizer.js
-  './models/offlineStorage.js'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(MODELS_CACHE); // Pre-cache the model files.
-    })
-  );
-});
-
+// ✅ Unified Fetch Handler (Cache-First with Offline Fallback)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+      // Return cached response if available
+      if (response) {
+        return response;
+      }
+
+      // Fetch from network if not in cache
+      return fetch(event.request).then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Return offline fallback for navigation requests
+        if (event.request.mode === 'navigate') {
+          return caches.match(OFFLINE_URL);
+        }
+      });
     })
   );
 });
-
