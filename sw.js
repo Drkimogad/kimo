@@ -18,6 +18,9 @@ const CACHE_ASSETS = [
   './favicon.ico',
   './models/text-model.js',
   './models/image-model.js',
+  './utils/offlineStorage.js',
+  './models/image-model.js',
+
   
   // New MobileNet model files
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
