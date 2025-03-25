@@ -98,7 +98,7 @@ body {
   width: 100%;
   min-height: 120px;
   padding: 1rem;
-  border: 2px solid var(--accent);
+  border: 2px solid var (--accent);
   border-radius: var(--border-radius);
   resize: vertical;
   background: var(--bg-color);
@@ -134,7 +134,7 @@ body {
 
 .icon-button {
   background: transparent;
-  color: var(--text-color);
+  color: var (--text-color);
 }
 
 .upload-label {
@@ -226,7 +226,7 @@ body {
 
 /* Footer */
 .app-footer {
-  background: var(--footer-bg);
+  background: var (--footer-bg);
   padding: 1rem;
   text-align: center;
   margin-top: auto;
