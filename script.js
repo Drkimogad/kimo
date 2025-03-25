@@ -1,12 +1,11 @@
 import { loadModels } from './models.js';
-import { recognizeHandwriting } from './models.js';
+import { recognizeHandwriting } from './ocr.js';
 import { Summarizer } from './ai/summarizer.js';
 import { Personalizer } from './ai/personalizer.js';
 import { OfflineStorage } from './utils/offlineStorage.js';
 
 // Global state declaration
 let isListening = false;
-const API_BASE = import.meta.env.VITE_API_BASE || 'https://your-proxy-service.com';
 
 // Helper Functions
 function $(id) {
@@ -75,8 +74,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // API Configuration
 const API_ENDPOINTS = {
-  duckDuckGo: `${API_BASE}/search/ddg?q=`,
-  wikipedia: `${API_BASE}/search/wiki?q=`
+  duckDuckGo: 'https://your-proxy-service.com/search/ddg?q=',
+  wikipedia: 'https://your-proxy-service.com/search/wiki?q='
 };
 
 // Search Functions
