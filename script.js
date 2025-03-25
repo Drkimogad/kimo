@@ -1,5 +1,8 @@
 import { loadModels } from './models.js';
-import { recognizeHandwriting } from './ocr.js';
+import { recognizeHandwriting } from './models.js';
+import { Summarizer } from './ai/summarizer.js';
+import { Personalizer } from './ai/personalizer.js';
+import { OfflineStorage } from './utils/offlineStorage.js';
 
 // Global state declaration
 let isListening = false;
@@ -61,11 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Load models and initialize UI
     await loadModels();
-    $('response-area').innerHTML = `
-      <div class="welcome-message">
-        Welcome to Kimo AI 🚀<br>
-        Your AI-powered search companion and more!
-      </div>`;
+    $('response-area').style.display = 'none';
     
     document.querySelector('.response-actions')?.style?.setProperty('display', 'none');
   } catch (error) {
@@ -77,8 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // API Configuration
 const API_ENDPOINTS = {
   duckDuckGo: `${API_BASE}/search/ddg?q=`,
-  wikipedia: `${API_BASE}/search/wiki?q=`,
-  google: `${API_BASE}/search/google?q=`
+  wikipedia: `${API_BASE}/search/wiki?q=`
 };
 
 // Search Functions
@@ -95,7 +93,6 @@ async function searchAPI(endpoint, query) {
 
 const searchDuckDuckGo = (query) => searchAPI(API_ENDPOINTS.duckDuckGo, query);
 const searchWikipedia = (query) => searchAPI(API_ENDPOINTS.wikipedia, query);
-const searchGoogle = (query) => searchAPI(API_ENDPOINTS.google, query);
 
 // Search Execution
 async function performSearch(query) {
@@ -107,20 +104,20 @@ async function performSearch(query) {
 
   toggleLoading(true);
   try {
-    const [ddgResults, wikiResults, googleResults] = await Promise.all([
+    const [ddgResults, wikiResults] = await Promise.all([
       searchDuckDuckGo(query),
-      searchWikipedia(query),
-      searchGoogle(query)
+      searchWikipedia(query)
     ]);
 
     displayResults({
       "DuckDuckGo": ddgResults,
-      "Wikipedia": wikiResults,
-      "Google": googleResults
+      "Wikipedia": wikiResults
     });
 
     $('response-area').classList.add('has-results');
     document.querySelector('.response-actions')?.style?.setProperty('display', 'flex');
+    $('response-area').style.display = 'block';
+    document.querySelector('.welcome-message').style.display = 'none';
   } catch (error) {
     console.error('Search failed:', error);
     displayResponse('Search failed. Please try again.', true);
@@ -135,8 +132,7 @@ function displayResults(categorizedResults) {
   
   const resultsContainers = {
     "DuckDuckGo": $('duckduckgo-results'),
-    "Wikipedia": $('wikipedia-results'),
-    "Google": $('google-results')
+    "Wikipedia": $('wikipedia-results')
   };
 
   Object.entries(categorizedResults).forEach(([category, results]) => {
@@ -270,11 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // new AI enhancements 
 // ==================== AI ENHANCEMENTS ==================== //
-// Import AI modules at top (add after existing imports)
-import { Summarizer } from './ai/summarizer.js';
-import { Personalizer } from './ai/personalizer.js';
-import { OfflineStorage } from './utils/offlineStorage.js';
-
 // Add AI state management
 let aiConfig = {
   personalization: true,
@@ -307,12 +298,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       ? 'AI-powered search companion! 🧠'
       : 'Basic search companion';
     
-    $('response-area').innerHTML = `
-      <div class="welcome-message">
-        Welcome to Kimo AI 🚀<br>
-        ${welcomeMessage}
-      </div>`;
-      
+    $('response-area').style.display = 'none';
+    document.querySelector('.welcome-message').style.display = 'block';
   } catch (error) {
     // Existing error handling
   }
@@ -331,10 +318,9 @@ async function performSearch(query) {
   }
 
   // Modify results processing
-  const [ddgResults, wikiResults, googleResults] = await Promise.all([
+  const [ddgResults, wikiResults] = await Promise.all([
     searchDuckDuckGo(query),
-    searchWikipedia(query),
-    searchGoogle(query)
+    searchWikipedia(query)
   ]);
 
   // Personalize results
@@ -344,10 +330,7 @@ async function performSearch(query) {
       : ddgResults,
     "Wikipedia": aiConfig.personalization
       ? await Personalizer.rankResults(wikiResults)
-      : wikiResults,
-    "Google": aiConfig.personalization
-      ? await Personalizer.rankResults(googleResults)
-      : googleResults
+      : wikiResults
   };
 
   displayResults(processedResults);
@@ -355,7 +338,7 @@ async function performSearch(query) {
   // Add AI summary
   if (aiConfig.summarization) {
     const summary = await Summarizer.generate(
-      [...ddgResults, ...wikiResults, ...googleResults]
+      [...ddgResults, ...wikiResults]
         .map(r => r.title)
         .join('. ')
     );
