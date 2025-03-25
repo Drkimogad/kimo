@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v5'; // Increment cache version
+const CACHE_NAME = 'kimo-ai-cache-v6'; // Increment cache version
 const OFFLINE_URL = './offline.html';  // Fallback offline page
 
 // Files to cache (merged list, no duplication)
@@ -8,8 +8,6 @@ const CACHE_ASSETS = [
   './styles.css',
   './script.js',
   './models.js',
-  './ocr.js',
-  './main.js',
   './offline.html',
   './manifest.json',
   './icons/icon-512.png', 
