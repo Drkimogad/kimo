@@ -1,5 +1,5 @@
 import { loadModels } from './models.js';
-import { recognizeHandwriting } from './ocr.js';
+import { recognizeHandwriting } from './models.js';
 import { Summarizer } from './ai/summarizer.js';
 import { Personalizer } from './ai/personalizer.js';
 import { OfflineStorage } from './utils/offlineStorage.js';
