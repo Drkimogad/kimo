@@ -98,7 +98,7 @@ body {
   width: 100%;
   min-height: 120px;
   padding: 1rem;
-  border: 2px solid var (--accent);
+  border: 2px solid var(--accent);
   border-radius: var(--border-radius);
   resize: vertical;
   background: var(--bg-color);
@@ -134,7 +134,7 @@ body {
 
 .icon-button {
   background: transparent;
-  color: var (--text-color);
+  color: var(--text-color);
 }
 
 .upload-label {
@@ -152,6 +152,11 @@ body {
   order: 1; /* Forces response area to top */
   flex: 1;
   margin-top: 2rem;
+  height: 65%; /* Ensures response area takes up 65% of the page */
+  overflow-y: auto; /* Allows scrolling if content is long */
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  background-color: var(--footer-bg);
 }
 
 .results-grid {
@@ -226,7 +231,7 @@ body {
 
 /* Footer */
 .app-footer {
-  background: var (--footer-bg);
+  background: var(--footer-bg);
   padding: 1rem;
   text-align: center;
   margin-top: auto;
