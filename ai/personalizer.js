@@ -1,4 +1,4 @@
-import { OfflineStorage } from '/kimo/utils/offlineStorage.js';
+import { OfflineStorage } from '/ai/utils/offlineStorage.js';
 
 const PERSONALIZATION_WEIGHTS = {
   click: 2.0,
