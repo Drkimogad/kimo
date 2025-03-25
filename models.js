@@ -1,9 +1,16 @@
-// Import dependencies for the models
-import  mobilenet from './models.js';
-import  use from './models.js;
-import { Summarizer } from './ai/summarizer.js';  // Xenova summarizer
+// Import the required TensorFlow models directly
+import '@tensorflow/tfjs'; // This initializes TensorFlow globally
+import * as mobilenet from '@tensorflow-models/mobilenet'; // MobileNet for image classification
+import * as use from '@tensorflow-models/universal-sentence-encoder'; // USE for NLP tasks
+
+// Import other AI functionality and OCR tools
+import { Summarizer } from './ai/summarizer.js'; // Xenova summarizer
 import { Personalizer } from './ai/personalizer.js'; // Xenova personalizer
 import * as Tesseract from 'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
+
+// Export the models for use in aisearching.js
+export { mobilenet, use, Summarizer, Personalizer, Tesseract };
+
 
 // Declare variables for the models
 let mobilenetModel;
