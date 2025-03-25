@@ -12,37 +12,51 @@
   
 <</head>
 <body data-theme="light">
+  <!-- Header Section -->
   <header class="app-header">
     <h1 class="kimo-title">Kimo AI</h1>
     <button id="theme-toggle" aria-label="Toggle theme">🌗</button>
   </header>
 
   <main class="main-content">
-    <section id="response-area" class="response-container" style="display: none;">
-      <div class="welcome-message">
+    <!-- Response Area Section -->
+    <section id="response-area" class="response-container">
+      <!-- Welcome Message -->
+      <div id="welcome-message" class="welcome-message">
         <p>Welcome to Kimo AI 🚀<br>Your AI-powered search companion and more!</p>
       </div>
-      
+
+      <!-- Spinner (displayed when searching) -->
+      <div id="searching-spinner" class="searching-spinner" style="display: none;">
+        <p>Kimo is searching...</p>
+      </div>
+
+      <!-- Results Grid -->
       <div class="results-grid">
+        <!-- AI Summary Section -->
         <div class="summary-container" id="ai-summary"></div>
+
+        <!-- DuckDuckGo Results Section -->
         <div class="api-results">
           <h3>DuckDuckGo Results</h3>
           <ul id="duckduckgo-results"></ul>
         </div>
+
+        <!-- Wikipedia Results Section -->
         <div class="api-results">
           <h3>Wikipedia Results</h3>
           <ul id="wikipedia-results"></ul>
         </div>
       </div>
 
+      <!-- Response Actions Section (Save & Clear Only) -->
       <div class="response-actions" style="display: none;">
         <button id="clear-btn" class="icon-button" aria-label="Clear results">🗑️ Clear</button>
-        <button id="humanize-btn" class="icon-button" aria-label="Simplify output">📝 Simplify</button>
         <button id="save-btn" class="icon-button" aria-label="Save session">💾 Save</button>
-        <button id="summary-toggle" class="icon-button" aria-label="Toggle summary">🧠 Summary</button>
       </div>
     </section>
 
+    <!-- Search Container Section -->
     <div class="search-container">
       <div class="input-group">
         <textarea 
@@ -62,10 +76,14 @@
             >
           </label>
           <button id="submit-btn" class="primary-button">🚀 Search</button>
+          <!-- Summarize and Personalize buttons added in search area -->
+          <button id="summarize-btn" class="icon-button" aria-label="Summarize output">📝 Summarize</button>
+          <button id="personalize-btn" class="icon-button" aria-label="Personalize output">👤 Personalize</button>
         </div>
       </div>
     </div>
 
+    <!-- Loading Spinner (when processing request) -->
     <div id="loading" class="loading-hidden" aria-live="polite">
       <div class="spinner"></div>
       <span class="loading-text">Analyzing with AI...</span>
@@ -73,6 +91,7 @@
     </div>
   </main>
 
+  <!-- Footer Section -->
   <footer class="app-footer">
     <p>© 2024 Kimo AI. All rights reserved.</p>
     <div class="privacy-controls">
@@ -80,26 +99,26 @@
     </div>
   </footer>
 
+  <!-- External Scripts -->
   <script src="https://unpkg.com/tesseract.js" defer></script>
-   <script type="module" src="./models.js" defer></script>
-  <script type="module" src="./script.js" defer></script>
   <script src="https://esm.sh/@xenova/transformers" defer></script>
+  <script type="module" src="./models.js" defer></script>
+  <script type="module" src="./aisearching.js" defer></script>
   <script type="module" src="./utils/offlineStorage.js" defer></script>
   <script type="module" src="./ai/summarizer.js" defer></script>
   <script type="module" src="./ai/personalizer.js" defer></script>
 
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/kimo/sw.js')
-        .then(registration => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(error => {
-          console.error('Service Worker registration failed:', error);
-        });
-    });
-  }
-</script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/kimo/sw.js')
+          .then(registration => {
+            console.log('Service Worker registered with scope:', registration.scope);
+          })
+          .catch(error => {
+            console.error('Service Worker registration failed:', error);
+          });
+      });
+    }
+  </script>
 </body>
-</html>
