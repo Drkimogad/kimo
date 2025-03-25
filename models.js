@@ -19,7 +19,6 @@ let summarizer;
 let personalizer;
 let activeModel;  // Add a variable to track the active model
 
-const MODEL_PATH = '/models/t5-small/'; // Point to your models directory
 // Function to load the models
 export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer', 'personalizer']) {
   const loadPromises = [];
