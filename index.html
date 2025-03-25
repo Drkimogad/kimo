@@ -9,8 +9,7 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon">    
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="theme-color" content="#ffffff">
-  
-<</head>
+</head>
 <body data-theme="light">
   <!-- Header Section -->
   <header class="app-header">
@@ -20,7 +19,7 @@
 
   <main class="main-content">
     <!-- Response Area Section -->
-    <section id="response-area" class="response-container">
+    <section id="response-container" class="response-container">
       <!-- Welcome Message -->
       <div id="welcome-message" class="welcome-message">
         <p>Welcome to Kimo AI 🚀<br>Your AI-powered search companion and more!</p>
@@ -30,42 +29,18 @@
       <div id="searching-spinner" class="searching-spinner" style="display: none;">
         <p>Kimo is searching...</p>
       </div>
-
-      <!-- Results Grid -->
-      <div class="results-grid">
-        <!-- AI Summary Section -->
-        <div class="summary-container" id="ai-summary"></div>
-
-        <!-- DuckDuckGo Results Section -->
-        <div class="api-results">
-          <h3>DuckDuckGo Results</h3>
-          <ul id="duckduckgo-results"></ul>
-        </div>
-
-        <!-- Wikipedia Results Section -->
-        <div class="api-results">
-          <h3>Wikipedia Results</h3>
-          <ul id="wikipedia-results"></ul>
-        </div>
-      </div>
-
-      <!-- Response Actions Section (Save & Clear Only) -->
-      <div class="response-actions" style="display: none;">
-        <button id="clear-btn" class="icon-button" aria-label="Clear results">🗑️ Clear</button>
-        <button id="save-btn" class="icon-button" aria-label="Save session">💾 Save</button>
-      </div>
     </section>
 
     <!-- Search Container Section -->
     <div class="search-container">
       <div class="input-group">
         <textarea 
-          id="user-input" 
+          id="searchInput" 
           placeholder="Type your query, upload a file, or speak..."
           aria-label="Search input"
         ></textarea>
         <div class="button-group">
-          <button id="voice-btn" class="icon-button" aria-label="Voice input">🎤</button>
+          <button id="voiceInputButton" class="icon-button" aria-label="Voice input">🎤</button>
           <label for="file-upload" class="icon-button upload-label" aria-label="File upload">
             📁
             <input 
@@ -76,11 +51,16 @@
             >
           </label>
           <button id="submit-btn" class="primary-button">🚀 Search</button>
-          <!-- Summarize and Personalize buttons added in search area -->
           <button id="summarize-btn" class="icon-button" aria-label="Summarize output">📝 Summarize</button>
           <button id="personalize-btn" class="icon-button" aria-label="Personalize output">👤 Personalize</button>
         </div>
       </div>
+    </div>
+
+    <!-- Response Actions Section (Save & Clear Buttons) -->
+    <div class="response-actions">
+      <button id="clear-btn" class="icon-button" aria-label="Clear results">🗑️ Clear</button>
+      <button id="save-btn" class="icon-button" aria-label="Save session">💾 Save</button>
     </div>
 
     <!-- Loading Spinner (when processing request) -->
@@ -117,3 +97,4 @@
     }
   </script>
 </body>
+</html>
