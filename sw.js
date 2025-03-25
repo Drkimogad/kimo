@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v6'; // Increment cache version
+const CACHE_NAME = 'kimo-ai-cache-v7'; // Increment cache version
 const OFFLINE_URL = './offline.html';  // Fallback offline page
 
 // Files to cache (merged list, no duplication)
