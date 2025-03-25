@@ -1,6 +1,6 @@
 // aisearching.js
 
-import { loadModels, summarizerModel, personalizerModel } from './models.js';
+import { loadModels, mobilenetModel, useModel, summarizer, personalizer, Tesseract, setActiveModel } from './models.js';
 
 let searchInput = document.getElementById("searchInput");
 let responseContainer = document.getElementById("responseContainer");
