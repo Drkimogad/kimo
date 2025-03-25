@@ -264,16 +264,14 @@ document.addEventListener('DOMContentLoaded', () => {
   $('photo-upload-box').style.display = 'none';
 });
 
-// new AI enhancements 
-// ==================== AI ENHANCEMENTS ==================== //
-// Add AI state management
+// AI enhancements 
 let aiConfig = {
   personalization: true,
   summarization: true,
   modelStatus: 'loading'
 };
 
-// Add after DOMContentLoaded handler
+// Initialize AI systems
 async function initializeAISystems() {
   try {
     await OfflineStorage.init();
@@ -290,7 +288,6 @@ async function initializeAISystems() {
 document.addEventListener('DOMContentLoaded', async () => {
   // Add to existing try block
   try {
-    // Add after loadModels()
     await initializeAISystems();
     
     // Update welcome message
