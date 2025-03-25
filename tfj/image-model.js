@@ -1,5 +1,4 @@
-import * as tf from 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest';
-import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
+import tf from 'https://esm.sh/@tensorflow-models/mobilenet';
 
 export const image = {
   model: null,
