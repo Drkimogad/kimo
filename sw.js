@@ -35,7 +35,7 @@ const CACHE_ASSETS = [
   'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js',
   'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz',
   
-  //xenova transformer.js files
+  // Xenova transformer.js files
   'https://esm.sh/@xenova/transformers',
 
   // Local model files
@@ -51,9 +51,9 @@ const CACHE_ASSETS = [
 // ✅ Install Service Worker & Cache Assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open('my-cache').then((cache) => {
+    caches.open(CACHE_NAME).then((cache) => {
       return Promise.all(
-        urlsToCache.map((url) => {
+        CACHE_ASSETS.map((url) => {
           return fetch(url)
             .then((response) => {
               if (!response.ok) throw new Error(`HTTP error: ${url}`);
@@ -100,7 +100,8 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         }
         return networkResponse;
-      }).catch(() => {
+      }).catch((error) => {
+        console.error('Fetch failed; returning offline page instead.', error);
         // Return offline fallback for navigation requests
         if (event.request.mode === 'navigate') {
           return caches.match(OFFLINE_URL);
