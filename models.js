@@ -1,5 +1,5 @@
 // Import the required TensorFlow models directly
-import '@tensorflow/tfjs'; // This initializes TensorFlow globally
+import "https://esm.sh/@tensorflow/tfjs@4.9.0"; // CDN link for TensorFlow.js
 import * as mobilenet from '@tensorflow-models/mobilenet'; // MobileNet for image classification
 import * as use from '@tensorflow-models/universal-sentence-encoder'; // USE for NLP tasks
 
