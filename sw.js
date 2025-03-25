@@ -6,8 +6,8 @@ const CACHE_ASSETS = [
   './',
   './index.html',
   './styles.css',
-  './script.js',
-  './models.js',
+  './aisearching.js',
+  './models.js',   // main script
   './offline.html',
   './manifest.json',
   './icons/icon-512.png', 
