@@ -1,4 +1,4 @@
-import tf from 'https://esm.sh/@tensorflow-models/mobilenet';
+import * as tf fromm 'https://esm.sh/@tensorflow-models/mobilenet';
 
 export const image = {
   model: null,
