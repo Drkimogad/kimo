@@ -23,6 +23,9 @@ const CACHE_ASSETS = [
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard3of5.bin',
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard4of5.bin',
   'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard5of5.bin',
+   // Add other dependencies like TensorFlow core and converter if not already cached for both mobileNet and encoder
+  'https://esm.sh/@tensorflow/tfjs-converter@^4.9.0?target=es2022',
+  'https://esm.sh/@tensorflow/tfjs-core@^4.9.0?target=es2022',
 
   // Universal Sentence Encoder files
   'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/model.json',
