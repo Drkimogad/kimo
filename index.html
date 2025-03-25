@@ -10,43 +10,32 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="theme-color" content="#ffffff">
   
-  <!-- Preload AI models -->
-  <link rel="preload" href="/models/t5-small/onnx/model.onnx" as="fetch">
-  <link rel="preload" href="/models/t5-small/tokenizer.json" as="fetch">
-</head>
+<</head>
 <body data-theme="light">
-  <!-- Header remains unchanged -->
   <header class="app-header">
     <h1 class="kimo-title">Kimo AI</h1>
     <button id="theme-toggle" aria-label="Toggle theme">🌗</button>
   </header>
 
   <main class="main-content">
-    <!-- Updated Response Area with Summary Support -->
-    <section id="response-area" class="response-container">
+    <section id="response-area" class="response-container" style="display: none;">
       <div class="welcome-message">
-        <p>Welcome to Kimo AI 🚀<br>Your AI-powered search companion!</p>
+        <p>Welcome to Kimo AI 🚀<br>Your AI-powered search companion and more!</p>
       </div>
       
       <div class="results-grid">
-        <!-- Added summary containers -->
         <div class="summary-container" id="ai-summary"></div>
         <div class="api-results">
-          <h3>Web Results <span class="personalized-badge">Personalized</span></h3>
+          <h3>DuckDuckGo Results</h3>
           <ul id="duckduckgo-results"></ul>
         </div>
         <div class="api-results">
-          <h3>Wikipedia <span class="personalized-badge">Personalized</span></h3>
+          <h3>Wikipedia Results</h3>
           <ul id="wikipedia-results"></ul>
-        </div>
-        <div class="api-results">
-          <h3>Google <span class="personalized-badge">Personalized</span></h3>
-          <ul id="google-results"></ul>
         </div>
       </div>
 
-      <!-- Updated Action Buttons -->
-      <div class="response-actions">
+      <div class="response-actions" style="display: none;">
         <button id="clear-btn" class="icon-button" aria-label="Clear results">🗑️ Clear</button>
         <button id="humanize-btn" class="icon-button" aria-label="Simplify output">📝 Simplify</button>
         <button id="save-btn" class="icon-button" aria-label="Save session">💾 Save</button>
@@ -54,7 +43,6 @@
       </div>
     </section>
 
-    <!-- Search Controls -->
     <div class="search-container">
       <div class="input-group">
         <textarea 
@@ -78,7 +66,6 @@
       </div>
     </div>
 
-    <!-- Enhanced Loading Indicator -->
     <div id="loading" class="loading-hidden" aria-live="polite">
       <div class="spinner"></div>
       <span class="loading-text">Analyzing with AI...</span>
@@ -93,24 +80,17 @@
     </div>
   </footer>
 
-  <!-- Updated Scripts Section -->
   <script src="https://unpkg.com/tesseract.js" defer></script>
   <script type="module" src="utils/offlineStorage.js" defer></script>
   <script type="module" src="ai/summarizer.js" defer></script>
   <script type="module" src="ai/personalizer.js" defer></script>
-  <script type="module" src="ocr.js" defer></script>
-  <script type="module" src="main.js" defer></script>
-  <script type="module" src="models.js" defer></script>  
+  <script type="module" src="models.js" defer></script>
   <script type="module" src="script.js" defer></script>
 
-  <!-- Updated Service Worker Registration -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        // Register main service worker
         navigator.serviceWorker.register('/sw.js');
-        
-        // Register AI model cache worker
         navigator.serviceWorker.register('/models/t5-small/service-worker-cache.js', {
           scope: '/models/'
         });
