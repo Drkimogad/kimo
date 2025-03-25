@@ -1,7 +1,7 @@
-import * as tf from 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest';
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
-const Tesseract = window.Tesseract; // import function
+const Tesseract = window.Tesseract; // Ensure Tesseract.js is already loaded in the HTML script tag
+
 
 let mobilenetModel;
 let useModel;
