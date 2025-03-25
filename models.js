@@ -1,17 +1,22 @@
+// Import dependencies for the models
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
 import { Summarizer } from './summarizer.js';  // Xenova summarizer
 import { Personalizer } from './personalizer.js'; // Xenova personalizer
 import * as Tesseract from 'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
 
+// Declare variables for the models
 let mobilenetModel;
 let useModel;
 let summarizer;
 let personalizer;
+let activeModel;  // Add a variable to track the active model
 
+// Function to load the models
 export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer', 'personalizer']) {
   const loadPromises = [];
 
+  // Load the MobileNet model
   if (modelsToLoad.includes('mobilenet')) {
     loadPromises.push(mobilenet.load().then(model => {
       mobilenetModel = model;
@@ -19,6 +24,7 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer
     }));
   }
 
+  // Load the Universal Sentence Encoder model
   if (modelsToLoad.includes('use')) {
     loadPromises.push(use.load().then(model => {
       useModel = model;
@@ -26,6 +32,7 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer
     }));
   }
 
+  // Load the Summarizer model
   if (modelsToLoad.includes('summarizer')) {
     loadPromises.push(Summarizer.load().then(model => {
       summarizer = model;
@@ -33,6 +40,7 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer
     }));
   }
 
+  // Load the Personalizer model
   if (modelsToLoad.includes('personalizer')) {
     loadPromises.push(Personalizer.load().then(model => {
       personalizer = model;
@@ -40,10 +48,12 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer
     }));
   }
 
+  // Wait for all models to load
   await Promise.all(loadPromises);
   console.log('All specified models loaded successfully');
 }
 
+// Function to recognize handwriting from an image
 export function recognizeHandwriting(imageSource) {
   let imagePath = imageSource;
 
@@ -60,6 +70,7 @@ export function recognizeHandwriting(imageSource) {
   });
 }
 
+// Function to set the active model (MobileNet or Universal Sentence Encoder)
 export function setActiveModel(modelName) {
   if (modelName === 'mobilenet' && mobilenetModel) {
     activeModel = mobilenetModel;
@@ -72,40 +83,5 @@ export function setActiveModel(modelName) {
   }
 }
 
-export { mobilenetModel, useModel, summarizer, personalizer };
-
-
-// models.js
-
-// Initialize the models and functions that will be used for summarizing and personalizing
-let summarizerModel, personalizerModel;
-
-async function loadModels() {
-    try {
-        // Load summarizer and personalizer models (This assumes you're using a local model or API)
-        summarizerModel = await loadSummarizerModel();  // Implement loadSummarizerModel as per your setup
-        personalizerModel = await loadPersonalizerModel(); // Implement loadPersonalizerModel as per your setup
-        console.log("Models loaded successfully.");
-    } catch (error) {
-        console.error("Error loading models:", error);
-    }
-}
-
-// Example functions to load models, replace with actual logic
-async function loadSummarizerModel() {
-    // Logic to load summarizer model (either locally or from an endpoint)
-    return new Promise(resolve => {
-        setTimeout(() => resolve("Summarizer Model Loaded"), 1000);
-    });
-}
-
-async function loadPersonalizerModel() {
-    // Logic to load personalizer model
-    return new Promise(resolve => {
-        setTimeout(() => resolve("Personalizer Model Loaded"), 1000);
-    });
-}
-
-// Exporting the loadModels function and the models
-export { loadModels, summarizerModel, personalizerModel };
-
+// Export the models for use in other scripts
+export { mobilenetModel, useModel, summarizer, personalizer, activeModel };
