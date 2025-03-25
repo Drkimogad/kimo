@@ -73,3 +73,39 @@ export function setActiveModel(modelName) {
 }
 
 export { mobilenetModel, useModel, summarizer, personalizer };
+
+
+// models.js
+
+// Initialize the models and functions that will be used for summarizing and personalizing
+let summarizerModel, personalizerModel;
+
+async function loadModels() {
+    try {
+        // Load summarizer and personalizer models (This assumes you're using a local model or API)
+        summarizerModel = await loadSummarizerModel();  // Implement loadSummarizerModel as per your setup
+        personalizerModel = await loadPersonalizerModel(); // Implement loadPersonalizerModel as per your setup
+        console.log("Models loaded successfully.");
+    } catch (error) {
+        console.error("Error loading models:", error);
+    }
+}
+
+// Example functions to load models, replace with actual logic
+async function loadSummarizerModel() {
+    // Logic to load summarizer model (either locally or from an endpoint)
+    return new Promise(resolve => {
+        setTimeout(() => resolve("Summarizer Model Loaded"), 1000);
+    });
+}
+
+async function loadPersonalizerModel() {
+    // Logic to load personalizer model
+    return new Promise(resolve => {
+        setTimeout(() => resolve("Personalizer Model Loaded"), 1000);
+    });
+}
+
+// Exporting the loadModels function and the models
+export { loadModels, summarizerModel, personalizerModel };
+
