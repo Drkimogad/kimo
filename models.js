@@ -9,7 +9,7 @@ let useModel;
 let summarizer;
 let personalizer;
 
-export async function loadModels(modelsToLoad = ['mobilenet', 'use']) {
+export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer', 'personalizer']) {
   const loadPromises = [];
 
   if (modelsToLoad.includes('mobilenet')) {
