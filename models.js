@@ -1,9 +1,9 @@
 // Import dependencies for the models
-import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
-import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
-import { Summarizer } from './summarizer.js';  // Xenova summarizer
-import { Personalizer } from './personalizer.js'; // Xenova personalizer
-import * as Tesseract from 'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
+import  mobilenet from './models.js';
+import  use from './models.js;
+import { Summarizer } from './ai/summarizer.js';  // Xenova summarizer
+import { Personalizer } from './ai/personalizer.js'; // Xenova personalizer
+import * as Tesseract from 'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
 
 // Declare variables for the models
 let mobilenetModel;
