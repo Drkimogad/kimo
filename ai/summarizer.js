@@ -1,4 +1,4 @@
-import { pipeline } from 'https://cdn.skypack.dev/pin/@xenova/transformers@v2.17.2-OzL2Rh1SMMLkxMPy0iO2/mode=imports/optimized/@xenova/transformers.js';
+import { pipeline } from 'https://esm.sh/@xenova/transformers';
 
 const SUMMARY_CACHE = new Map();
 const CLOUD_SUMMARY_URL = import.meta.env.VITE_SUMMARY_API || '/api/summarize';
