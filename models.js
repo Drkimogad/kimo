@@ -1,11 +1,13 @@
 import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
 import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
-const Tesseract = window.Tesseract; // Ensure Tesseract.js is already loaded in the HTML script tag
-
+import { Summarizer } from './summarizer.js';  // Xenova summarizer
+import { Personalizer } from './personalizer.js'; // Xenova personalizer
+import * as Tesseract from 'https://cdn.jsdelivr.net/npm/tesseract.js@2.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
 
 let mobilenetModel;
 let useModel;
-let activeModel;
+let summarizer;
+let personalizer;
 
 export async function loadModels(modelsToLoad = ['mobilenet', 'use']) {
   const loadPromises = [];
@@ -24,8 +26,38 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use']) {
     }));
   }
 
+  if (modelsToLoad.includes('summarizer')) {
+    loadPromises.push(Summarizer.load().then(model => {
+      summarizer = model;
+      console.log('Summarizer model loaded');
+    }));
+  }
+
+  if (modelsToLoad.includes('personalizer')) {
+    loadPromises.push(Personalizer.load().then(model => {
+      personalizer = model;
+      console.log('Personalizer model loaded');
+    }));
+  }
+
   await Promise.all(loadPromises);
   console.log('All specified models loaded successfully');
+}
+
+export function recognizeHandwriting(imageSource) {
+  let imagePath = imageSource;
+
+  if (imageSource instanceof HTMLCanvasElement) {
+    imagePath = imageSource.toDataURL('image/png');
+  }
+
+  Tesseract.recognize(imagePath, 'eng', {
+    logger: (m) => console.log(m),
+  }).then(({ data: { text } }) => {
+    console.log('Recognized Text:', text);
+  }).catch(err => {
+    console.error('Error:', err);
+  });
 }
 
 export function setActiveModel(modelName) {
@@ -40,31 +72,4 @@ export function setActiveModel(modelName) {
   }
 }
 
-export const recognizeHandwriting = (imageSource) => {
-  // Check if the image source is a canvas or an image URL
-  let imagePath = imageSource;
-
-  // If it's a canvas, convert it to a data URL first
-  if (imageSource instanceof HTMLCanvasElement) {
-    imagePath = imageSource.toDataURL('image/png'); // Convert canvas to base64 string
-  }
-
-  Tesseract.recognize(
-    imagePath,
-    'eng', // Language (English in this case)
-    {
-      logger: (m) => console.log(m), // Log progress
-    }
-  ).then(({ data: { text } }) => {
-    console.log('Recognized Text:', text); // Output recognized text
-    // Here you can update the UI or pass the text back
-  }).catch(err => {
-    console.error('Error:', err); // Handle errors
-  });
-};
-
-// Wrap Tesseract usage inside an event listener
-window.addEventListener('load', () => {
-    console.log("Window loaded. Checking Tesseract...");
-    console.log(window.Tesseract);  // Should print an object if loaded correctly
-});
+export { mobilenetModel, useModel, summarizer, personalizer };
