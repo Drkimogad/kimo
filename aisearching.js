@@ -1,15 +1,14 @@
-// aisearching.js
-
-import { loadModels, mobilenetModel, useModel, summarizer, personalizer, Tesseract, setActiveModel } from './models.js';
+import { loadModels, summarizerModel, personalizerModel } from './models.js';
 
 let searchInput = document.getElementById("searchInput");
-let responseContainer = document.getElementById("responseContainer");
-let welcomeMessage = document.getElementById("welcomeMessage");
-let spinner = document.getElementById("spinner");
-let saveButton = document.getElementById("saveButton");
+let responseContainer = document.getElementById("response-container");
+let welcomeMessage = document.getElementById("welcome-message");
+let spinner = document.getElementById("searching-spinner");
+let saveButton = document.getElementById("save-btn");
+let clearButton = document.getElementById("clear-btn");
 
 let voiceInputButton = document.getElementById("voiceInputButton");
-let photoUploadButton = document.getElementById("photoUploadButton");
+let photoUploadButton = document.getElementById("file-upload");
 
 // Initialize the app
 async function initializeApp() {
@@ -28,6 +27,7 @@ async function initializeApp() {
     // Add event listeners for buttons
     voiceInputButton.addEventListener('click', toggleVoiceRecognition);
     saveButton.addEventListener('click', saveSearchResults);
+    clearButton.addEventListener('click', clearSearchResults);
 }
 
 // Voice recognition function
@@ -108,29 +108,23 @@ async function fetchDuckDuckGoResults(query) {
     return new Promise(resolve => {
         setTimeout(() => {
             resolve([
-                { title: "Result 1", link: "https://duckduckgo.com", source: 'duckduckgo' },
-                { title: "Result 2", link: "https://duckduckgo.com", source: 'duckduckgo' }
+                { title: "Result 1", link: "https://duckduckgo.com" },
+                { title: "Result 2", link: "https://duckduckgo.com" }
             ]);
         }, 2000);
     });
 }
 
-// Display search results in categorized sections
+// Display search results in the response container
 function displaySearchResults(results) {
-    const duckDuckGoResults = results.filter(result => result.source === 'duckduckgo');
-
-    let resultsHTML = '';
-
-    // Display DuckDuckGo Results
-    if (duckDuckGoResults.length > 0) {
-        resultsHTML += '<h3>DuckDuckGo Results</h3>';
-        resultsHTML += '<ul>';
-        duckDuckGoResults.forEach(result => {
-            resultsHTML += `<li><a href="${result.link}" target="_blank">${result.title}</a></li>`;
-        });
-        resultsHTML += '</ul>';
-    }
-
+    let resultsHTML = '<h3>Search Results</h3><ul>';
+    
+    results.forEach(result => {
+        resultsHTML += `<li><a href="${result.link}" target="_blank">${result.title}</a></li>`;
+    });
+    
+    resultsHTML += '</ul>';
+    
     responseContainer.innerHTML = resultsHTML;
     responseContainer.style.display = 'block';
 }
@@ -139,6 +133,12 @@ function displaySearchResults(results) {
 function displayError(message) {
     responseContainer.innerHTML = `<p style="color: red;">${message}</p>`;
     responseContainer.style.display = 'block';
+}
+
+// Clear the search results and input
+function clearSearchResults() {
+    responseContainer.innerHTML = '';
+    searchInput.value = '';
 }
 
 // Save the search results or summarized text
