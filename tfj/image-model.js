@@ -1,4 +1,5 @@
-import * as tf fromm 'https://esm.sh/@tensorflow-models/mobilenet';
+// Import MobileNet from model.js, no need to import @tensorflow/tfjs again
+import { mobilenet } from './model.js';
 
 export const image = {
   model: null,
