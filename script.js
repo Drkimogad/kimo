@@ -1,115 +1,75 @@
-// Model initialization
-import { loadModels, setActiveModel, recognizeHandwriting } from './models.js';
+import { mobilenetModel, useModel, summarizer, personalizer } from './models.js';
 
-window.addEventListener('load', async () => {
-  // 1. Load the models (MobileNet and Universal Sentence Encoder)
-  await loadModels();
+// Online search functionality (DuckDuckGo, Wikipedia)
+async function onlineSearch(query) {
+  const duckDuckGoUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+  const wikipediaUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(query)}`;
 
-  // 2. Set the active model for processing (e.g., 'mobilenet' or 'use')
-  setActiveModel('mobilenet'); // Change to 'use' if needed for sentence encoding
-
-  console.log('Models loaded and active model set.');
-});
-
-// Handle Image Upload and Trigger OCR Recognition
-const imageUploadButton = document.getElementById('imageUploadButton');
-const imageInput = document.getElementById('imageInput');
-const resultTextArea = document.getElementById('resultTextArea');
-
-imageUploadButton.addEventListener('click', () => {
-  const file = imageInput.files[0];
-  
-  if (file) {
-    const imageURL = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      // Check if the image is ready for OCR
-      recognizeHandwriting(img); // Pass the loaded image to Tesseract.js for OCR processing
-    };
-    img.src = imageURL;
-  } else {
-    alert('Please upload an image file');
-  }
-});
-
-// Function to display the OCR result in the result area
-function displayOCRResult(text) {
-  resultTextArea.textContent = text; // Display recognized text in the UI
+  // Open these URLs or display results in your app
+  console.log(`DuckDuckGo Search: ${duckDuckGoUrl}`);
+  console.log(`Wikipedia Search: ${wikipediaUrl}`);
 }
 
-// Integrate the result display in the recognizeHandwriting function
-export const recognizeHandwriting = (imageSource) => {
-  let imagePath = imageSource;
+// AI-based searching with Summarizer and Personalizer
+async function aiSearch(query) {
+  const summarizedResult = await summarizer.summarize(query);
+  const personalizedResult = await personalizer.personalize(summarizedResult);
 
-  // If the image source is a canvas, convert to data URL
-  if (imageSource instanceof HTMLCanvasElement) {
-    imagePath = imageSource.toDataURL('image/png');
-  }
-
-  Tesseract.recognize(
-    imagePath,
-    'eng', 
-    {
-      logger: (m) => console.log(m), // Show progress in the console
-    }
-  ).then(({ data: { text } }) => {
-    console.log('Recognized Text:', text);
-    displayOCRResult(text); // Display the recognized text in the result area
-  }).catch(err => {
-    console.error('OCR Error:', err); // Handle errors
-  });
-};
-
-// Example of image classification using MobileNet (if it's the active model)
-const classifyImageButton = document.getElementById('classifyImageButton');
-const classifyImageInput = document.getElementById('classifyImageInput');
-const classificationResultArea = document.getElementById('classificationResult');
-
-classifyImageButton.addEventListener('click', () => {
-  const file = classifyImageInput.files[0];
-  
-  if (file) {
-    const imageURL = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = async () => {
-      if (activeModel === mobilenetModel) {
-        // Classify the image using the MobileNet model
-        const predictions = await activeModel.classify(img);
-        displayClassificationResult(predictions);
-      }
-    };
-    img.src = imageURL;
-  } else {
-    alert('Please upload an image to classify');
-  }
-});
-
-// Function to display classification results
-function displayClassificationResult(predictions) {
-  classificationResultArea.textContent = JSON.stringify(predictions, null, 2);
+  console.log('Summarized Result:', summarizedResult);
+  console.log('Personalized Result:', personalizedResult);
+  return personalizedResult;
 }
 
-// Example usage for sentence encoding with USE (if it's the active model)
-const encodeSentenceButton = document.getElementById('encodeSentenceButton');
-const sentenceInput = document.getElementById('sentenceInput');
-const sentenceEmbeddingResultArea = document.getElementById('sentenceEmbeddingResult');
-
-encodeSentenceButton.addEventListener('click', async () => {
-  const sentence = sentenceInput.value.trim();
-
-  if (sentence) {
-    if (activeModel === useModel) {
-      const embeddings = await activeModel.embed([sentence]);
-      displaySentenceEmbeddingResult(embeddings);
-    } else {
-      alert('Universal Sentence Encoder is not the active model');
-    }
-  } else {
-    alert('Please enter a sentence to encode');
+// Image Classification (MobileNet)
+async function classifyImage(image) {
+  if (!mobilenetModel) {
+    console.error('MobileNet model not loaded');
+    return;
   }
+
+  const prediction = await mobilenetModel.classify(image);
+  console.log('Predictions:', prediction);
+  return prediction;
+}
+
+// Text Embedding (Universal Sentence Encoder)
+async function getTextEmbedding(text) {
+  if (!useModel) {
+    console.error('Universal Sentence Encoder model not loaded');
+    return;
+  }
+
+  const embedding = await useModel.embed(text);
+  console.log('Text Embedding:', embedding);
+  return embedding;
+}
+
+// Speech Recognition (Voice Input)
+function initSpeechRecognition() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.start();
+
+  recognition.onresult = (event) => {
+    const spokenText = event.results[0][0].transcript;
+    console.log('Voice Input:', spokenText);
+
+    // Process the voice input (e.g., trigger a search or text generation)
+    aiSearch(spokenText);  // Example: Use voice input for AI searching
+  };
+
+  recognition.onerror = (event) => {
+    console.error('Speech Recognition Error:', event.error);
+  };
+}
+
+// Trigger voice input through a button click or some other event
+document.getElementById('start-voice-input').addEventListener('click', () => {
+  initSpeechRecognition();
 });
 
-// Function to display the sentence embedding result
-function displaySentenceEmbeddingResult(embeddings) {
-  sentenceEmbeddingResultArea.textContent = JSON.stringify(embeddings.arraySync(), null, 2);
-}
+export { onlineSearch, aiSearch, classifyImage, getTextEmbedding, initSpeechRecognition };
