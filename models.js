@@ -14,10 +14,17 @@ import Long from 'long';
 window.Long = Long;
 
 // Declare variables for the models
-// Existing imports remain the same
-
-// Declare variables for the models
 let mobilenetModel, useModel, summarizerModel, personalizerModel, activeModel;
+// Import model loader from models.js
+import { loadModels } from './models.js';
+
+async function initApp() {
+  console.log('Initializing App...');
+  await loadModels();  // Load all specified models before starting the app
+  console.log('Models loaded. App is ready.');
+}
+
+initApp();  // Initialize the app
 
 // Export the loaders instead of direct variables to avoid undefined exports
 export function getSummarizerModel() {
