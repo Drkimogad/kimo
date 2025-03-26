@@ -1,4 +1,4 @@
-import { pipeline } from './@xenova/transformers';
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers';
 
 const SUMMARY_CACHE = new Map();
 const CLOUD_SUMMARY_URL = '/api/summarize';  // Static fallback
