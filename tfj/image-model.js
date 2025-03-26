@@ -1,5 +1,5 @@
 // Import MobileNet from model.js, no need to import @tensorflow/tfjs again
-import { mobilenetModel } from './tfj/image-model.js';
+import { mobilenetModel } from './tfj/image.js';
 
 export const image = {
   model: null,
