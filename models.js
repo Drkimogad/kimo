@@ -91,4 +91,4 @@ export function setActiveModel(modelName) {
 }
 
 // Export the models for use in other scripts
-export { mobilenetModel, useModel, summarizer, personalizer, activeModel };
+export { mobilenetModel, useModel, summarizerModel, personalizerModel, activeModel };
