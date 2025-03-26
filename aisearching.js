@@ -1,4 +1,7 @@
-import { summarizerModel, personalizerModel } from './models.js';
+import { getSummarizerModel, getPersonalizerModel } from './models.js';
+
+const summarizerModel = getSummarizerModel();  // Access after model load
+const personalizerModel = getPersonalizerModel();  // Access after load
 
 let searchInput = document.getElementById("searchInput");
 let responseContainer = document.getElementById("response-container");
