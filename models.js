@@ -1,110 +1,87 @@
-// Import TensorFlow.js
-import "https://unpkg.com/@tensorflow/tfjs@4.9.0"; // Alternative
+// Model Loader with Cache Validation
+const MODEL_STATES = {
+    NOT_LOADED: 0,
+    LOADING: 1,
+    LOADED: 2,
+    ERROR: 3
+};
 
-// Import MobileNet model
-import * as mobilenet from 'https://unpkg.com/@tensorflow-models/mobilenet@2.1.0'; // Alternative
+const modelRegistry = {
+    mobilenet: { state: MODEL_STATES.NOT_LOADED, instance: null },
+    sentenceEncoder: { state: MODEL_STATES.NOT_LOADED, instance: null },
+    tesseract: { state: MODEL_STATES.NOT_LOADED, worker: null },
+    summarizer: { state: MODEL_STATES.NOT_LOADED },
+    personalizer: { state: MODEL_STATES.NOT_LOADED }
+};
 
-// Import Universal Sentence Encoder
-import * as use from 'https://unpkg.com/@tensorflow-models/universal-sentence-encoder@1.3.2'; // Alternative
+// Progressive Loading with Retries
+async function loadWithRetry(loader, modelName, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const model = await loader();
+            modelRegistry[modelName].state = MODEL_STATES.LOADED;
+            modelRegistry[modelName].instance = model;
+            updateLoadingProgress();
+            return model;
+        } catch (error) {
+            if (i === retries - 1) {
+                modelRegistry[modelName].state = MODEL_STATES.ERROR;
+                throw new Error(`${modelName} load failed: ${error.message}`);
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
+    }
+}
 
-// Import other AI functionality and OCR tools
-import { Summarizer } from './ai/summarizer.js'; // Xenova summarizer
-import { Personalizer } from './ai/personalizer.js'; // Xenova personalizer
-import * as Tesseract from 'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
-
-// Polyfill for buffer
-import { Buffer } from 'buffer';
-window.Buffer = Buffer;
-
-// Polyfill for long
-import { Long } from 'long';
-window.Long = Long;
-
-// Declare variables for the models
-let mobilenetModel, useModel, summarizerModel, personalizerModel, activeModel;
-
-// Cache object
-const cache = {};
-
-// Load models
+// Unified Model Loader
 export async function loadModels() {
-  mobilenetModel = await mobilenet.load();
-  useModel = await use.load();
-  summarizerModel = new Summarizer();
-  personalizerModel = new Personalizer();
+    try {
+        // Load Core TF first
+        await loadWithRetry(() => import('/model-cache/tf.js'), 'tfjs');
+        
+        // Parallel load base models
+        await Promise.all([
+            loadWithRetry(() => import('/model-cache/mobilenet.js').then(m => m.load()), 'mobilenet'),
+            loadWithRetry(() => import('/model-cache/universal-sentence-encoder.js').then(m => m.load()), 'sentenceEncoder'),
+            loadWithRetry(() => import('/model-cache/tesseract.js').then(m => m.createWorker()), 'tesseract')
+        ]);
+        
+        // Load custom models
+        modelRegistry.summarizer.state = MODEL_STATES.LOADED;
+        modelRegistry.personalizer.state = MODEL_STATES.LOADED;
+        
+    } catch (error) {
+        console.error('Critical load failure:', error);
+        showGlobalError('AI engine failed to initialize. Please refresh.');
+    }
 }
 
-// Function to load and cache the config file
-async function getConfig() {
-  if (!cache.config) {
-    const response = await fetch('/models/t5-small/config.json');
-    cache.config = await response.json();
-  }
-  return cache.config;
+// Handwriting Recognition with Fallback
+export async function recognizeHandwriting(image) {
+    if (modelRegistry.tesseract.state !== MODEL_STATES.LOADED) {
+        throw new Error('OCR engine not ready');
+    }
+    
+    try {
+        await modelRegistry.tesseract.worker.loadLanguage('eng');
+        await modelRegistry.tesseract.worker.initialize('eng');
+        const { data: { text } } = await modelRegistry.tesseract.worker.recognize(image);
+        return text.replace(/\n/g, ' ').trim();
+    } catch (error) {
+        if (navigator.onLine) {
+            throw new Error('Text recognition failed. Try clearer image.');
+        } else {
+            throw new Error('OCR requires internet connection');
+        }
+    }
 }
 
-// Function to load and cache the tokenizer
-async function getTokenizer() {
-  if (!cache.tokenizer) {
-    const response = await fetch('/models/t5-small/tokenizer.json');
-    cache.tokenizer = await response.json();
-  }
-  return cache.tokenizer;
+// Progress Updates
+function updateLoadingProgress() {
+    const loaded = Object.values(modelRegistry).filter(m => m.state === MODEL_STATES.LOADED).length;
+    const total = Object.keys(modelRegistry).length;
+    const progress = document.querySelector('.model-load-progress');
+    if (progress) {
+        progress.value = Math.floor((loaded / total) * 100);
+    }
 }
-
-// Initialize the app
-async function initApp() {
-  console.log('Initializing App...');
-  await loadModels();  // Load all specified models before starting the app
-  console.log('Models loaded. App is ready.');
-  const config = await getConfig();
-  const tokenizer = await getTokenizer();
-  console.log('Config:', config);
-  console.log('Tokenizer:', tokenizer);
-}
-
-initApp();  // Initialize the app
-
-// Export the loaders instead of direct variables to avoid undefined exports
-export function getSummarizerModel() {
-  if (summarizerModel) return summarizerModel;
-  console.warn('Summarizer model not loaded yet. Please wait until models are fully loaded.');
-  return null;
-}
-
-export function getPersonalizerModel() {
-  if (personalizerModel) return personalizerModel;
-  console.warn('Personalizer model not loaded yet. Please wait until models are fully loaded.');
-  return null;
-}
-
-// Handwriting recognition function
-export function recognizeHandwriting(imageSource) {
-  let imagePath = imageSource;
-  if (imageSource instanceof HTMLCanvasElement) {
-    imagePath = imageSource.toDataURL('image/png');
-  }
-  Tesseract.recognize(imagePath, 'eng', {
-    logger: (m) => console.log(m),
-  }).then(({ data: { text } }) => {
-    console.log('Recognized Text:', text);
-  }).catch(err => {
-    console.error('Error:', err);
-  });
-}
-
-// Function to set the active model (MobileNet or Universal Sentence Encoder)
-export function setActiveModel(modelName) {
-  if (modelName === 'mobilenet' && mobilenetModel) {
-    activeModel = mobilenetModel;
-    console.log('MobileNet model is now active');
-  } else if (modelName === 'use' && useModel) {
-    activeModel = useModel;
-    console.log('Universal Sentence Encoder model is now active');
-  } else {
-    console.error('Invalid model name or model not loaded');
-  }
-}
-
-// Export the models for use in other scripts
-export { mobilenetModel, useModel, activeModel };
