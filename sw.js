@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v13'; // Increment cache version
+const CACHE_NAME = 'kimo-ai-cache-v10'; // Increment cache version
 const OFFLINE_URL = './offline.html';  // Fallback offline page
 
 const CACHE_ASSETS = [
@@ -23,14 +23,14 @@ const CACHE_ASSETS = [
   'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard4of5.bin',
   'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard5of5.bin',
 
-  // Add other dependencies like TensorFlow core and converter if not already cached for both mobileNet and encoder
-  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@^4.9.0?target=es2022',
-  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@^4.9.0?target=es2022',
+  // TensorFlow core and converter
+  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@4.9.0/dist/tfjs-converter.min.js',
+  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@4.9.0/dist/tfjs-core.min.js',
 
   // Universal Sentence Encoder files
   'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/model.json',
-  'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
-  'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2.bin',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2.bin',
 
   // Tesseract.js library and language file
   'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js',
@@ -40,17 +40,13 @@ const CACHE_ASSETS = [
   'https://cdn.jsdelivr.net/npm/@xenova/transformers',
 
   // Local model files
-  '../text-model.js',
-  '../image-model.js',
-  '../t5-small/tokenizer.json',
-  '../t5-small/config.json',
-  '../summarizer.js',
-  '../personalizer.js',
-  '../offlineStorage.js',
-
-  // External scripts to be cached
-  'https://unpkg.com/@tensorflow-models/universal-sentence-encoder@1.3.2',
-  'https://unpkg.com/@tensorflow-models/mobilenet@2.1.0'
+  './tfj/text-model.js',
+  './tfj/image-model.js',
+  './models/t5-small/tokenizer.json',
+  './models/t5-small/config.json',
+  './ai/summarizer.js',
+  './ai/personalizer.js',
+  './utils/offlineStorage.js'
 ];
 
 // ✅ Install Service Worker & Cache Assets
@@ -113,3 +109,8 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+````
+
+### Summary:
+1. **Specific Paths**: Use specific file paths for each resource to ensure they are correctly fetched and cached.
+2. **CORS**: Verify that the external resources support CORS, or use a proxy if needed.
