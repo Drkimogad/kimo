@@ -17,7 +17,7 @@ import * as Tesseract from 'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.
 
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
-import Long from 'long';
+import { Long } from 'long';
 window.Long = Long;
 
 // Declare variables for the models
