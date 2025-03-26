@@ -1,1 +1,46 @@
-.node modules
+# Node.js dependencies
+/node_modules/
+
+# Build output
+/dist
+/build
+
+# Log files
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Environment files (contains sensitive info)
+.env
+
+# IDE and editor-specific files
+.idea/
+.vscode/
+
+# Temporary files from development tools
+*.swp
+*.swo
+*.bak
+
+# TensorFlow.js models (if stored in the models folder, adjust if needed)
+models/*
+
+# Cached files for service workers
+/sw.js
+
+# Generated files from Tesseract.js or AI processing
+ocr_results/
+*.tesseract.*
+
+# Local storage files (if any)
+/offlineStorage.js
+
+# Exclude config files for models (they are often specific to your setup)
+models/t5-small/config.json
+models/t5-small/tokenizer.json
+
+# Other sensitive or unnecessary files
+npm-debug.log
+yarn-error.log
