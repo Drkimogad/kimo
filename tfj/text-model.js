@@ -1,5 +1,5 @@
 // Import universal sentence encoder from model.js, no need to import @tensorflow/tfjs again
-import { useModel } from './models.js';
+import { useModel } from './tfj/text-model.js';
 
 export const text = {
   model: null,
