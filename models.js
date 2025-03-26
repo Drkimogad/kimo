@@ -8,6 +8,11 @@ import { Summarizer } from './ai/summarizer.js'; // Xenova summarizer
 import { Personalizer } from './ai/personalizer.js'; // Xenova personalizer
 import * as Tesseract from 'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
 
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
+import Long from 'long';
+window.Long = Long;
+
 // Declare variables for the models
 let mobilenetModel;
 let useModel;
