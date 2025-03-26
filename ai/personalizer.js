@@ -1,4 +1,4 @@
-import { OfflineStorage } from './ai/utils/offlineStorage.js';
+import { OfflineStorage } from './utils/offlineStorage.js';
 
 const PERSONALIZATION_WEIGHTS = {
   click: 2.0,
