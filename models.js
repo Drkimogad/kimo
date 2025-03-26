@@ -1,4 +1,4 @@
-// Model Loader with Cache Validation
+// Model State Management
 const MODEL_STATES = {
     NOT_LOADED: 0,
     LOADING: 1,
@@ -7,81 +7,124 @@ const MODEL_STATES = {
 };
 
 const modelRegistry = {
+    tf: { state: MODEL_STATES.NOT_LOADED, instance: null },
     mobilenet: { state: MODEL_STATES.NOT_LOADED, instance: null },
-    sentenceEncoder: { state: MODEL_STATES.NOT_LOADED, instance: null },
     tesseract: { state: MODEL_STATES.NOT_LOADED, worker: null },
-    summarizer: { state: MODEL_STATES.NOT_LOADED },
-    personalizer: { state: MODEL_STATES.NOT_LOADED }
+    isReady: false
 };
 
-// Progressive Loading with Retries
+// Progress Tracking
+let totalModels = Object.keys(modelRegistry).length - 1; // Exclude isReady
+let loadedModels = 0;
+
+// Unified Loader with Retries
 async function loadWithRetry(loader, modelName, retries = 3) {
-    for (let i = 0; i < retries; i++) {
+    modelRegistry[modelName].state = MODEL_STATES.LOADING;
+    
+    for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            const model = await loader();
+            const result = await loader();
+            modelRegistry[modelName].instance = result;
             modelRegistry[modelName].state = MODEL_STATES.LOADED;
-            modelRegistry[modelName].instance = model;
-            updateLoadingProgress();
-            return model;
+            loadedModels++;
+            updateProgress();
+            return result;
         } catch (error) {
-            if (i === retries - 1) {
+            if (attempt === retries) {
                 modelRegistry[modelName].state = MODEL_STATES.ERROR;
-                throw new Error(`${modelName} load failed: ${error.message}`);
+                throw new Error(`${modelName} failed after ${retries} attempts: ${error.message}`);
             }
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
         }
     }
 }
 
-// Unified Model Loader
+// Main Load Function
 export async function loadModels() {
     try {
-        // Load Core TF first
-        await loadWithRetry(() => import('/model-cache/tf.js'), 'tfjs');
-        
-        // Parallel load base models
+        // 1. Load TensorFlow Core
+        await loadWithRetry(
+            () => import('/model-cache/tf.js'),
+            'tf'
+        );
+
+        // 2. Load Other Models in Parallel
         await Promise.all([
-            loadWithRetry(() => import('/model-cache/mobilenet.js').then(m => m.load()), 'mobilenet'),
-            loadWithRetry(() => import('/model-cache/universal-sentence-encoder.js').then(m => m.load()), 'sentenceEncoder'),
-            loadWithRetry(() => import('/model-cache/tesseract.js').then(m => m.createWorker()), 'tesseract')
+            loadWithRetry(
+                () => import('/model-cache/mobilenet.js').then(m => m.load()),
+                'mobilenet'
+            ),
+            loadWithRetry(
+                () => import('/model-cache/tesseract.js')
+                    .then(Tesseract => Tesseract.createWorker()
+                        .then(worker => {
+                            return worker.loadLanguage('eng')
+                                .then(() => worker.initialize('eng'))
+                                .then(() => worker);
+                        }),
+                'tesseract'
+            )
         ]);
-        
-        // Load custom models
-        modelRegistry.summarizer.state = MODEL_STATES.LOADED;
-        modelRegistry.personalizer.state = MODEL_STATES.LOADED;
-        
+
+        modelRegistry.isReady = true;
+        return true;
     } catch (error) {
-        console.error('Critical load failure:', error);
-        showGlobalError('AI engine failed to initialize. Please refresh.');
+        console.error('Model loading failed:', error);
+        showGlobalError('AI engine initialization failed. Please refresh.');
+        return false;
     }
 }
 
-// Handwriting Recognition with Fallback
+// Handwriting Recognition
 export async function recognizeHandwriting(image) {
-    if (modelRegistry.tesseract.state !== MODEL_STATES.LOADED) {
-        throw new Error('OCR engine not ready');
+    if (!modelRegistry.isReady) {
+        throw new Error('Models not fully loaded');
     }
-    
+
     try {
-        await modelRegistry.tesseract.worker.loadLanguage('eng');
-        await modelRegistry.tesseract.worker.initialize('eng');
         const { data: { text } } = await modelRegistry.tesseract.worker.recognize(image);
-        return text.replace(/\n/g, ' ').trim();
+        return {
+            raw: text,
+            cleaned: text.replace(/\n+/g, ' ').trim()
+        };
     } catch (error) {
-        if (navigator.onLine) {
-            throw new Error('Text recognition failed. Try clearer image.');
-        } else {
-            throw new Error('OCR requires internet connection');
+        if (!navigator.onLine) {
+            throw new Error('OCR requires internet connection for language data');
         }
+        throw new Error(`Recognition failed: ${error.message}`);
     }
 }
 
 // Progress Updates
-function updateLoadingProgress() {
-    const loaded = Object.values(modelRegistry).filter(m => m.state === MODEL_STATES.LOADED).length;
-    const total = Object.keys(modelRegistry).length;
+function updateProgress() {
     const progress = document.querySelector('.model-load-progress');
     if (progress) {
-        progress.value = Math.floor((loaded / total) * 100);
+        progress.value = Math.floor((loadedModels / totalModels) * 100);
     }
+}
+
+// Global Error Handler
+function showGlobalError(message) {
+    const errorContainer = document.getElementById('global-error');
+    if (errorContainer) {
+        errorContainer.innerHTML = `
+            <div class="error-message">
+                <p>${message}</p>
+                <button onclick="window.location.reload()">Retry</button>
+            </div>
+        `;
+        errorContainer.style.display = 'block';
+    }
+}
+
+// Public API
+export function isModelReady() {
+    return modelRegistry.isReady;
+}
+
+export function getModel(modelName) {
+    if (!modelRegistry.isReady) {
+        throw new Error(`Models not loaded. Current state: ${modelRegistry[modelName].state}`);
+    }
+    return modelRegistry[modelName].instance;
 }
