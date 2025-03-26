@@ -14,20 +14,28 @@ import Long from 'long';
 window.Long = Long;
 
 // Declare variables for the models
-let mobilenetModel;
-let useModel;
-let summarizerModel;  // Declare summarizerModel variable
-let personalizerModel;  // Declare personalizerModel variable
-let activeModel;  // Add a variable to track the active model
+// Existing imports remain the same
 
-// Export the models for use in aisearching.js
-export { mobilenet, use, Summarizer, Personalizer, Tesseract };
+// Declare variables for the models
+let mobilenetModel, useModel, summarizerModel, personalizerModel, activeModel;
 
-// Function to load the models
+// Export the loaders instead of direct variables to avoid undefined exports
+export function getSummarizerModel() {
+  if (summarizerModel) return summarizerModel;
+  console.warn('Summarizer model not loaded yet. Please wait until models are fully loaded.');
+  return null;
+}
+
+export function getPersonalizerModel() {
+  if (personalizerModel) return personalizerModel;
+  console.warn('Personalizer model not loaded yet. Please wait until models are fully loaded.');
+  return null;
+}
+
 export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer', 'personalizer']) {
   const loadPromises = [];
 
-  // Load the MobileNet model
+  // Loading MobileNet model
   if (modelsToLoad.includes('mobilenet')) {
     loadPromises.push(mobilenet.load().then(model => {
       mobilenetModel = model;
@@ -35,7 +43,7 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer
     }));
   }
 
-  // Load the Universal Sentence Encoder model
+  // Loading Universal Sentence Encoder
   if (modelsToLoad.includes('use')) {
     loadPromises.push(use.load().then(model => {
       useModel = model;
@@ -43,35 +51,32 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer
     }));
   }
 
-  // Load the Summarizer model
+  // Loading Summarizer model
   if (modelsToLoad.includes('summarizer')) {
     loadPromises.push(Summarizer.load().then(model => {
-      summarizerModel = model;  // Assign to summarizerModel
+      summarizerModel = model;
       console.log('Summarizer model loaded');
     }));
   }
 
-  // Load the Personalizer model
+  // Loading Personalizer model
   if (modelsToLoad.includes('personalizer')) {
     loadPromises.push(Personalizer.load().then(model => {
-      personalizerModel = model;  // Assign to personalizerModel
+      personalizerModel = model;
       console.log('Personalizer model loaded');
     }));
   }
 
-  // Wait for all models to load
+  // Wait for all model loading promises to resolve
   await Promise.all(loadPromises);
   console.log('All specified models loaded successfully');
 }
 
-// Function to recognize handwriting from an image
 export function recognizeHandwriting(imageSource) {
   let imagePath = imageSource;
-
   if (imageSource instanceof HTMLCanvasElement) {
     imagePath = imageSource.toDataURL('image/png');
   }
-
   Tesseract.recognize(imagePath, 'eng', {
     logger: (m) => console.log(m),
   }).then(({ data: { text } }) => {
@@ -81,7 +86,6 @@ export function recognizeHandwriting(imageSource) {
   });
 }
 
-// Function to set the active model (MobileNet or Universal Sentence Encoder)
 export function setActiveModel(modelName) {
   if (modelName === 'mobilenet' && mobilenetModel) {
     activeModel = mobilenetModel;
@@ -94,5 +98,4 @@ export function setActiveModel(modelName) {
   }
 }
 
-// Export the models for use in other scripts
-export { mobilenetModel, useModel, summarizerModel, personalizerModel, activeModel };
+export { mobilenetModel, useModel, activeModel };
