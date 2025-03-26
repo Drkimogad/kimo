@@ -42,8 +42,8 @@ const CACHE_ASSETS = [
   // Local model files
   './tfj/text-model.js',
   './tfj/image-model.js',
-  './models/t5-small/tokenizer.json',
-  './models/t5-small/config.json',
+  '/models/t5-small/tokenizer.json',
+  '/models/t5-small/config.json',
   './ai/summarizer.js',
   './ai/personalizer.js',
   './utils/offlineStorage.js'
