@@ -1,7 +1,4 @@
-import { getSummarizerModel, getPersonalizerModel } from './models.js';
-
-const summarizerModel = getSummarizerModel();  // Access after model load
-const personalizerModel = getPersonalizerModel();  // Access after load
+import { getSummarizerModel, getPersonalizerModel, loadModels } from './models.js';
 
 let searchInput = document.getElementById("searchInput");
 let responseContainer = document.getElementById("response-container");
@@ -26,7 +23,11 @@ async function initializeApp() {
     // Load models
     await loadModels();
     
-    // Welcome message stays until search begins
+    // Hide welcome message after a brief moment
+    setTimeout(() => {
+        welcomeMessage.style.display = 'none';
+    }, 3000); // Welcome message stays for 3 seconds
+
     // Add event listeners for buttons
     voiceInputButton.addEventListener('click', toggleVoiceRecognition);
     saveButton.addEventListener('click', saveSearchResults);
@@ -89,8 +90,6 @@ function stopVoiceRecognition() {
 
 // Search function that fetches results from DuckDuckGo API
 async function searchContent(query) {
-    // Hide welcome message and response container
-    welcomeMessage.style.display = 'none';
     responseContainer.style.display = 'none';
     spinner.style.display = 'block'; // Show spinner during search
 
