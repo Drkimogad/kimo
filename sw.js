@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v9'; // Increment cache version
+const CACHE_NAME = 'kimo-ai-cache-v10'; // Increment cache version
 const OFFLINE_URL = './offline.html';  // Fallback offline page
 
 const CACHE_ASSETS = [
@@ -9,6 +9,7 @@ const CACHE_ASSETS = [
   './models.js',   // main script
   './offline.html',
   './manifest.json',
+  './vite.config.js',
   './icons/icon-512.png', 
   './icons/icon-192.png', 
   './icons/icon-128.png',
@@ -42,13 +43,18 @@ const CACHE_ASSETS = [
   // Local model files
   './tfj/text-model.js',
   './tfj/image-model.js',
-  '/models/t5-small/tokenizer.json',
-  '/models/t5-small/config.json',
+  './models/t5-small/tokenizer.json',
+  './models/t5-small/config.json',
   './ai/summarizer.js',
   './ai/personalizer.js',
-  './utils/offlineStorage.js'
+  './utils/offlineStorage.js',
+
+  // External scripts to be cached
+  'https://unpkg.com/@tensorflow-models/universal-sentence-encoder@1.3.2',
+  'https://unpkg.com/@tensorflow-models/mobilenet@2.1.0'
 ];
 
+// ✅ Install Service Worker & Cache Assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -68,6 +74,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
+// ✅ Activate and Remove Old Caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -83,13 +90,16 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();  // Take control of all pages
 });
 
+// ✅ Unified Fetch Handler (Cache-First with Offline Fallback)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
+      // Return cached response if available
       if (response) {
         return response;
       }
 
+      // Fetch from network if not in cache
       return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
