@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v7'; // Increment cache version
+const CACHE_NAME = 'kimo-ai-cache-v8'; // Increment cache version
 const OFFLINE_URL = './offline.html';  // Fallback offline page
 
 // Files to cache (merged list, no duplication)
@@ -42,8 +42,8 @@ const CACHE_ASSETS = [
   // Local model files
   './tfj/text-model.js',
   './tfj/image-model.js',
-  '/models/t5-small/tokenizer.json',
-  '/models/t5-small/config.json',
+  './models/t5-small/tokenizer.json',
+  './models/t5-small/config.json',
   './ai/summarizer.js',
   './ai/personalizer.js',
   './utils/offlineStorage.js'
