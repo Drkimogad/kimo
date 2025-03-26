@@ -15,6 +15,7 @@ window.Long = Long;
 
 // Declare variables for the models
 let mobilenetModel, useModel, summarizerModel, personalizerModel, activeModel;
+
 // Import model loader from models.js
 import { loadModels } from './models.js';
 
@@ -39,46 +40,7 @@ export function getPersonalizerModel() {
   return null;
 }
 
-export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer', 'personalizer']) {
-  const loadPromises = [];
-
-  // Loading MobileNet model
-  if (modelsToLoad.includes('mobilenet')) {
-    loadPromises.push(mobilenet.load().then(model => {
-      mobilenetModel = model;
-      console.log('MobileNet model loaded');
-    }));
-  }
-
-  // Loading Universal Sentence Encoder
-  if (modelsToLoad.includes('use')) {
-    loadPromises.push(use.load().then(model => {
-      useModel = model;
-      console.log('Universal Sentence Encoder model loaded');
-    }));
-  }
-
-  // Loading Summarizer model
-  if (modelsToLoad.includes('summarizer')) {
-    loadPromises.push(Summarizer.load().then(model => {
-      summarizerModel = model;
-      console.log('Summarizer model loaded');
-    }));
-  }
-
-  // Loading Personalizer model
-  if (modelsToLoad.includes('personalizer')) {
-    loadPromises.push(Personalizer.load().then(model => {
-      personalizerModel = model;
-      console.log('Personalizer model loaded');
-    }));
-  }
-
-  // Wait for all model loading promises to resolve
-  await Promise.all(loadPromises);
-  console.log('All specified models loaded successfully');
-}
-
+// Handwriting recognition function
 export function recognizeHandwriting(imageSource) {
   let imagePath = imageSource;
   if (imageSource instanceof HTMLCanvasElement) {
@@ -93,6 +55,7 @@ export function recognizeHandwriting(imageSource) {
   });
 }
 
+// Function to set the active model (MobileNet or Universal Sentence Encoder)
 export function setActiveModel(modelName) {
   if (modelName === 'mobilenet' && mobilenetModel) {
     activeModel = mobilenetModel;
@@ -105,4 +68,5 @@ export function setActiveModel(modelName) {
   }
 }
 
+// Export the models for use in other scripts
 export { mobilenetModel, useModel, activeModel };
