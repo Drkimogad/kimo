@@ -152,11 +152,30 @@ body {
   order: 1; /* Forces response area to top */
   flex: 1;
   margin-top: 2rem;
-  height: 65%; /* Ensures response area takes up 65% of the page */
+  height: calc(100vh - 200px); /* Ensures response area takes up majority of the page */
   overflow-y: auto; /* Allows scrolling if content is long */
-  border: 1px solid #ddd;
+  /* border: 1px solid #ddd; */ /* Commented out to make it borderless */
   border-radius: var(--border-radius);
   background-color: var(--footer-bg);
+  position: relative; /* For positioning clear and save buttons */
+}
+
+#welcome-message {
+  display: none; /* Initially hidden */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+#save-btn, #clear-btn {
+  display: none; /* Initially hidden */
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
 }
 
 .results-grid {
