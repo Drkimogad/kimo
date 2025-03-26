@@ -1,7 +1,7 @@
 // Import the required TensorFlow models directly
-import "https://esm.sh/@tensorflow/tfjs@4.9.0"; // CDN link for TensorFlow.js
-import * as mobilenet from '@tensorflow-models/mobilenet'; // MobileNet for image classification
-import * as use from '@tensorflow-models/universal-sentence-encoder'; // USE for NLP tasks
+import "https://esm.sh/@tensorflow/tfjs@4.9.0";
+import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
+import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
 
 // Import other AI functionality and OCR tools
 import { Summarizer } from './ai/summarizer.js'; // Xenova summarizer
