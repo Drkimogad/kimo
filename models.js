@@ -1,7 +1,14 @@
-// Import the required TensorFlow models directly
-import "https://esm.sh/@tensorflow/tfjs@4.9.0";
-import * as mobilenet from 'https://esm.sh/@tensorflow-models/mobilenet';
-import * as use from 'https://esm.sh/@tensorflow-models/universal-sentence-encoder';
+// Import TensorFlow.js
+import "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.9.0";
+// import "https://unpkg.com/@tensorflow/tfjs@4.9.0"; // Alternative
+
+// Import MobileNet model
+import * as mobilenet from 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0';
+// import * as mobilenet from 'https://unpkg.com/@tensorflow-models/mobilenet@2.1.0'; // Alternative
+
+// Import Universal Sentence Encoder
+import * as use from 'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2';
+// import * as use from 'https://unpkg.com/@tensorflow-models/universal-sentence-encoder@1.3.2'; // Alternative
 
 // Import other AI functionality and OCR tools
 import { Summarizer } from './ai/summarizer.js'; // Xenova summarizer
