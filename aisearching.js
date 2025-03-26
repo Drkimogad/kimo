@@ -26,11 +26,7 @@ async function initializeApp() {
     // Load models
     await loadModels();
     
-    // Hide welcome message after a brief moment
-    setTimeout(() => {
-        welcomeMessage.style.display = 'none';
-    }, 3000); // Welcome message stays for 3 seconds
-
+    // Welcome message stays until search begins
     // Add event listeners for buttons
     voiceInputButton.addEventListener('click', toggleVoiceRecognition);
     saveButton.addEventListener('click', saveSearchResults);
@@ -93,6 +89,8 @@ function stopVoiceRecognition() {
 
 // Search function that fetches results from DuckDuckGo API
 async function searchContent(query) {
+    // Hide welcome message and response container
+    welcomeMessage.style.display = 'none';
     responseContainer.style.display = 'none';
     spinner.style.display = 'block'; // Show spinner during search
 
