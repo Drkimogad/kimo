@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v12'; // Increment cache version
+const CACHE_NAME = 'kimo-ai-cache-v13'; // Increment cache version
 const OFFLINE_URL = './offline.html';  // Fallback offline page
 
 const CACHE_ASSETS = [
@@ -40,13 +40,13 @@ const CACHE_ASSETS = [
   'https://cdn.jsdelivr.net/npm/@xenova/transformers',
 
   // Local model files
-  './tfj/text-model.js',
-  './tfj/image-model.js',
-  '/models/t5-small/tokenizer.json',
-  '/models/t5-small/config.json',
-  './ai/summarizer.js',
-  './ai/personalizer.js',
-  './utils/offlineStorage.js',
+  '../text-model.js',
+  '../image-model.js',
+  '../t5-small/tokenizer.json',
+  '../t5-small/config.json',
+  '../summarizer.js',
+  '../personalizer.js',
+  '../offlineStorage.js',
 
   // External scripts to be cached
   'https://unpkg.com/@tensorflow-models/universal-sentence-encoder@1.3.2',
