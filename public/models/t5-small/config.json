@@ -1,6 +1,6 @@
 
 {
-  "_name_or_path": "./models/t5-small",
+  "_name_or_path": "/models/t5-small",
   "architectures": [
     "T5ForConditionalGeneration"
   ],
