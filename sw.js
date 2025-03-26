@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v10'; // Increment cache version
+const CACHE_NAME = 'kimo-ai-cache-v9'; // Increment cache version
 const OFFLINE_URL = './offline.html';  // Fallback offline page
 
 const CACHE_ASSETS = [
@@ -9,7 +9,6 @@ const CACHE_ASSETS = [
   './models.js',   // main script
   './offline.html',
   './manifest.json',
-  './vite.config.js',
   './icons/icon-512.png', 
   './icons/icon-192.png', 
   './icons/icon-128.png',
