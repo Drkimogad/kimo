@@ -1,7 +1,6 @@
-const CACHE_NAME = 'kimo-ai-cache-v8'; // Increment cache version
+const CACHE_NAME = 'kimo-ai-cache-v9'; // Increment cache version
 const OFFLINE_URL = './offline.html';  // Fallback offline page
 
-// Files to cache (merged list, no duplication)
 const CACHE_ASSETS = [
   './',
   './index.html',
@@ -14,30 +13,31 @@ const CACHE_ASSETS = [
   './icons/icon-192.png', 
   './icons/icon-128.png',
   './icons/icon-64.png',
-  './favicon.ico',
+  './favicon.ico', 
 
   // MobileNet model files
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard1of5.bin',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard2of5.bin',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard3of5.bin',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard4of5.bin',
-  'https://esm.sh/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard5of5.bin',
-   // Add other dependencies like TensorFlow core and converter if not already cached for both mobileNet and encoder
-  'https://esm.sh/@tensorflow/tfjs-converter@^4.9.0?target=es2022',
-  'https://esm.sh/@tensorflow/tfjs-core@^4.9.0?target=es2022',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/model.json',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard1of5.bin',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard2of5.bin',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard3of5.bin',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard4of5.bin',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/group1-shard5of5.bin',
+
+  // Add other dependencies like TensorFlow core and converter if not already cached for both mobileNet and encoder
+  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@^4.9.0?target=es2022',
+  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core@^4.9.0?target=es2022',
 
   // Universal Sentence Encoder files
-  'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/model.json',
-  'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
-  'https://esm.sh/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/model.json',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard1of2',
+  'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2/dist/group1-shard2of2',
 
   // Tesseract.js library and language file
   'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js',
   'https://tessdata.projectnaptha.com/4.0.0_best/eng.traineddata.gz',
   
   // Xenova transformer.js files
-  'https://esm.sh/@xenova/transformers',
+  'https://cdn.jsdelivr.net/npm/@xenova/transformers',
 
   // Local model files
   './tfj/text-model.js',
@@ -49,7 +49,6 @@ const CACHE_ASSETS = [
   './utils/offlineStorage.js'
 ];
 
-// ✅ Install Service Worker & Cache Assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -69,7 +68,6 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// ✅ Activate and Remove Old Caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -85,16 +83,13 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();  // Take control of all pages
 });
 
-// ✅ Unified Fetch Handler (Cache-First with Offline Fallback)
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // Return cached response if available
       if (response) {
         return response;
       }
 
-      // Fetch from network if not in cache
       return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
@@ -103,7 +98,6 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       }).catch((error) => {
         console.error('Fetch failed; returning offline page instead.', error);
-        // Return offline fallback for navigation requests
         if (event.request.mode === 'navigate') {
           return caches.match(OFFLINE_URL);
         }
