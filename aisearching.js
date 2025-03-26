@@ -19,6 +19,10 @@ async function initializeApp() {
     responseContainer.style.display = 'none';
     welcomeMessage.style.display = 'block';
     
+    // Hide clear and save buttons initially
+    saveButton.style.display = 'none';
+    clearButton.style.display = 'none';
+    
     // Load models
     await loadModels();
     
@@ -35,6 +39,7 @@ async function initializeApp() {
 
 // Voice recognition function
 let isListening = false;
+let recognition;
 
 function toggleVoiceRecognition() {
     if (!isListening) {
@@ -53,7 +58,7 @@ function startVoiceRecognition() {
     }
 
     const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-    const recognition = new SpeechRecognition();
+    recognition = new SpeechRecognition();
     recognition.interimResults = true;
     recognition.lang = 'en-US';
 
@@ -80,7 +85,10 @@ function startVoiceRecognition() {
 
 function stopVoiceRecognition() {
     isListening = false;
-    console.log("Voice recognition stopped");
+    if (recognition) {
+        recognition.stop();
+        console.log("Voice recognition stopped");
+    }
 }
 
 // Search function that fetches results from DuckDuckGo API
@@ -130,6 +138,10 @@ function displaySearchResults(results) {
     
     responseContainer.innerHTML = resultsHTML;
     responseContainer.style.display = 'block';
+    
+    // Show clear and save buttons when results are displayed
+    saveButton.style.display = 'block';
+    clearButton.style.display = 'block';
 }
 
 // Error handling function
