@@ -1,79 +1,179 @@
-// Import TensorFlow.js
-import "https://unpkg.com/@tensorflow/tfjs@4.9.0"; // Alternative
+import { getSummarizerModel, getPersonalizerModel } from './models.js';
 
-// Import MobileNet model
-import * as mobilenet from 'https://unpkg.com/@tensorflow-models/mobilenet@2.1.0'; // Alternative
+const summarizerModel = getSummarizerModel();  // Access after model load
+const personalizerModel = getPersonalizerModel();  // Access after load
 
-// Import Universal Sentence Encoder
-import * as use from 'https://unpkg.com/@tensorflow-models/universal-sentence-encoder@1.3.2'; // Alternative
+let searchInput = document.getElementById("searchInput");
+let responseContainer = document.getElementById("response-container");
+let welcomeMessage = document.getElementById("welcome-message");
+let spinner = document.getElementById("searching-spinner");
+let saveButton = document.getElementById("save-btn");
+let clearButton = document.getElementById("clear-btn");
 
-// Import other AI functionality and OCR tools
-import { Summarizer } from './ai/summarizer.js'; // Xenova summarizer
-import { Personalizer } from './ai/personalizer.js'; // Xenova personalizer
-import * as Tesseract from 'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
+let voiceInputButton = document.getElementById("voiceInputButton");
+let photoUploadButton = document.getElementById("file-upload");
 
-// Polyfill for buffer
-import { Buffer } from 'buffer';
-window.Buffer = Buffer;
+// Initialize the app
+async function initializeApp() {
+    // Hide the response container and display the welcome message on app load
+    responseContainer.style.display = 'none';
+    welcomeMessage.style.display = 'block';
+    
+    // Hide clear and save buttons initially
+    saveButton.style.display = 'none';
+    clearButton.style.display = 'none';
+    
+    // Load models
+    await loadModels();
+    
+    // Hide welcome message after a brief moment
+    setTimeout(() => {
+        welcomeMessage.style.display = 'none';
+    }, 3000); // Welcome message stays for 3 seconds
 
-// Polyfill for long
-import { Long } from 'long';
-window.Long = Long;
-
-// Declare variables for the models
-let mobilenetModel, useModel, summarizerModel, personalizerModel, activeModel;
-
-// Import model loader from models.js
-import { loadModels } from './models.js';
-
-async function initApp() {
-  console.log('Initializing App...');
-  await loadModels();  // Load all specified models before starting the app
-  console.log('Models loaded. App is ready.');
+    // Add event listeners for buttons
+    voiceInputButton.addEventListener('click', toggleVoiceRecognition);
+    saveButton.addEventListener('click', saveSearchResults);
+    clearButton.addEventListener('click', clearSearchResults);
 }
 
-initApp();  // Initialize the app
+// Voice recognition function
+let isListening = false;
+let recognition;
 
-// Export the loaders instead of direct variables to avoid undefined exports
-export function getSummarizerModel() {
-  if (summarizerModel) return summarizerModel;
-  console.warn('Summarizer model not loaded yet. Please wait until models are fully loaded.');
-  return null;
+function toggleVoiceRecognition() {
+    if (!isListening) {
+        startVoiceRecognition();
+    } else {
+        stopVoiceRecognition();
+    }
 }
 
-export function getPersonalizerModel() {
-  if (personalizerModel) return personalizerModel;
-  console.warn('Personalizer model not loaded yet. Please wait until models are fully loaded.');
-  return null;
+function startVoiceRecognition() {
+    isListening = true;
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        displayError('Speech Recognition API not supported by this browser.');
+        return;
+    }
+
+    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => toggleListeningUI(true);
+    recognition.onend = () => {
+        toggleListeningUI(false);
+        searchContent(searchInput.value); // Perform search after stopping voice recognition
+    };
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        displayError('Failed to recognize speech.');
+    };
+    recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+            .map(result => result[0])
+            .map(result => result.transcript)
+            .join('');
+        searchInput.value = transcript;
+    };
+
+    recognition.start();
+    console.log("Voice recognition started");
 }
 
-// Handwriting recognition function
-export function recognizeHandwriting(imageSource) {
-  let imagePath = imageSource;
-  if (imageSource instanceof HTMLCanvasElement) {
-    imagePath = imageSource.toDataURL('image/png');
-  }
-  Tesseract.recognize(imagePath, 'eng', {
-    logger: (m) => console.log(m),
-  }).then(({ data: { text } }) => {
-    console.log('Recognized Text:', text);
-  }).catch(err => {
-    console.error('Error:', err);
-  });
+function stopVoiceRecognition() {
+    isListening = false;
+    if (recognition) {
+        recognition.stop();
+        console.log("Voice recognition stopped");
+    }
 }
 
-// Function to set the active model (MobileNet or Universal Sentence Encoder)
-export function setActiveModel(modelName) {
-  if (modelName === 'mobilenet' && mobilenetModel) {
-    activeModel = mobilenetModel;
-    console.log('MobileNet model is now active');
-  } else if (modelName === 'use' && useModel) {
-    activeModel = useModel;
-    console.log('Universal Sentence Encoder model is now active');
-  } else {
-    console.error('Invalid model name or model not loaded');
-  }
+// Search function that fetches results from DuckDuckGo API
+async function searchContent(query) {
+    responseContainer.style.display = 'none';
+    spinner.style.display = 'block'; // Show spinner during search
+
+    try {
+        const results = await fetchDuckDuckGoResults(query);
+        
+        if (!results || results.length === 0) {
+            throw new Error("No results found.");
+        }
+
+        // Process and display search results
+        displaySearchResults(results);
+    } catch (error) {
+        console.error(error);
+        displayError("Failed to fetch contents. Please try again later.");
+    } finally {
+        spinner.style.display = 'none'; // Hide spinner after search completes
+    }
 }
 
-// Export the models for use in other scripts
-export { mobilenetModel, useModel, activeModel };
+// Function to fetch DuckDuckGo results (replace with actual API call)
+async function fetchDuckDuckGoResults(query) {
+    // Mocking the DuckDuckGo API call here
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve([
+                { title: "Result 1", link: "https://duckduckgo.com" },
+                { title: "Result 2", link: "https://duckduckgo.com" }
+            ]);
+        }, 2000);
+    });
+}
+
+// Display search results in the response container
+function displaySearchResults(results) {
+    let resultsHTML = '<h3>Search Results</h3><ul>';
+    
+    results.forEach(result => {
+        resultsHTML += `<li><a href="${result.link}" target="_blank">${result.title}</a></li>`;
+    });
+    
+    resultsHTML += '</ul>';
+    
+    responseContainer.innerHTML = resultsHTML;
+    responseContainer.style.display = 'block';
+    
+    // Show clear and save buttons when results are displayed
+    saveButton.style.display = 'block';
+    clearButton.style.display = 'block';
+}
+
+// Error handling function
+function displayError(message) {
+    responseContainer.innerHTML = `<p style="color: red;">${message}</p>`;
+    responseContainer.style.display = 'block';
+}
+
+// Clear the search results and input
+function clearSearchResults() {
+    responseContainer.innerHTML = '';
+    searchInput.value = '';
+}
+
+// Save the search results or summarized text
+function saveSearchResults() {
+    const contentToSave = responseContainer.innerHTML;
+    if (contentToSave) {
+        saveContent(contentToSave);
+    } else {
+        alert("No content to save.");
+    }
+}
+
+// Implement saving content locally (as an example)
+function saveContent(content) {
+    const blob = new Blob([content], { type: 'text/html' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'search_results.html';
+    link.click();
+}
+
+// Initialize app on window load
+window.onload = initializeApp;
