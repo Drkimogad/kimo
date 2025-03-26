@@ -1,130 +1,178 @@
 import { loadModels, recognizeHandwriting } from './models.js';
 
-const UIState = {
-    READY: 1,
-    PROCESSING: 2,
-    ERROR: 3
+// DOM Elements
+const elements = {
+  searchInput: document.getElementById('searchInput'),
+  responseContainer: document.getElementById('response-container'),
+  welcomeMessage: document.getElementById('welcome-message'),
+  spinner: document.getElementById('searching-spinner'),
+  saveBtn: document.getElementById('save-btn'),
+  clearBtn: document.getElementById('clear-btn'),
+  fileUpload: document.getElementById('file-upload')
 };
-let currentState = UIState.READY;
 
-// Unified Event Handler
-function bindInteractiveElements() {
-    const elements = {
-        voiceInput: document.getElementById('voiceInputButton'),
-        fileUpload: document.getElementById('file-upload'),
-        searchInput: document.getElementById('searchInput'),
-        submitBtn: document.getElementById('submit-btn'),
-        summarizeBtn: document.getElementById('summarize-btn'),
-        personalizeBtn: document.getElementById('personalize-btn'),
-        clearBtn: document.getElementById('clear-btn'),
-        saveBtn: document.getElementById('save-btn')
-    };
+// State Management
+let searchResults = [];
 
-    // Voice Input
-    elements.voiceInput.addEventListener('click', handleVoiceInput);
-    
-    // File Upload
-    elements.fileUpload.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            try {
-                const text = await recognizeHandwriting(file);
-                elements.searchInput.value = text;
-                triggerSearch(text);
-            } catch (error) {
-                showError(error.message);
-            }
-        }
-    });
-
-    // Search Triggers
-    elements.submitBtn.addEventListener('click', () => triggerSearch(elements.searchInput.value));
-    elements.searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            triggerSearch(elements.searchInput.value);
-        }
-    });
-
-    // AI Actions
-    elements.summarizeBtn.addEventListener('click', handleSummarize);
-    elements.personalizeBtn.addEventListener('click', handlePersonalize);
-
-    // Utilities
-    elements.clearBtn.addEventListener('click', clearResults);
-    elements.saveBtn.addEventListener('click', saveResults);
+// Initialize App
+export async function initializeApp() {
+  try {
+    elements.welcomeMessage.style.display = 'block';
+    await loadModels();
+    bindEvents();
+  } catch (error) {
+    showError('Failed to initialize AI engine');
+  }
 }
 
-// Voice Input Handler
-let recognition;
-function handleVoiceInput() {
-    if (currentState === UIState.PROCESSING) return;
-
-    if (!('webkitSpeechRecognition' in window)) {
-        showError('Voice input not supported in this browser');
-        return;
-    }
-
-    recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition))();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onresult = (e) => {
-        const transcript = e.results[0][0].transcript;
-        document.getElementById('searchInput').value = transcript;
-        triggerSearch(transcript);
-    };
-
-    recognition.start();
+// Event Binding
+function bindEvents() {
+  // Search Submit
+  document.getElementById('submit-btn').addEventListener('click', () => 
+    triggerSearch(elements.searchInput.value)
+  );
+  
+  // File Upload
+  elements.fileUpload.addEventListener('change', handleFileUpload);
+  
+  // Clear/Save Buttons
+  elements.clearBtn.addEventListener('click', clearAll);
+  elements.saveBtn.addEventListener('click', saveResults);
 }
 
 // Core Search Function
 async function triggerSearch(query) {
-    if (!query.trim() || currentState === UIState.PROCESSING) return;
+  if (!query.trim()) return;
+  
+  try {
+    showLoading();
+    const results = await Promise.all([
+      fetchDuckDuckGo(query),
+      fetchWikipedia(query)
+    ]);
     
-    try {
-        setUIState(UIState.PROCESSING);
-        const results = await Promise.allSettled([
-            fetchSearchResults(query),
-            fetchAIAnalysis(query)
-        ]);
-        
-        displayResults(results);
-        setUIState(UIState.READY);
-    } catch (error) {
-        showError('Search failed. Try again later.');
-        setUIState(UIState.ERROR);
-    }
+    searchResults = results.flat();
+    displayResults();
+  } catch (error) {
+    showError('Search failed: ' + error.message);
+  } finally {
+    hideLoading();
+  }
 }
 
-// State Management
-function setUIState(state) {
-    currentState = state;
-    const loadingElem = document.getElementById('loading');
-    const buttons = document.querySelectorAll('button');
-    
-    switch(state) {
-        case UIState.PROCESSING:
-            loadingElem.classList.remove('loading-hidden');
-            buttons.forEach(btn => btn.disabled = true);
-            break;
-        case UIState.ERROR:
-            loadingElem.classList.add('loading-hidden');
-            buttons.forEach(btn => btn.disabled = false);
-            break;
-        default:
-            loadingElem.classList.add('loading-hidden');
-            buttons.forEach(btn => btn.disabled = false);
-    }
+// API Functions
+async function fetchDuckDuckGo(query) {
+  const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json`);
+  const data = await response.json();
+  return data.RelatedTopics.map(item => ({
+    title: item.Text,
+    url: item.FirstURL,
+    source: 'DuckDuckGo'
+  }));
+}
+
+async function fetchWikipedia(query) {
+  const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
+  const data = await response.json();
+  return data.query.search.map(item => ({
+    title: item.title,
+    url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+    source: 'Wikipedia'
+  }));
+}
+
+// Display Results
+function displayResults() {
+  elements.responseContainer.innerHTML = `
+    <div class="results-header">
+      <h3>Search Results</h3>
+      <div class="result-actions">
+        <button id="save-results">💾 Save</button>
+        <button id="clear-results">🗑️ Clear</button>
+      </div>
+    </div>
+    <div class="result-categories">
+      ${renderCategory('DuckDuckGo')}
+      ${renderCategory('Wikipedia')}
+    </div>
+  `;
+  
+  // Re-bind buttons
+  document.getElementById('save-results').addEventListener('click', saveResults);
+  document.getElementById('clear-results').addEventListener('click', clearResults);
+}
+
+function renderCategory(source) {
+  const items = searchResults.filter(r => r.source === source);
+  if (!items.length) return '';
+  
+  return `
+    <div class="result-category">
+      <h4>${source}</h4>
+      <ul>
+        ${items.map(item => `
+          <li>
+            <a href="${item.url}" target="_blank" rel="noopener">${item.title}</a>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+  `;
+}
+
+// File Handling
+async function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  try {
+    showLoading();
+    const text = await recognizeHandwriting(file);
+    elements.searchInput.value = text;
+    triggerSearch(text);
+  } catch (error) {
+    showError('OCR failed: ' + error.message);
+  } finally {
+    event.target.value = ''; // Reset input
+    hideLoading();
+  }
+}
+
+// Utility Functions
+function showLoading() {
+  elements.spinner.style.display = 'block';
+  elements.responseContainer.style.display = 'none';
+}
+
+function hideLoading() {
+  elements.spinner.style.display = 'none';
+  elements.responseContainer.style.display = 'block';
+}
+
+function showError(message) {
+  elements.responseContainer.innerHTML = `
+    <div class="error-message">
+      <p>${message}</p>
+      <button onclick="window.location.reload()">Retry</button>
+    </div>
+  `;
+}
+
+function clearAll() {
+  elements.searchInput.value = '';
+  elements.responseContainer.innerHTML = '';
+  elements.welcomeMessage.style.display = 'block';
+  searchResults = [];
+}
+
+function saveResults() {
+  const blob = new Blob([JSON.stringify(searchResults, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kimo-search-${new Date().toISOString()}.json`;
+  a.click();
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        await loadModels();
-        bindInteractiveElements();
-        document.getElementById('welcome-message').style.display = 'block';
-    } catch (error) {
-        showError('Failed to initialize application');
-    }
-});
+window.addEventListener('DOMContentLoaded', initializeApp);
