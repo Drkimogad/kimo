@@ -152,16 +152,16 @@ body {
   order: 1; /* Forces response area to top */
   flex: 1;
   margin-top: 2rem;
-  height: calc(100vh - 200px); /* Ensures response area takes up majority of the page */
+  width: 95%; /* Occupies 95% of the width */
+  height: 50vh; /* Occupies 50% of the full page height */
   overflow-y: auto; /* Allows scrolling if content is long */
-  /* border: 1px solid #ddd; */ /* Commented out to make it borderless */
   border-radius: var(--border-radius);
   background-color: var(--footer-bg);
   position: relative; /* For positioning clear and save buttons */
 }
 
 #welcome-message {
-  display: none; /* Initially hidden */
+  display: block; /* Initially visible */
   position: absolute;
   top: 50%;
   left: 50%;
@@ -289,3 +289,12 @@ body {
     position: static;
   }
 }
+````
+
+### Summary of Changes:
+1. **Response Container**:
+   - Set the width to 95% of its parent container: `width: 95%;`
+   - Set the height to 50% of the full page height: `height: 50vh;`
+   - Removed the border to make it visually spacious.
+
+This should ensure that the `response-container` is present, occupying 95% of the width and 50% of the full page height, but without a visible border.
