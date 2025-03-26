@@ -88,20 +88,25 @@ function stopVoiceRecognition() {
     }
 }
 
-// Search function that fetches results from DuckDuckGo API
+// Search function that fetches results from DuckDuckGo and Wikipedia APIs
 async function searchContent(query) {
     responseContainer.style.display = 'none';
     spinner.style.display = 'block'; // Show spinner during search
 
     try {
-        const results = await fetchDuckDuckGoResults(query);
-        
-        if (!results || results.length === 0) {
+        const [duckDuckGoResults, wikipediaResults] = await Promise.all([
+            fetchDuckDuckGoResults(query),
+            fetchWikipediaResults(query)
+        ]);
+
+        const combinedResults = [...duckDuckGoResults, ...wikipediaResults];
+
+        if (!combinedResults || combinedResults.length === 0) {
             throw new Error("No results found.");
         }
 
         // Process and display search results
-        displaySearchResults(results);
+        displaySearchResults(combinedResults);
     } catch (error) {
         console.error(error);
         displayError("Failed to fetch contents. Please try again later.");
@@ -116,11 +121,22 @@ async function fetchDuckDuckGoResults(query) {
     return new Promise(resolve => {
         setTimeout(() => {
             resolve([
-                { title: "Result 1", link: "https://duckduckgo.com" },
-                { title: "Result 2", link: "https://duckduckgo.com" }
+                { title: "DuckDuckGo Result 1", link: "https://duckduckgo.com" },
+                { title: "DuckDuckGo Result 2", link: "https://duckduckgo.com" }
             ]);
         }, 2000);
     });
+}
+
+// Function to fetch Wikipedia results
+async function fetchWikipediaResults(query) {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srsearch=${encodeURIComponent(query)}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.query.search.map(result => ({
+        title: result.title,
+        link: `https://en.wikipedia.org/wiki/${encodeURIComponent(result.title)}`
+    }));
 }
 
 // Display search results in the response container
