@@ -1,13 +1,10 @@
 // Import TensorFlow.js
-//import "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.9.0"; // alternative
 import "https://unpkg.com/@tensorflow/tfjs@4.9.0"; // Alternative
 
 // Import MobileNet model
-// import * as mobilenet from 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0';   // alternative
 import * as mobilenet from 'https://unpkg.com/@tensorflow-models/mobilenet@2.1.0'; // Alternative
 
 // Import Universal Sentence Encoder
-// import * as use from 'https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder@1.3.2';   // alternative
 import * as use from 'https://unpkg.com/@tensorflow-models/universal-sentence-encoder@1.3.2'; // Alternative
 
 // Import other AI functionality and OCR tools
@@ -15,8 +12,11 @@ import { Summarizer } from './ai/summarizer.js'; // Xenova summarizer
 import { Personalizer } from './ai/personalizer.js'; // Xenova personalizer
 import * as Tesseract from 'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
 
+// Polyfill for buffer
 import { Buffer } from 'buffer';
 window.Buffer = Buffer;
+
+// Polyfill for long
 import { Long } from 'long';
 window.Long = Long;
 
