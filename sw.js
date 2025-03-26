@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v11'; // Increment cache version
+const CACHE_NAME = 'kimo-ai-cache-v9'; // Increment cache version
 const OFFLINE_URL = './offline.html';  // Fallback offline page
 
 const CACHE_ASSETS = [
@@ -58,15 +58,14 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return Promise.all(
-        CACHE_ASSETS.map((url) => {
-          return fetch(url)
-            .then((response) => {
-              if (!response.ok) throw new Error(`HTTP error: ${url}`);
-              return cache.put(url, response);
-            })
-            .catch((error) => {
-              console.error('Failed to cache:', url, error);
-            });
+        CACHE_ASSETS.map(async (url) => {
+          try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error: ${url}`);
+            await cache.put(url, response);
+          } catch (error) {
+            console.error('Failed to cache:', url, error);
+          }
         })
       );
     })
