@@ -23,9 +23,15 @@ window.Long = Long;
 // Declare variables for the models
 let mobilenetModel, useModel, summarizerModel, personalizerModel, activeModel;
 
-// Import model loader from models.js
-import { loadModels } from './models.js';
+// Load models
+export async function loadModels() {
+  mobilenetModel = await mobilenet.load();
+  useModel = await use.load();
+  summarizerModel = new Summarizer();
+  personalizerModel = new Personalizer();
+}
 
+// Initialize the app
 async function initApp() {
   console.log('Initializing App...');
   await loadModels();  // Load all specified models before starting the app
