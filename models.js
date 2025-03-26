@@ -23,6 +23,9 @@ window.Long = Long;
 // Declare variables for the models
 let mobilenetModel, useModel, summarizerModel, personalizerModel, activeModel;
 
+// Cache object
+const cache = {};
+
 // Load models
 export async function loadModels() {
   mobilenetModel = await mobilenet.load();
@@ -31,11 +34,33 @@ export async function loadModels() {
   personalizerModel = new Personalizer();
 }
 
+// Function to load and cache the config file
+async function getConfig() {
+  if (!cache.config) {
+    const response = await fetch('/models/t5-small/config.json');
+    cache.config = await response.json();
+  }
+  return cache.config;
+}
+
+// Function to load and cache the tokenizer
+async function getTokenizer() {
+  if (!cache.tokenizer) {
+    const response = await fetch('/models/t5-small/tokenizer.json');
+    cache.tokenizer = await response.json();
+  }
+  return cache.tokenizer;
+}
+
 // Initialize the app
 async function initApp() {
   console.log('Initializing App...');
   await loadModels();  // Load all specified models before starting the app
   console.log('Models loaded. App is ready.');
+  const config = await getConfig();
+  const tokenizer = await getTokenizer();
+  console.log('Config:', config);
+  console.log('Tokenizer:', tokenizer);
 }
 
 initApp();  // Initialize the app
