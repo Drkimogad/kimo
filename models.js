@@ -8,16 +8,15 @@ import { Summarizer } from './ai/summarizer.js'; // Xenova summarizer
 import { Personalizer } from './ai/personalizer.js'; // Xenova personalizer
 import * as Tesseract from 'https://unpkg.com/tesseract.js@6.0.0/dist/tesseract.min.js'; // Tesseract.js for OCR
 
-// Export the models for use in aisearching.js
-export { mobilenet, use, Summarizer, Personalizer, Tesseract };
-
-
 // Declare variables for the models
 let mobilenetModel;
 let useModel;
-let summarizer;
-let personalizer;
+let summarizerModel;  // Declare summarizerModel variable
+let personalizerModel;  // Declare personalizerModel variable
 let activeModel;  // Add a variable to track the active model
+
+// Export the models for use in aisearching.js
+export { mobilenet, use, Summarizer, Personalizer, Tesseract };
 
 // Function to load the models
 export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer', 'personalizer']) {
@@ -42,7 +41,7 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer
   // Load the Summarizer model
   if (modelsToLoad.includes('summarizer')) {
     loadPromises.push(Summarizer.load().then(model => {
-      summarizer = model;
+      summarizerModel = model;  // Assign to summarizerModel
       console.log('Summarizer model loaded');
     }));
   }
@@ -50,7 +49,7 @@ export async function loadModels(modelsToLoad = ['mobilenet', 'use', 'summarizer
   // Load the Personalizer model
   if (modelsToLoad.includes('personalizer')) {
     loadPromises.push(Personalizer.load().then(model => {
-      personalizer = model;
+      personalizerModel = model;  // Assign to personalizerModel
       console.log('Personalizer model loaded');
     }));
   }
