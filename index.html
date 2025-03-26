@@ -9,6 +9,7 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon">    
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="theme-color" content="#ffffff">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body data-theme="light">
   <!-- Header Section -->
@@ -62,6 +63,14 @@
       <button id="clear-btn" class="icon-button" aria-label="Clear results">🗑️ Clear</button>
       <button id="save-btn" class="icon-button" aria-label="Save session">💾 Save</button>
     </div>
+    
+    <div class="error-message" hidden>
+      <svg>...</svg>
+      <span class="error-text"></span>
+    </div>
+    <button class="will-change">
+      <span class="button-content">...</span>
+    </button>
 
     <!-- Loading Spinner (when processing request) -->
     <div id="loading" class="loading-hidden" aria-live="polite">
