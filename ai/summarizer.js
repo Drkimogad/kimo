@@ -1,18 +1,3 @@
-import { getModel } from '../js/models.js';
-
-export class Summarizer {
-  static async init() {
-    const t5 = getModel('t5');
-    if (!t5?.config) throw new Error('T5 config not loaded');
-    
-    this.config = {
-      max_length: t5.config.task_specific_params?.summarization?.max_length || 200,
-      min_length: t5.config.task_specific_params?.summarization?.min_length || 30,
-      // ... other params
-    };
-  }
-}
-
 import { OfflineStorage } from './OfflineStorage.js';
 import { getModel } from '../models.js';
 
@@ -25,6 +10,11 @@ const FALLBACK_OPTIONS = {
 export class Summarizer {
   static #model = null;
   static #status = 'unloaded'; // unloaded | loading | ready | error
+  static #config = {
+    max_length: 200,
+    min_length: 30,
+    length_penalty: 2.0
+  };
 
   static async init() {
     if (this.#status === 'ready') return true;
@@ -35,7 +25,16 @@ export class Summarizer {
     this.#status = 'loading';
     
     try {
-      // Try loading from IndexedDB cache first
+      // Load T5 config first
+      const t5 = getModel('t5');
+      if (t5?.config?.task_specific_params?.summarization) {
+        this.#config = {
+          ...this.#config,
+          ...t5.config.task_specific_params.summarization
+        };
+      }
+
+      // Try loading from IndexedDB cache
       const cachedModel = await OfflineStorage.getCachedModel('summarizer');
       if (cachedModel) {
         this.#model = cachedModel;
@@ -74,7 +73,7 @@ export class Summarizer {
 
   static async generate(text, options = {}) {
     const {
-      max_length = 150,
+      max_length = this.#config.max_length,
       strategy = 'auto' // auto | local | cloud | fallback
     } = options;
 
@@ -103,18 +102,24 @@ export class Summarizer {
   }
 
   static async simplify(text) {
-    return this.generate(text, { max_length: 100 });
+    return this.generate(text, { 
+      max_length: Math.floor(this.#config.max_length * 0.66) 
+    });
   }
 
   static async #processLocal(text, max_length) {
     if (this.#status !== 'ready') await this.init();
     
-    const min_length = Math.floor(max_length * FALLBACK_OPTIONS.min_length_ratio);
+    const min_length = Math.floor(max_length * this.#config.min_length_ratio || FALLBACK_OPTIONS.min_length_ratio);
     const chunks = this.#chunkText(text, FALLBACK_OPTIONS.max_chunk_size);
     
     const results = await Promise.all(
       chunks.map(chunk => 
-        this.#model(chunk, { max_length, min_length })
+        this.#model(chunk, { 
+          max_length,
+          min_length,
+          length_penalty: this.#config.length_penalty
+        })
       )
     );
     
@@ -126,7 +131,11 @@ export class Summarizer {
       const response = await fetch('/api/summarize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, max_length })
+        body: JSON.stringify({ 
+          text, 
+          max_length,
+          config: this.#config 
+        })
       });
       
       if (!response.ok) throw new Error('Cloud summarizer unavailable');
@@ -142,7 +151,8 @@ export class Summarizer {
     return {
       summary: text.split(/\s+/).slice(0, max_length).join(' ') + '...',
       isFallback: true,
-      warning: 'Summary quality may be reduced'
+      warning: 'Summary quality may be reduced',
+      config: this.#config
     };
   }
 
@@ -186,9 +196,15 @@ export class Summarizer {
   static get status() {
     return this.#status;
   }
+
+  static get config() {
+    return this.#config;
+  }
 }
 
 // Automatic initialization in background
-setTimeout(() => {
-  Summarizer.init().catch(() => {});
-}, 3000);
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    Summarizer.init().catch(() => {});
+  }, 3000);
+}
