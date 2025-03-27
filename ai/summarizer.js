@@ -1,3 +1,18 @@
+import { getModel } from '../js/models.js';
+
+export class Summarizer {
+  static async init() {
+    const t5 = getModel('t5');
+    if (!t5?.config) throw new Error('T5 config not loaded');
+    
+    this.config = {
+      max_length: t5.config.task_specific_params?.summarization?.max_length || 200,
+      min_length: t5.config.task_specific_params?.summarization?.min_length || 30,
+      // ... other params
+    };
+  }
+}
+
 import { OfflineStorage } from './OfflineStorage.js';
 import { getModel } from '../models.js';
 
