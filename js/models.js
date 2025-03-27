@@ -1,49 +1,3 @@
-// Add this to your models.js
-const MODEL_BASE_PATH = '../models/t5-small';
-
-async function loadT5Config() {
-  try {
-    const response = await fetch(`${MODEL_BASE_PATH}/config.json`);
-    if (!response.ok) throw new Error('Config load failed');
-    const config = await response.json();
-    
-    // Validate essential T5 config
-    if (!config.d_model || !config.num_layers) {
-      throw new Error('Invalid T5 config');
-    }
-    
-    return config;
-  } catch (error) {
-    console.error('Failed to load T5 config:', error);
-    // Fallback to essential defaults if offline
-    return {
-      d_model: 512,
-      num_layers: 6,
-      num_heads: 8,
-      vocab_size: 32128,
-      // ... other essential params from your config
-    };
-  }
-}
-
-export async function loadModels() {
-  try {
-    const [tfjs, t5Config] = await Promise.all([
-      import('../model-cache/tf.js'),
-      loadT5Config()
-    ]);
-    
-    modelRegistry.t5 = {
-      config: t5Config,
-      status: MODEL_STATES.LOADED
-    };
-    
-    console.log('T5 config loaded:', t5Config.model_type);
-  } catch (error) {
-    console.error('T5 initialization failed:', error);
-  }
-}
-
 // models.js - Core Model Loader
 import { imageModel } from '../tfj/image-model.js';
 import { textModel } from '../tfj/text-model.js';
@@ -58,38 +12,45 @@ const MODEL_STATES = {
   ERROR: 3
 };
 
+const MODEL_BASE_PATH = '../models/t5-small';
 const modelRegistry = {
   tf: { state: MODEL_STATES.NOT_LOADED, instance: null },
   mobilenet: { state: MODEL_STATES.NOT_LOADED, instance: null },
   tesseract: { state: MODEL_STATES.NOT_LOADED, worker: null },
-  summarizer: { state: MODEL_STATES.NOT_LOADED },
-  personalizer: { state: MODEL_STATES.NOT_LOADED }
+  t5: { state: MODEL_STATES.NOT_LOADED, config: null },
+  summarizer: { state: MODEL_STATES.NOT_LOADED, instance: null },
+  personalizer: { state: MODEL_STATES.NOT_LOADED, instance: null }
 };
 
-export async function loadModels() {
+async function loadT5Config() {
   try {
-    // Load core models
-    await loadWithRetry(() => import('../model-cache/tf.js'), 'tf');
+    const response = await fetch(`${MODEL_BASE_PATH}/config.json`);
+    if (!response.ok) throw new Error('Config load failed');
+    const config = await response.json();
     
-    await Promise.all([
-      loadWithRetry(() => import('../model-cache/mobilenet.js')
-        .then(m => m.load()), 'mobilenet'),
-      loadWithRetry(() => import('../model-cache/tesseract.js')
-        .then(Tesseract => Tesseract.createWorker()), 'tesseract')
-    ]);
-
-    // Initialize custom models
-    modelRegistry.summarizer.instance = new Summarizer();
-    modelRegistry.personalizer.instance = new Personalizer();
+    if (!config.d_model || !config.num_layers) {
+      throw new Error('Invalid T5 config');
+    }
     
-    return true;
+    return config;
   } catch (error) {
-    console.error('Model loading failed:', error);
-    throw new Error(`MODEL_LOAD_ERROR: ${error.message}`);
+    console.error('Failed to load T5 config:', error);
+    return {
+      d_model: 512,
+      num_layers: 6,
+      num_heads: 8,
+      vocab_size: 32128,
+      task_specific_params: {
+        summarization: {
+          max_length: 200,
+          min_length: 30,
+          length_penalty: 2.0
+        }
+      }
+    };
   }
 }
 
-// Helper function
 async function loadWithRetry(loader, modelName, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
@@ -107,8 +68,48 @@ async function loadWithRetry(loader, modelName, retries = 3) {
   }
 }
 
+export async function loadModels() {
+  try {
+    // Phase 1: Load core frameworks
+    await loadWithRetry(() => import('../model-cache/tf.js'), 'tf');
+    
+    // Phase 2: Parallel load heavy models and configs
+    const [mobilenet, tesseract, t5Config] = await Promise.all([
+      loadWithRetry(() => import('../model-cache/mobilenet.js')
+        .then(m => m.load()), 'mobilenet'),
+      loadWithRetry(() => import('../model-cache/tesseract.js')
+        .then(Tesseract => Tesseract.createWorker()), 'tesseract'),
+      loadT5Config()
+    ]);
+    
+    // Register T5 config
+    modelRegistry.t5 = {
+      config: t5Config,
+      state: MODEL_STATES.LOADED
+    };
+    
+    // Phase 3: Initialize application models
+    modelRegistry.summarizer.instance = new Summarizer(t5Config);
+    modelRegistry.personalizer.instance = new Personalizer();
+    
+    console.log('All models loaded successfully');
+    return true;
+  } catch (error) {
+    console.error('Model loading failed:', error);
+    throw new Error(`MODEL_LOAD_ERROR: ${error.message}`);
+  }
+}
+
 export function getModel(name) {
-  return modelRegistry[name]?.instance || null;
+  if (!modelRegistry[name] || modelRegistry[name].state !== MODEL_STATES.LOADED) {
+    console.warn(`Model ${name} not loaded or unavailable`);
+    return null;
+  }
+  return modelRegistry[name].instance || modelRegistry[name].config;
+}
+
+export function getModelStatus(name) {
+  return modelRegistry[name]?.state || MODEL_STATES.NOT_LOADED;
 }
 
 export { imageModel, textModel, Summarizer, Personalizer, OfflineStorage };
