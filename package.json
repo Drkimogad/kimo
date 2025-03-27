@@ -1,0 +1,32 @@
+{
+  "name": "kimo-ai",
+  "version": "1.0.0",
+  "description": "AI-powered search companion",
+  "main": "./src/index.js",
+  "scripts": {
+    "build": "webpack --mode production"
+  },
+  "dependencies": {
+    "@tensorflow-models/mobilenet": "^2.1.1",
+    "@tensorflow/tfjs": "^4.22.0",
+    "@xenova/transformers": "^1.4.3",
+    "assert": "^2.1.0",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5",
+    "vite": "^6.2.3"
+  },
+  "author": "Drkimogad",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "babel-loader": "^10.0.0",
+    "buffer": "^6.0.3",
+    "long": "^5.3.1",
+    "vite-plugin-node-polyfills": "^0.23.0",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
+  }
+}
