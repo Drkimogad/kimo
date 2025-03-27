@@ -113,3 +113,10 @@ export function getModelStatus(name) {
 }
 
 export { imageModel, textModel, Summarizer, Personalizer, OfflineStorage };
+
+// Register for background sync
+if ('serviceWorker' in navigator && 'SyncManager' in window) {
+  navigator.serviceWorker.ready.then(reg => {
+    reg.sync.register('retry-failed-requests');
+  });
+}
