@@ -5,10 +5,10 @@ const CACHE_TIMEOUT = 5000; // 5 second timeout for network requests
 // Core app files
 const CORE_ASSETS = [
   './',
-  './index.html',
+  '../index.html',
   './styles.css',
-  './js/models.js',
-  './js/aisearching.js',
+  './dist/index.js',
+  './dist/aisearching.js',
   './manifest.json',
   './favicon.ico',
   './offline.html'
@@ -29,9 +29,9 @@ const MODEL_ASSETS = [
   './tfj/image-model.js',
   './models/t5-small/tokenizer.json',
   './models/t5-small/config.json',
-  './ai/summarizer.js',
-  './ai/personalizer.js',
-  './utils/offlineStorage.js',
+  './src/ai/summarizer.js',
+  './src/ai/personalizer.js',
+  './src/utils/offlineStorage.js',
 
   // TensorFlow
   './model-cache/tf.js',
