@@ -4,33 +4,18 @@ import nodePolyfills from 'vite-plugin-node-polyfills';
 export default defineConfig({
   plugins: [
     nodePolyfills({
-      // Polyfill only necessary Node.js modules
+      // Only polyfill the specific modules causing errors
       globals: {
-        Buffer: true,
-        process: true,
-      },
-      protocolImports: true,
+        Buffer: true,  // Fixes "Buffer is not defined"
+        Long: true     // Fixes protobufjs Long dependency
+      }
     })
   ],
   resolve: {
     alias: {
-      // Required for TensorFlow.js and other libs
-      buffer: 'buffer',
-      crypto: 'crypto-browserify',
-      stream: 'stream-browserify',
-      util: 'util'
+      // Explicitly point to browser-friendly implementations
+      buffer: 'buffer/',
+      long: 'long'  // For protobufjs compatibility
     }
-  },
-  optimizeDeps: {
-    // Add heavy dependencies for pre-bundling
-    include: [
-      '@tensorflow/tfjs',
-      '@tensorflow-models/mobilenet',
-      'tesseract.js'
-    ],
-  },
-  build: {
-    // Increase chunk size warning limit (for TF.js models)
-    chunkSizeWarningLimit: 1600,
   }
 });
