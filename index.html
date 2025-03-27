@@ -9,6 +9,10 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon">    
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="theme-color" content="#ffffff">
+  <!-- Preload critical resources -->
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/buffer@6.0.3/index.min.js" as="script">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body data-theme="light">
@@ -21,13 +25,11 @@
   <main class="main-content">
     <!-- Response Area Section -->
     <section id="response-container" class="response-container">
-      <!-- Welcome Message -->
       <div id="welcome-message" class="welcome-message">
         <p>Welcome to Kimo AI 🚀<br>Your AI-powered search companion and more!</p>
       </div>
-
-      <!-- Spinner (displayed when searching) -->
-      <div id="searching-spinner" class="searching-spinner" style="display: none;">
+      <div id="searching-spinner" class="searching-spinner" hidden>
+        <div class="spinner"></div>
         <p>Kimo is searching...</p>
       </div>
     </section>
@@ -39,6 +41,7 @@
           id="searchInput" 
           placeholder="Type your query, upload a file, or speak..."
           aria-label="Search input"
+          rows="3"
         ></textarea>
         <div class="button-group">
           <button id="voiceInputButton" class="icon-button" aria-label="Voice input">🎤</button>
@@ -47,63 +50,79 @@
             <input 
               type="file" 
               id="file-upload" 
-              accept="image/*,text/plain"
+              accept="image/*, text/plain, .pdf"
               aria-hidden="true"
             >
           </label>
           <button id="submit-btn" class="primary-button">🚀 Search</button>
-          <button id="summarize-btn" class="icon-button" aria-label="Summarize output">📝 Summarize</button>
-          <button id="personalize-btn" class="icon-button" aria-label="Personalize output">👤 Personalize</button>
+          <button id="summarize-btn" class="icon-button" aria-label="Summarize">📝 Summarize</button>
+          <button id="personalize-btn" class="icon-button" aria-label="Personalize">👤 Personalize</button>
         </div>
       </div>
     </div>
 
-    <!-- Response Actions Section (Save & Clear Buttons) -->
-    <div class="response-actions">
+    <!-- Response Actions -->
+    <div class="response-actions" hidden>
       <button id="clear-btn" class="icon-button" aria-label="Clear results">🗑️ Clear</button>
       <button id="save-btn" class="icon-button" aria-label="Save session">💾 Save</button>
     </div>
-    
-    <div class="error-message" hidden>
-      <svg>...</svg>
-      <span class="error-text"></span>
-    </div>
-    <button class="will-change">
-      <span class="button-content">...</span>
-    </button>
 
-    <!-- Loading Spinner (when processing request) -->
+    <!-- Status Indicators -->
     <div id="loading" class="loading-hidden" aria-live="polite">
       <div class="spinner"></div>
       <span class="loading-text">Analyzing with AI...</span>
       <progress class="model-load-progress" value="0" max="100"></progress>
     </div>
+    
+    <div id="error-message" class="error-message" hidden>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span class="error-text"></span>
+      <button class="retry-btn">Retry</button>
+    </div>
   </main>
 
-  <!-- Footer Section -->
   <footer class="app-footer">
-    <p>© 2024 Kimo AI. All rights reserved.</p>
+    <p>© 2025 Kimo AI. All rights reserved.</p>
     <div class="privacy-controls">
       <button id="privacy-toggle" aria-label="Privacy settings">🔒 AI Personalization</button>
     </div>
   </footer>
 
-  <!-- External Scripts -->
-<script type="module" src="./js/models.js"></script>
-<script type="module" src="./js/aisearching.js"></script>
-
+  <!-- Polyfill for Buffer (load before app scripts) -->
+  <script src="https://cdn.jsdelivr.net/npm/buffer@6.0.3/index.min.js"></script>
   <script>
+    // Initialize Buffer globally if not already defined
+    window.Buffer = window.Buffer || Buffer;
+    
+    // Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/kimo/sw.js')
-          .then(registration => {
-            console.log('Service Worker registered with scope:', registration.scope);
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => {
+            console.log('Service Worker registered:', reg.scope);
+            // Check for updates hourly
+            setInterval(() => reg.update(), 3600000);
           })
-          .catch(error => {
-            console.error('Service Worker registration failed:', error);
-          });
+          .catch(err => console.error('SW registration failed:', err));
       });
     }
+    
+    // Prevents double submission of forms
+    document.addEventListener('DOMContentLoaded', () => {
+      const forms = document.querySelectorAll('button[type="submit"]');
+      forms.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (btn.classList.contains('processing')) e.preventDefault();
+          btn.classList.add('processing');
+        });
+      });
+    });
   </script>
+
+  <!-- Main App Scripts (type="module" for ES6 support) -->
+  <script type="module" src="./js/models.js"></script>
+  <script type="module" src="./js/aisearching.js"></script>
 </body>
 </html>
