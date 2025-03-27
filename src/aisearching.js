@@ -1,4 +1,4 @@
-import { loadModels, summarizerModel, personalizerModel } from './models.js';
+import { loadModels, summarizerModel, personalizerModel } from './src/index.js';
 
 let searchInput = document.getElementById("searchInput");
 let responseContainer = document.getElementById("response-container");
