@@ -8,6 +8,9 @@
 # Log files
 *.log
 
+node_modules/
+.DS_Store
+
 # OS-specific files
 .DS_Store
 Thumbs.db
