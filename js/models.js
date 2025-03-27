@@ -1,3 +1,11 @@
+// Top of your entry file
+import { Buffer } from 'buffer';
+import * as Long from 'long';
+
+// Global assignments (only if needed)
+window.Buffer = Buffer;
+window.Long = Long;
+
 // models.js - Core Model Loader
 import { imageModel } from '../tfj/image-model.js';
 import { textModel } from '../tfj/text-model.js';
