@@ -1,3 +1,49 @@
+// Add this to your models.js
+const MODEL_BASE_PATH = '../models/t5-small';
+
+async function loadT5Config() {
+  try {
+    const response = await fetch(`${MODEL_BASE_PATH}/config.json`);
+    if (!response.ok) throw new Error('Config load failed');
+    const config = await response.json();
+    
+    // Validate essential T5 config
+    if (!config.d_model || !config.num_layers) {
+      throw new Error('Invalid T5 config');
+    }
+    
+    return config;
+  } catch (error) {
+    console.error('Failed to load T5 config:', error);
+    // Fallback to essential defaults if offline
+    return {
+      d_model: 512,
+      num_layers: 6,
+      num_heads: 8,
+      vocab_size: 32128,
+      // ... other essential params from your config
+    };
+  }
+}
+
+export async function loadModels() {
+  try {
+    const [tfjs, t5Config] = await Promise.all([
+      import('../model-cache/tf.js'),
+      loadT5Config()
+    ]);
+    
+    modelRegistry.t5 = {
+      config: t5Config,
+      status: MODEL_STATES.LOADED
+    };
+    
+    console.log('T5 config loaded:', t5Config.model_type);
+  } catch (error) {
+    console.error('T5 initialization failed:', error);
+  }
+}
+
 // models.js - Core Model Loader
 import { imageModel } from '../tfj/image-model.js';
 import { textModel } from '../tfj/text-model.js';
