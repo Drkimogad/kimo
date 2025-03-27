@@ -4,9 +4,11 @@ const path = require('path');
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname,'dist'),
+    path: path.resolve(__dirname, 'dist'),  // Keep output in dist/
     filename: 'bundle.js',
-  },
+    publicPath: '/dist/'  // Add this line
+  }
+}
   resolve: {
     extensions: ['.js'],
     alias: {
