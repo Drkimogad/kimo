@@ -1,4 +1,4 @@
-import { storage } from '@utils/offlineStorage';
+import { storage } from './src/utils/offlineStorage';
 
 const PERSONALIZATION_WEIGHTS = {
   click: 2.0,
