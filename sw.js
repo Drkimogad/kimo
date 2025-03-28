@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kimo-ai-cache-v14'; // Updated version
+const CACHE_NAME = 'kimo-ai-cache-v15'; // Updated version
 const OFFLINE_URL = './offline.html';
 const CACHE_TIMEOUT = 5000; // 5 second timeout for network requests
 
@@ -7,8 +7,8 @@ const CORE_ASSETS = [
   './',
   '../index.html',
   './styles.css',
-  './dist/index.js',
-  './dist/aisearching.js',
+  './src/index.js',
+  './src/aisearching.js',
   './manifest.json',
   './favicon.ico',
   './offline.html'
